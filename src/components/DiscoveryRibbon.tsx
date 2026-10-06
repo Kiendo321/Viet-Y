@@ -12,8 +12,8 @@ interface DiscoveryRibbonProps {
 const FABRIC_SWATCHES = [
   { col: 0 as const, name: 'Đỏ son', colorId: 'color-do-son-tram' },
   { col: 1 as const, name: 'Mực chàm', colorId: 'color-muc-cham-co' },
-  { col: 2 as const, name: 'Trắng ngà', colorId: 'color-trang-nga-toi-gian' },
-  { col: 3 as const, name: 'Xanh ngọc', colorId: 'color-xanh-ngoc-bich' },
+  { col: 2 as const, name: 'Xanh ngọc', colorId: 'color-xanh-ngoc-bich' },
+  { col: 3 as const, name: 'Trắng ngà', colorId: 'color-trang-nga-toi-gian' },
 ];
 
 export const DiscoveryRibbon: React.FC<DiscoveryRibbonProps> = ({
@@ -71,7 +71,7 @@ export const DiscoveryRibbon: React.FC<DiscoveryRibbonProps> = ({
 
             {/* 1 Short sentence description */}
             <p className="text-xs text-[#30251F]/75 mt-2 leading-relaxed">
-              4 sắc lụa mở rộng cho ngày hội: đỏ son, mực chàm, trắng ngà và xanh ngọc.
+              4 sắc lụa mở rộng cho ngày hội: đỏ son, mực chàm, xanh ngọc và trắng ngà.
             </p>
 
             {/* Action link */}
@@ -181,6 +181,13 @@ export const DiscoveryRibbon: React.FC<DiscoveryRibbonProps> = ({
               </a>
             </div>
           </article>
+        </div>
+
+        {/* Attribution note at the bottom of Discovery Ribbon */}
+        <div className="mt-8 sm:mt-10 pt-4 border-t border-[#DECFB9]/60 text-center">
+          <p className="text-[11px] sm:text-xs text-[#30251F]/70">
+            Hình ảnh minh họa AI · Thông tin văn hóa dẫn nguồn Bảo tàng Lịch sử Quốc gia.
+          </p>
         </div>
       </div>
     </section>
