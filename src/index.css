@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-serif: "Noto Serif", Georgia, serif;
+    --font-serif-display: "Noto Serif Display", "Noto Serif", Georgia, serif;
+    --font-sans: "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #F7F0E4;
+    color: #30251F;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    color: #30251F;
+    letter-spacing: -0.015em;
+  }
+}
+
+.font-serif-display {
+  font-family: var(--font-serif-display);
+}
+
+/* Subtle paper texture */
+.paper-texture {
+  background-color: #F7EEDD;
+  background-image: radial-gradient(rgba(48, 37, 31, 0.035) 1px, transparent 1px);
+  background-size: 12px 12px;
+}
+
+/* Silk-curved dividers & editorial flourishes */
+.silk-divider-gold {
+  background: linear-gradient(90deg, transparent 0%, #B18C52 25%, #DECFB9 50%, #B18C52 75%, transparent 100%);
+  height: 1px;
+}
+
+.silk-shadow-subtle {
+  box-shadow: 0 4px 20px -2px rgba(48, 37, 31, 0.05), 0 2px 6px -1px rgba(48, 37, 31, 0.03);
+}
+
+.silk-shadow-card {
+  box-shadow: 0 10px 30px -4px rgba(48, 37, 31, 0.08), 0 4px 10px -2px rgba(48, 37, 31, 0.04);
+}
+
+/* Custom horizontal scroll bar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Respect user's motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Việt phục Remix",
+  "description": "Cẩm nang và bộ phối áo ngũ thân truyền thống & remix đương đại cho sinh viên tham gia Ngày hội văn hóa.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
