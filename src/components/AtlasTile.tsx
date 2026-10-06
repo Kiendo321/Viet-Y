@@ -1,6 +1,5 @@
 import React from 'react';
-import catalogAtlas from '../assets/style-a-catalog-atlas.png';
-import editorialAtlas from '../assets/style-a-editorial-atlas.png';
+import { catalogAtlas, editorialAtlas } from '../assets/assetUrls';
 
 export interface AtlasTileProps {
   atlas: 'catalog' | 'editorial';

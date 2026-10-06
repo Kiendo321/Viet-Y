@@ -57,8 +57,10 @@ export default function App() {
   });
 
   // Stylist AI suggestions state
-  const [hasCalledStylist, setHasCalledStylist] = useState<boolean>(false);
-  const [isSuggesting, setIsSuggesting] = useState<boolean>(false);
+  type Step4Status = 'idle' | 'loading' | 'success' | 'fallback' | 'error';
+  const [step4Status, setStep4Status] = useState<Step4Status>('idle');
+  const [step4StatusCode, setStep4StatusCode] = useState<number | null>(null);
+  const [step4ErrorCode, setStep4ErrorCode] = useState<string | null>(null);
   const [suggestError, setSuggestError] = useState<string | null>(null);
   const [suggestSource, setSuggestSource] = useState<'gemini' | 'curated_fallback' | null>(null);
   const [actualModelUsed, setActualModelUsed] = useState<string | null>(null);
@@ -68,6 +70,8 @@ export default function App() {
   // AI Image generation state
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [imageStatusCode, setImageStatusCode] = useState<number | null>(null);
+  const [imageErrorCode, setImageErrorCode] = useState<string | null>(null);
   const [originalAiImage, setOriginalAiImage] = useState<string | null>(null);
   const [recoloredAiImage, setRecoloredAiImage] = useState<string | null>(null);
   const [isRecoloring, setIsRecoloring] = useState<boolean>(false);
@@ -105,14 +109,15 @@ export default function App() {
   const currentStyle = ALLOWLIST_STYLES.find((s) => s.id === selection.styleId) || ALLOWLIST_STYLES[0];
   const currentAccessories = ALLOWLIST_ACCESSORIES.filter((a) => selection.accessoryIds.includes(a.id));
 
-  // Handle Gemini Stylist Call (Guaranteed loading, 30s timeout, Content-Type check, double-submit protection)
+  // Handle Gemini Stylist Call (Explicit state machine: idle | loading | success | fallback | error, double-submit protection)
   const handleAskStylist = async () => {
-    if (isSuggesting) return; // Prevent double submit
+    if (step4Status === 'loading') return; // Prevent double submit
 
     const reqId = ++latestRequestIdRef.current;
-    setIsSuggesting(true);
+    setStep4Status('loading');
     setSuggestError(null);
-    setHasCalledStylist(true);
+    setStep4StatusCode(null);
+    setStep4ErrorCode(null);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
@@ -140,6 +145,9 @@ export default function App() {
       if (!contentType.toLowerCase().includes('application/json')) {
         const errorDesc = `Máy chủ phản hồi không đúng định dạng JSON (HTTP ${res.status}). Đã kích hoạt mẫu tĩnh dự phòng.`;
         setSuggestError(errorDesc);
+        setStep4Status('fallback');
+        setStep4StatusCode(res.status);
+        setStep4ErrorCode('INVALID_CONTENT_TYPE');
         setSuggestSource('curated_fallback');
         setActualModelUsed(null);
         setSuggestions(FALLBACK_RECOMMENDATIONS);
@@ -151,6 +159,9 @@ export default function App() {
         data = await res.json();
       } catch (jsonErr: any) {
         setSuggestError(`Không thể đọc định dạng phản hồi từ máy chủ (HTTP ${res.status}). Đã kích hoạt mẫu tĩnh dự phòng.`);
+        setStep4Status('fallback');
+        setStep4StatusCode(res.status);
+        setStep4ErrorCode('PARSE_ERROR');
         setSuggestSource('curated_fallback');
         setActualModelUsed(null);
         setSuggestions(FALLBACK_RECOMMENDATIONS);
@@ -159,35 +170,41 @@ export default function App() {
 
       if (reqId !== latestRequestIdRef.current) return;
 
+      setStep4StatusCode(data.statusCode || res.status);
+      setStep4ErrorCode(data.error || null);
+
       // ONLY report Gemini success if source is genuinely 'gemini' and model is returned
       if (res.ok && data.source === 'gemini' && data.model && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
         setSuggestions(data.suggestions);
         setSuggestSource('gemini');
         setActualModelUsed(data.model);
         setSuggestError(null);
+        setStep4Status('success');
       } else {
         const errorMsg = data.message || 'Mô hình Gemini chưa phản hồi.';
         setSuggestError(errorMsg);
         setSuggestSource('curated_fallback');
         setActualModelUsed(null);
         setSuggestions(data.suggestions || FALLBACK_RECOMMENDATIONS);
+        setStep4Status('fallback');
       }
     } catch (err: any) {
       if (reqId !== latestRequestIdRef.current) return;
       console.error('Stylist call error:', err);
       let errorMsg = err?.message || 'Không thể kết nối đến máy chủ.';
+      let errCode = 'NETWORK_ERROR';
       if (err?.name === 'AbortError') {
         errorMsg = 'Yêu cầu vượt quá thời gian chờ (timeout 30s). Đã chuyển sang mẫu tĩnh dự phòng.';
+        errCode = 'CLIENT_TIMEOUT';
       }
       setSuggestError(errorMsg);
+      setStep4Status('error');
+      setStep4ErrorCode(errCode);
       setSuggestions(FALLBACK_RECOMMENDATIONS);
       setSuggestSource('curated_fallback');
       setActualModelUsed(null);
     } finally {
       clearTimeout(timeoutId);
-      if (reqId === latestRequestIdRef.current) {
-        setIsSuggesting(false);
-      }
     }
   };
 
@@ -203,11 +220,19 @@ export default function App() {
     setHasSavedCurrent(false);
   };
 
-  // Handle AI Image Generation
+  // Handle AI Image Generation (Double-submit protected, no false quota promises, keeps fallback diagram)
   const handleGenerateAiImage = async () => {
-    if (isGeneratingImage) return;
+    if (isGeneratingImage) return; // Prevent double submit
     setIsGeneratingImage(true);
     setImageError(null);
+    setImageStatusCode(null);
+    setImageErrorCode(null);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 25000);
+
     try {
       const res = await fetch('/api/image/generate', {
         method: 'POST',
@@ -218,19 +243,34 @@ export default function App() {
           styleId: selection.styleId,
           customNote: selection.userNote,
         }),
+        signal: controller.signal,
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      setImageStatusCode(data.statusCode || res.status);
+      setImageErrorCode(data.error || null);
+
       if (!res.ok) {
-        throw new Error(data.message || 'Lỗi khi tạo ảnh minh họa.');
+        const isQuota = res.status === 429 || data.error === 'QUOTA_EXCEEDED';
+        const msg = isQuota
+          ? 'Hạn mức tạo ảnh AI hiện không khả dụng (429 Quota). Bạn vẫn có thể tiếp tục phối màu, phụ kiện và lưu cấu hình bình thường.'
+          : (data.message || 'Không thể sinh ảnh minh họa AI. Hệ thống vẫn bảo lưu các lựa chọn của bạn.');
+        throw new Error(msg);
       }
 
       setOriginalAiImage(data.imageUrl);
       setRecoloredAiImage(null);
     } catch (err: any) {
       console.error('Image generation failed:', err);
-      setImageError(err?.message || 'Không thể tạo ảnh minh họa AI.');
+      if (err?.name === 'AbortError') {
+        setImageError('Yêu cầu tạo ảnh vượt quá thời gian chờ (timeout 25s). Hệ thống vẫn bảo lưu các lựa chọn của bạn.');
+        setImageErrorCode('CLIENT_TIMEOUT');
+        setImageStatusCode(504);
+      } else {
+        setImageError(err?.message || 'Không thể tạo ảnh minh họa AI.');
+      }
     } finally {
+      clearTimeout(timeoutId);
       setIsGeneratingImage(false);
     }
   };
@@ -241,6 +281,12 @@ export default function App() {
 
     setIsRecoloring(true);
     setRecolorError(null);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 25000);
+
     try {
       const res = await fetch('/api/image/recolor', {
         method: 'POST',
@@ -250,9 +296,10 @@ export default function App() {
           newColorId,
           currentColorName: currentColor.name,
         }),
+        signal: controller.signal,
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         throw new Error(data.message || 'Lỗi khi đổi màu sắc áo.');
       }
@@ -262,8 +309,13 @@ export default function App() {
       setHasSavedCurrent(false);
     } catch (err: any) {
       console.error('Recolor failed:', err);
-      setRecolorError(err?.message || 'Không thể thực hiện đổi sắc áo.');
+      if (err?.name === 'AbortError') {
+        setRecolorError('Yêu cầu đổi màu vượt quá thời gian chờ (timeout 25s). Đã bảo lưu ảnh hiện tại.');
+      } else {
+        setRecolorError(err?.message || 'Không thể thực hiện đổi sắc áo.');
+      }
     } finally {
+      clearTimeout(timeoutId);
       setIsRecoloring(false);
     }
   };
@@ -803,60 +855,103 @@ export default function App() {
                 {/* Primary Call Button */}
                 <button
                   type="button"
-                  disabled={isSuggesting}
+                  disabled={step4Status === 'loading'}
                   onClick={handleAskStylist}
                   className="min-h-[44px] flex items-center justify-center gap-2 px-6 py-2.5 bg-[#9F1D26] hover:bg-[#79171E] disabled:bg-[#9F1D26]/50 text-white text-xs font-semibold rounded-xs shadow transition-colors shrink-0"
                 >
-                  {isSuggesting ? (
+                  {step4Status === 'loading' ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
                       <span>Đang gọi Gemini stylist...</span>
                     </>
+                  ) : step4Status === 'success' ? (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      <span>Gọi lại Gemini gợi ý</span>
+                    </>
+                  ) : step4Status === 'fallback' || step4Status === 'error' ? (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      <span>Thử gọi lại Gemini</span>
+                    </>
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4" />
-                      <span>{hasCalledStylist ? 'Gọi lại Gemini gợi ý' : 'Nhờ Gemini gợi ý 2 bộ phối'}</span>
+                      <span>Nhờ Gemini gợi ý 2 bộ phối</span>
                     </>
                   )}
                 </button>
               </div>
 
-              {/* Status Notification Banner (Honest & Clean) */}
-              {!hasCalledStylist ? (
+              {/* Status Notification Banner (Explicit state machine: idle | loading | success | fallback | error) */}
+              {step4Status === 'idle' && (
                 <div className="p-4 bg-[#FFFBF4] border border-[#DECFB9] text-[#30251F] rounded-sm text-xs flex items-start gap-3 shadow-xs">
                   <Info className="w-4 h-4 text-[#B18C52] shrink-0 mt-0.5" />
                   <div>
                     <span className="font-semibold block text-[#30251F]">
-                      Mẫu minh họa tĩnh — chưa gọi Gemini
+                      Mẫu tham khảo ban đầu — chưa gọi Gemini
                     </span>
                     <p className="text-[#30251F]/80 text-[11px] mt-0.5 leading-relaxed">
-                      Bấm nút <strong>&ldquo;Nhờ Gemini gợi ý 2 bộ phối&rdquo;</strong> ở trên để máy chủ gọi mô hình AI phân tích cấu hình hiện tại của bạn. Hai thẻ bên dưới hiện là mẫu tĩnh để bạn tham khảo trước.
+                      Bấm nút <strong>&ldquo;Nhờ Gemini gợi ý 2 bộ phối&rdquo;</strong> ở trên để máy chủ gọi mô hình AI phân tích cấu hình hiện tại của bạn. Hai thẻ bên dưới hiện là mẫu tham khảo ban đầu từ bộ sưu tập tư liệu.
                     </p>
                   </div>
                 </div>
-              ) : suggestSource === 'gemini' ? (
+              )}
+
+              {step4Status === 'loading' && (
+                <div className="p-4 bg-[#FFFBF4] border-2 border-[#9F1D26]/30 text-[#30251F] rounded-sm text-xs flex items-start gap-3 shadow-xs">
+                  <RefreshCw className="w-4 h-4 text-[#9F1D26] animate-spin shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold block text-[#9F1D26]">
+                      Đang xử lý: Đang kết nối và phân tích gợi ý từ Gemini...
+                    </span>
+                    <p className="text-[#30251F]/80 text-[11px] mt-0.5 leading-relaxed">
+                      Yêu cầu đang được gửi tới mô hình AI trên máy chủ để đối chiếu danh mục allowlist. Vui lòng đợi trong giây lát, chưa có kết quả phản hồi.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {step4Status === 'success' && (
                 <div className="p-4 bg-[#FFFBF4] border-2 border-[#486657] text-[#30251F] rounded-sm text-xs flex items-center justify-between shadow-xs">
                   <div className="flex items-center gap-2.5">
                     <CheckCircle2 className="w-4 h-4 text-[#486657]" />
                     <span>
-                      Gợi ý trực tiếp từ: <strong className="font-mono text-[#486657]">Gemini Stylist</strong> (đối chiếu danh mục chuẩn).
+                      Gợi ý trực tiếp từ: <strong className="font-mono text-[#486657]">Gemini Stylist</strong> ({actualModelUsed || 'gemini-3.8-flash'}, đối chiếu danh mục chuẩn).
                     </span>
                   </div>
                   <span className="text-[11px] text-[#486657] font-mono uppercase tracking-wider font-semibold">
                     2 đề xuất AI
                   </span>
                 </div>
-              ) : (
+              )}
+
+              {step4Status === 'fallback' && (
                 <div className="p-4 bg-[#FFFBF4] border-2 border-[#B18C52] text-[#30251F] rounded-sm text-xs space-y-1.5 shadow-xs">
                   <div className="flex items-center gap-2 font-semibold text-[#79171E]">
                     <AlertTriangle className="w-4 h-4 text-[#9F1D26]" />
                     <span>Mẫu tĩnh dự phòng — Gemini chưa phản hồi</span>
                   </div>
                   <p className="text-[#30251F]/80 text-[11px] leading-relaxed">
-                    <strong>Nguyên nhân:</strong> {suggestError || 'Mô hình AI hiện đang bận hoặc quá thời gian chờ.'}
+                    <strong>Thông báo hệ thống:</strong> {suggestError || 'Mô hình AI hiện đang bận hoặc quá thời gian chờ.'}
                   </p>
                   <p className="text-[#30251F]/70 text-[11px]">
-                    Hệ thống không giả danh AI. Bạn có thể chọn mẫu tĩnh dự phòng bên dưới hoặc tiếp tục tự phối thủ công ở bước 3.
+                    Hệ thống bảo đảm tính minh bạch, không ngụy tạo kết quả AI. Bạn có thể chọn mẫu tĩnh dự phòng bên dưới hoặc tiếp tục tự phối thủ công ở bước 3.
+                  </p>
+                </div>
+              )}
+
+              {step4Status === 'error' && (
+                <div className="p-4 bg-[#FFFBF4] border-2 border-[#9F1D26] text-[#30251F] rounded-sm text-xs space-y-1.5 shadow-xs">
+                  <div className="flex items-center gap-2 font-semibold text-[#9F1D26]">
+                    <AlertTriangle className="w-4 h-4 text-[#9F1D26]" />
+                    <span>Lỗi kết nối máy chủ</span>
+                  </div>
+                  <p className="text-[#30251F]/80 text-[11px] leading-relaxed">
+                    <strong>Chi tiết:</strong> {suggestError || 'Không thể kết nối đến máy chủ.'}
+                  </p>
+                  <p className="text-[#30251F]/70 text-[11px]">
+                    Hệ thống chuyển sang hiển thị mẫu tĩnh dự phòng để đảm bảo trải nghiệm không bị gián đoạn.
                   </p>
                 </div>
               )}
@@ -866,15 +961,18 @@ export default function App() {
                 <summary className="cursor-pointer font-medium hover:text-[#9F1D26] flex items-center justify-between list-none">
                   <span className="flex items-center gap-1.5">
                     <Info className="w-3.5 h-3.5 text-[#B18C52]" />
-                    <span>Chi tiết kỹ thuật (Mô hình & máy chủ)</span>
+                    <span>Chi tiết kỹ thuật (Trạng thái & máy chủ)</span>
                   </span>
                   <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
                 </summary>
                 <div className="mt-2.5 pt-2.5 border-t border-[#DECFB9] space-y-1 text-[11px] text-[#30251F]/80 font-mono">
+                  <p>• Trạng thái UI: <code>{step4Status}</code></p>
+                  <p>• Mã trạng thái dịch vụ: <code>{step4StatusCode ?? (step4Status === 'loading' ? 'Đang gửi request' : 'Chưa gửi')}</code></p>
+                  {step4ErrorCode && <p>• Mã lỗi hệ thống: <code>{step4ErrorCode}</code></p>}
                   <p>• Mô hình chính: <code>gemini-3.8-flash</code> (thinkingLevel: LOW, timeout 12s)</p>
                   <p>• Mô hình dự phòng: <code>gemini-3.7-flash</code> (kích hoạt khi 429/503/timeout)</p>
-                  <p>• Mô hình phản hồi thực tế: <code>{actualModelUsed || 'Chưa phản hồi (Mẫu tĩnh)'}</code></p>
-                  <p>• Nguồn dữ liệu: <code>{suggestSource || 'Chưa gọi'}</code></p>
+                  <p>• Mô hình phản hồi thực tế: <code>{actualModelUsed || (step4Status === 'loading' ? 'Đang gọi...' : 'Chưa có')}</code></p>
+                  <p>• Nguồn dữ liệu: <code>{suggestSource || (step4Status === 'idle' ? 'Mẫu tham khảo khởi tạo' : step4Status === 'loading' ? 'Đang truy vấn...' : 'curated_fallback')}</code></p>
                   <p>• Ràng buộc: Khóa reason/badge theo chuẩn tư liệu bảo tàng, chống ảo giác.</p>
                 </div>
               </details>
@@ -890,11 +988,27 @@ export default function App() {
                     selection.accessoryIds.includes(rec.accessoryId) &&
                     selection.styleId === rec.styleId;
 
-                  const sourceBadge = !hasCalledStylist
-                    ? 'Mẫu minh họa tĩnh — chưa gọi Gemini'
-                    : suggestSource === 'gemini'
-                    ? `Gemini • ${actualModelUsed || 'gemini-3.8-flash'}`
-                    : 'Mẫu tĩnh dự phòng — Gemini chưa phản hồi';
+                  const sourceBadge =
+                    step4Status === 'idle'
+                      ? 'Mẫu tham khảo — chưa gọi Gemini'
+                      : step4Status === 'loading'
+                      ? 'Mẫu tham khảo — chưa phải kết quả request'
+                      : step4Status === 'success'
+                      ? `Gemini • ${actualModelUsed || 'gemini-3.8-flash'}`
+                      : step4Status === 'error'
+                      ? 'Mẫu tĩnh dự phòng (Lỗi kết nối)'
+                      : 'Mẫu tĩnh dự phòng — Gemini chưa phản hồi';
+
+                  const badgeColorClass =
+                    step4Status === 'idle'
+                      ? 'text-[#30251F]/60'
+                      : step4Status === 'loading'
+                      ? 'text-[#B18C52]'
+                      : step4Status === 'success'
+                      ? 'text-[#486657]'
+                      : step4Status === 'error'
+                      ? 'text-[#9F1D26]'
+                      : 'text-[#B18C52]';
 
                   return (
                     <div
@@ -908,13 +1022,7 @@ export default function App() {
                       <div className="space-y-3">
                         {/* Prominent source status label on card */}
                         <div className="flex flex-col gap-1 border-b border-[#DECFB9] pb-2">
-                          <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${
-                            !hasCalledStylist
-                              ? 'text-[#30251F]/60'
-                              : suggestSource === 'gemini'
-                              ? 'text-[#486657]'
-                              : 'text-[#B18C52]'
-                          }`}>
+                          <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${badgeColorClass}`}>
                             {sourceBadge}
                           </span>
                           <div className="flex items-center justify-between">
@@ -1055,14 +1163,28 @@ export default function App() {
 
               {/* Error or quota warning */}
               {imageError && (
-                <div className="p-4 bg-[#FFFBF4] border border-[#B18C52] text-[#30251F] rounded-sm text-xs space-y-1">
+                <div className="p-4 bg-[#FFFBF4] border border-[#B18C52] text-[#30251F] rounded-sm text-xs space-y-2 shadow-xs">
                   <div className="flex items-center gap-2 font-semibold text-[#79171E]">
                     <AlertTriangle className="w-4 h-4 text-[#9F1D26]" />
-                    <span>Chưa thể sinh ảnh AI lúc này: {imageError}</span>
+                    <span>Thông báo tạo ảnh AI: {imageError}</span>
                   </div>
                   <p className="text-[#30251F]/80 text-[11px] leading-relaxed">
-                    Nếu mô hình bận, bạn vẫn có thể tham khảo sơ đồ cấu trúc áo bên dưới và tiếp tục sang bước 6 để lưu cấu hình bộ phối.
+                    Hệ thống không tự động thử lại để tránh phát sinh chi phí. Bạn vẫn có thể tiếp tục phối màu, phụ kiện và lưu cấu hình bộ phối bình thường.
                   </p>
+                  {(imageStatusCode || imageErrorCode) && (
+                    <details className="text-[11px] text-[#30251F]/70 pt-1 group">
+                      <summary className="cursor-pointer font-medium hover:text-[#9F1D26] list-none flex items-center gap-1">
+                        <Info className="w-3 h-3 text-[#B18C52]" />
+                        <span>Xem chi tiết mã phản hồi</span>
+                      </summary>
+                      <div className="mt-1.5 p-2 bg-white/60 border border-[#DECFB9]/60 rounded-xs font-mono text-[10px] space-y-0.5">
+                        {imageStatusCode && <p>• HTTP Status: <code>{imageStatusCode}</code></p>}
+                        {imageErrorCode && <p>• Mã lỗi hệ thống: <code>{imageErrorCode}</code></p>}
+                        <p>• Mô hình cấu hình: <code>gemini-3.1-flash-image</code></p>
+                        <p>• Trạng thái: Giữ nguyên sơ đồ minh họa và thông số phối đồ</p>
+                      </div>
+                    </details>
+                  )}
                 </div>
               )}
 

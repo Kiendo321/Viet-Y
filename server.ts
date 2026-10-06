@@ -11,6 +11,10 @@ import {
   CULTURAL_ARTIFACT_MUSEUM,
   FALLBACK_RECOMMENDATIONS,
 } from './src/data/catalog.js';
+import {
+  validateAndLockStylistResponse,
+  sanitizeApiErrorMessage,
+} from './src/services/stylistValidator.js';
 
 dotenv.config();
 
@@ -157,22 +161,36 @@ Ghi chú bổ sung: ${preference || 'Chuẩn bị cho Ngày hội văn hóa sinh
       let responseText = '';
       let successfulModel = '';
 
-      const callWithTimeout = (modelName: string, timeoutMs: number) => {
+      const callWithTimeout = async (modelName: string, timeoutMs: number) => {
+        const abortController = new AbortController();
+        let timerId: NodeJS.Timeout | null = null;
         const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => {
+          timerId = setTimeout(() => {
+            abortController.abort();
             const err: any = new Error(`Mô hình ${modelName} vượt quá thời gian chờ (${timeoutMs}ms)`);
             err.status = 504;
             reject(err);
           }, timeoutMs);
         });
-        return Promise.race([
-          client.models.generateContent({
-            model: modelName,
-            contents: promptText,
-            config: configObj,
-          }),
-          timeoutPromise,
-        ]);
+
+        try {
+          const result = await Promise.race([
+            client.models.generateContent({
+              model: modelName,
+              contents: promptText,
+              config: {
+                ...configObj,
+                abortSignal: abortController.signal,
+              },
+            }),
+            timeoutPromise,
+          ]);
+          return result;
+        } finally {
+          if (timerId) {
+            clearTimeout(timerId);
+          }
+        }
       };
 
       for (let i = 0; i < candidateModels.length; i++) {
@@ -197,18 +215,12 @@ Ghi chú bổ sung: ${preference || 'Chuẩn bị cho Ngày hội văn hóa sinh
         const is503 = lastError?.status === 503 || (lastError?.message && lastError.message.includes('503'));
         const isTimeout = lastError?.status === 504 || (lastError?.message && lastError.message.includes('thời gian chờ'));
 
-        let errorMsg = `Cả hai mô hình (${PRIMARY_TEXT_MODEL} và ${BACKUP_TEXT_MODEL}) đều chưa phản hồi.`;
-        if (isQuota) {
-          errorMsg = `Hạn mức gọi mô hình AI đang đạt giới hạn (429 Quota).`;
-        } else if (is503) {
-          errorMsg = `Các mô hình Gemini hiện đang quá tải tạm thời (503 High Demand).`;
-        } else if (isTimeout) {
-          errorMsg = `Yêu cầu gọi mô hình vượt quá thời gian chờ (12s mỗi model).`;
-        }
+        const errorMsg = sanitizeApiErrorMessage(lastError, isQuota, is503, isTimeout);
 
         // Return HTTP 200 with structured fallback response so Nginx/Cloud Run proxy never intercepts with HTML
         res.status(200).json({
           error: isQuota ? 'QUOTA_EXCEEDED' : is503 ? 'SERVICE_UNAVAILABLE' : 'ALL_MODELS_FAILED',
+          statusCode: isQuota ? 429 : is503 ? 503 : isTimeout ? 504 : 500,
           message: errorMsg,
           canFallbackManual: true,
           source: 'curated_fallback',
@@ -218,89 +230,28 @@ Ghi chú bổ sung: ${preference || 'Chuẩn bị cho Ngày hội văn hóa sinh
         return;
       }
 
-      // Parse and validate response
-      try {
-        const parsed = JSON.parse(responseText);
-        if (!Array.isArray(parsed) || parsed.length === 0) {
-          throw new Error('Dữ liệu JSON trả về không phải là mảng đề xuất.');
-        }
-
-        // Validate each item strictly against allowlists
-        const validItems = parsed.filter((item) => {
-          if (!item || typeof item !== 'object') return false;
-          const validGarment = validGarmentIds.has(item.garmentId);
-          const validColor = validColorIds.has(item.colorId);
-          const validAccessory = validAccessoryIds.has(item.accessoryId);
-          const validStyle = validStyleIds.has(item.styleId);
-          return validGarment && validColor && validAccessory && validStyle;
-        });
-
-        // Locate the reference outfit and the remix outfit
-        const thamChieuRaw = validItems.find((item) => item.styleId === 'style-tham-chieu-tu-lieu');
-        const remixRaw = validItems.find((item) => item.styleId === 'style-remix-duong-dai');
-
-        // Validation constraints:
-        // 1. Must find both distinct styles
-        // 2. Reference style must lock garment color to 'color-sa-kep-den-lot-trang' (outside black, inside white)
-        const hasBothStyles = Boolean(thamChieuRaw && remixRaw);
-        const thamChieuHasCorrectColor = thamChieuRaw?.colorId === 'color-sa-kep-den-lot-trang';
-
-        if (!hasBothStyles || !thamChieuHasCorrectColor) {
-          console.warn(`[POST /api/stylist/suggest] Model ${successfulModel} failed cultural/catalog validation. hasBothStyles=${hasBothStyles}, thamChieuHasCorrectColor=${thamChieuHasCorrectColor}. Falling back to curated samples.`);
-          res.status(200).json({
-            source: 'curated_fallback',
-            model: null,
-            note: `Mô hình ${successfulModel} đã phản hồi nhưng vi phạm kiểm duyệt danh mục (phải có đúng 2 phong cách khác nhau và bộ tham chiếu phải là màu ngoài đen lót trắng). Đã kích hoạt mẫu tĩnh dự phòng có nhãn rõ ràng.`,
-            suggestions: FALLBACK_RECOMMENDATIONS,
-            canFallbackManual: true,
-          });
-          return;
-        }
-
-        // Server-side strict override of reason and highlightTag:
-        // Freeform reason/tag generated by Gemini is completely replaced with verified app templates
-        // to guarantee no hallucinated claims (e.g. turban facts) appear as source facts on UI.
-        const lockedThamChieu = {
-          id: thamChieuRaw.id || 'rec-tham-chieu',
-          title: thamChieuRaw.title?.trim() || 'Bộ phối tham chiếu tư liệu hiện vật',
-          garmentId: thamChieuRaw.garmentId,
-          colorId: 'color-sa-kep-den-lot-trang',
-          accessoryId: thamChieuRaw.accessoryId,
-          styleId: 'style-tham-chieu-tu-lieu',
-          reason: 'Gợi ý phối tham chiếu: màu áo ngoài đen, lót trắng theo mô tả hiện vật. Phụ kiện là lựa chọn phối trong demo, không nằm trong mô tả nguồn.',
-          highlightTag: 'Tham chiếu hiện vật',
-        };
-
-        const lockedRemix = {
-          id: remixRaw.id || 'rec-remix',
-          title: remixRaw.title?.trim() || 'Bộ phối Remix đương đại sinh viên',
-          garmentId: remixRaw.garmentId,
-          colorId: remixRaw.colorId,
-          accessoryId: remixRaw.accessoryId,
-          styleId: 'style-remix-duong-dai',
-          reason: 'Gợi ý phối hiện đại do Gemini đề xuất. Màu và phụ kiện là lựa chọn phong cách, không phải dữ kiện hiện vật.',
-          highlightTag: 'Remix hiện đại',
-        };
-
-        // Strictly ordered [thamChieu, remix] - impossible to swap order or styles
-        const strictlyOrderedSuggestions = [lockedThamChieu, lockedRemix];
-
+      // Parse and validate response using validator service
+      const validationResult = validateAndLockStylistResponse(responseText);
+      if (!validationResult.isValid) {
+        console.warn(`[POST /api/stylist/suggest] Model ${successfulModel} response validation failed:`, validationResult.note);
         res.status(200).json({
-          source: 'gemini',
-          model: successfulModel,
-          suggestions: strictlyOrderedSuggestions,
-        });
-      } catch (parseErr: any) {
-        console.error(`Failed to parse response from ${successfulModel} as JSON:`, parseErr, responseText);
-        res.status(200).json({
-          error: 'PARSE_FAILED',
-          message: `Mô hình ${successfulModel} phản hồi định dạng không hợp lệ. Bạn có thể tự phối thủ công.`,
-          canFallbackManual: true,
+          error: validationResult.error || 'VALIDATION_FAILED',
+          statusCode: 200,
+          message: validationResult.note || 'Dữ liệu phản hồi không đúng danh mục. Đã kích hoạt mẫu tĩnh dự phòng.',
           source: 'curated_fallback',
           model: null,
-          suggestions: FALLBACK_RECOMMENDATIONS,
+          suggestions: validationResult.suggestions,
+          canFallbackManual: true,
         });
+        return;
       }
+
+      res.status(200).json({
+        source: 'gemini',
+        model: successfulModel,
+        statusCode: 200,
+        suggestions: validationResult.suggestions,
+      });
     } catch (unexpectedError: any) {
       console.error('[POST /api/stylist/suggest] Unexpected error:', unexpectedError);
       res.status(200).json({
@@ -369,19 +320,34 @@ Atmosphere:
     let lastError: any = null;
 
     for (const modelName of imageModelsToTry) {
+      const abortController = new AbortController();
+      let timerId: NodeJS.Timeout | null = null;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timerId = setTimeout(() => {
+          abortController.abort();
+          const err: any = new Error(`Mô hình ${modelName} vượt quá thời gian chờ (20000ms)`);
+          err.status = 504;
+          reject(err);
+        }, 20000);
+      });
+
       try {
         console.log(`Calling Gemini image generation model: ${modelName}`);
-        const response = await client.models.generateContent({
-          model: modelName,
-          contents: {
-            parts: [{ text: prompt }],
-          },
-          config: {
-            imageConfig: {
-              aspectRatio: '3:4',
+        const response = await Promise.race([
+          client.models.generateContent({
+            model: modelName,
+            contents: {
+              parts: [{ text: prompt }],
             },
-          },
-        });
+            config: {
+              imageConfig: {
+                aspectRatio: '3:4',
+              },
+              abortSignal: abortController.signal,
+            },
+          }),
+          timeoutPromise,
+        ]);
 
         const parts = response.candidates?.[0]?.content?.parts || [];
         for (const part of parts) {
@@ -391,6 +357,7 @@ Atmosphere:
             res.json({
               imageUrl,
               modelUsed: modelName,
+              statusCode: 200,
               promptUsed: prompt,
               disclaimer: 'Minh họa AI, không phải ảnh hiện vật hay phục dựng chính xác.',
             });
@@ -401,17 +368,22 @@ Atmosphere:
         // If candidate responded but no image inlineData
         throw new Error('Mô hình không trả về dữ liệu hình ảnh (inlineData).');
       } catch (err: any) {
-        console.warn(`Model ${modelName} failed:`, err?.message || err);
+        console.warn(`Model ${modelName} failed:`, err?.status || err?.message || err);
         lastError = err;
-        // Try fallback model if available
+      } finally {
+        if (timerId) {
+          clearTimeout(timerId);
+        }
       }
     }
 
     const isQuota = lastError?.status === 429 || (lastError?.message && lastError.message.includes('429'));
-    res.status(isQuota ? 429 : 500).json({
+    const statusCode = isQuota ? 429 : 500;
+    res.status(statusCode).json({
       error: isQuota ? 'QUOTA_EXCEEDED' : 'IMAGE_GENERATION_FAILED',
+      statusCode,
       message: isQuota
-        ? 'Hạn mức tạo ảnh AI của dự án đã đạt giới hạn tạm thời (429 Quota). Vui lòng thử lại sau ít phút hoặc tiếp tục xem sơ đồ cấu trúc áo.'
+        ? 'Hạn mức tạo ảnh AI hiện không khả dụng (429 Quota). Bạn vẫn có thể tiếp tục phối màu, phụ kiện và lưu cấu hình bình thường.'
         : (lastError?.message || 'Không thể sinh ảnh minh họa AI. Hệ thống vẫn bảo lưu các lựa chọn của bạn.'),
     });
   });
@@ -424,6 +396,7 @@ Atmosphere:
     if (!client) {
       res.status(503).json({
         error: 'API_KEY_MISSING',
+        statusCode: 503,
         message: 'Chưa có GEMINI_API_KEY để chỉnh sửa ảnh.',
       });
       return;
@@ -446,29 +419,44 @@ Strict constraints:
     let lastError: any = null;
 
     for (const modelName of imageModelsToTry) {
+      const abortController = new AbortController();
+      let timerId: NodeJS.Timeout | null = null;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timerId = setTimeout(() => {
+          abortController.abort();
+          const err: any = new Error(`Mô hình ${modelName} vượt quá thời gian chờ (20000ms)`);
+          err.status = 504;
+          reject(err);
+        }, 20000);
+      });
+
       try {
         console.log(`Calling Gemini image recolor model: ${modelName}`);
-        const response = await client.models.generateContent({
-          model: modelName,
-          contents: {
-            parts: [
-              {
-                inlineData: {
-                  mimeType: 'image/png',
-                  data: cleanBase64,
+        const response = await Promise.race([
+          client.models.generateContent({
+            model: modelName,
+            contents: {
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: 'image/png',
+                    data: cleanBase64,
+                  },
                 },
-              },
-              {
-                text: editPrompt,
-              },
-            ],
-          },
-          config: {
-            imageConfig: {
-              aspectRatio: '3:4',
+                {
+                  text: editPrompt,
+                },
+              ],
             },
-          },
-        });
+            config: {
+              imageConfig: {
+                aspectRatio: '3:4',
+              },
+              abortSignal: abortController.signal,
+            },
+          }),
+          timeoutPromise,
+        ]);
 
         const parts = response.candidates?.[0]?.content?.parts || [];
         for (const part of parts) {
@@ -478,6 +466,7 @@ Strict constraints:
             res.json({
               imageUrl,
               modelUsed: modelName,
+              statusCode: 200,
               recoloredColor: targetColor.name,
               disclaimer: 'Minh họa AI, không phải ảnh hiện vật hay phục dựng chính xác. Khả năng bảo lưu chi tiết có thể bị giới hạn bởi thuật toán biến đổi AI.',
             });
@@ -486,17 +475,23 @@ Strict constraints:
         }
         throw new Error('Mô hình không trả về ảnh sau khi biến đổi màu.');
       } catch (err: any) {
-        console.warn(`Recolor failed on ${modelName}:`, err?.message || err);
+        console.warn(`Recolor failed on ${modelName}:`, err?.status || err?.message || err);
         lastError = err;
+      } finally {
+        if (timerId) {
+          clearTimeout(timerId);
+        }
       }
     }
 
     const isQuota = lastError?.status === 429 || (lastError?.message && lastError.message.includes('429'));
-    res.status(isQuota ? 429 : 500).json({
+    const statusCode = isQuota ? 429 : 500;
+    res.status(statusCode).json({
       error: isQuota ? 'QUOTA_EXCEEDED' : 'RECOLOR_FAILED',
+      statusCode,
       message: isQuota
-        ? 'Hạn mức biến đổi ảnh đang bận (429 Quota). Ảnh gốc trước đó vẫn được giữ nguyên an toàn.'
-        : (lastError?.message || 'Không thể biến đổi màu áo. Đã giữ nguyên ảnh hiện tại.'),
+        ? 'Hạn mức biến đổi ảnh AI hiện không khả dụng (429 Quota). Bạn vẫn có thể tiếp tục phối màu, phụ kiện và lưu cấu hình bình thường.'
+        : (lastError?.message || 'Không thể biến đổi màu áo lúc này. Đã bảo lưu ảnh hiện tại.'),
     });
   });
 

@@ -4,7 +4,7 @@ import { OutfitSelection } from '../data/catalog';
 import { BraidedFlowerLogo, HeadlineFlourish, LeafBranchOrnament } from './HeritageOrnaments';
 import { LookComposerPanel } from './LookComposerPanel';
 import { DiscoveryRibbon } from './DiscoveryRibbon';
-import heroBg from '../assets/style-a-hero.png';
+import { heroBg } from '../assets/assetUrls';
 
 interface EditorialLandingProps {
   selection: OutfitSelection;
