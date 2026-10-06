@@ -220,7 +220,9 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
       const stepButton = await screen.findByRole('button', { name: stepLabels[stepNum] });
       fireEvent.click(stepButton);
       await waitFor(() => {
-        if (stepNum === 4) {
+        if (stepNum === 3) {
+          assert.ok(screen.getByText(/Sắc áo, phụ kiện & phong cách/i));
+        } else if (stepNum === 4) {
           assert.ok(screen.getByText(/Stylist Gemini gợi ý bộ phối/i));
         } else if (stepNum === 5) {
           assert.ok(screen.getByText(/Minh họa hình ảnh concept/i));
@@ -429,6 +431,74 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
       // 3. Nút quay lại bước 4 và sang bước 6 hoạt động bình thường
       assert.ok(screen.getByRole('button', { name: /Quay lại bước 4/i }));
       assert.ok(screen.getByRole('button', { name: /Sang bước 6: Thẻ văn hóa & Lưu/i }));
+    });
+
+    test('Bước 3 thử màu SVG tức thì: Đổi 2 màu thì robe fill đổi, khăn đóng đen và quần giữ nguyên, fetch không bị gọi', async () => {
+      const fetchCalls: string[] = [];
+      globalThis.fetch = async (input: any) => {
+        const url = typeof input === 'string' ? input : input?.url || '';
+        fetchCalls.push(url);
+        if (url.includes('/api/health')) {
+          return createMockResponse({ status: 'ok', hasApiKey: true });
+        }
+        return createMockResponse({});
+      };
+
+      render(React.createElement(App));
+      await navigateToStep(3);
+
+      // Verify Step 3 header is present
+      assert.ok(screen.getByText(/Sắc áo, phụ kiện & phong cách/i));
+
+      // 1. Kiểm tra màu áo ban đầu (Mặc định: Sa kép đen lót trắng - #1E232A)
+      const robeFlapInitial = document.querySelector('g[data-part="robe"] path[fill="#1E232A"]');
+      assert.ok(robeFlapInitial, 'Áo ban đầu phải có fill #1E232A');
+
+      // Khăn đóng đen (acc-khan-dong-den) mặc định được chọn, headwear fill là #1C1F24
+      const headwearPathInitial = document.querySelector('g[data-part="headwear"] path[fill="#1C1F24"]');
+      assert.ok(headwearPathInitial, 'Khăn đóng đen ban đầu phải có fill #1C1F24');
+
+      // Trousers mặc định (quần trắng nền minh họa) fill #F6F3EB
+      const trouserPathInitial = document.querySelector('g[data-part="trousers"] path[fill="#F6F3EB"]');
+      assert.ok(trouserPathInitial, 'Quần trắng nền minh họa ban đầu phải có fill #F6F3EB');
+
+      // Đảm bảo không có fetch nào ngoài /api/health lúc mount
+      const fetchCountBefore = fetchCalls.filter((u) => !u.includes('/api/health')).length;
+      assert.equal(fetchCountBefore, 0, 'Chưa có request nào ngoài health check');
+
+      // 2. Chọn màu thứ nhất: Đỏ son trầm (hex theo catalog: #962A22)
+      const redColor = ALLOWLIST_COLORS.find((c) => c.id === 'color-do-son-tram')!;
+      const redButton = screen.getByRole('button', { name: /Đỏ son trầm/i });
+      fireEvent.click(redButton);
+
+      // Assert robe fill đổi sang hex của Đỏ son trầm ngay lập tức
+      const robeFlapRed = document.querySelector(`g[data-part="robe"] path[fill="${redColor.hex}"]`);
+      assert.ok(robeFlapRed, `Áo phải đổi fill sang ${redColor.hex} ngay lập tức`);
+
+      // Assert phụ kiện khăn đóng đen vẫn đen (#1C1F24) và quần giữ nguyên (#F6F3EB)
+      const headwearPathAfterRed = document.querySelector('g[data-part="headwear"] path[fill="#1C1F24"]');
+      assert.ok(headwearPathAfterRed, 'Khăn đóng đen vẫn giữ màu #1C1F24 khi đổi màu áo');
+      const trouserPathAfterRed = document.querySelector('g[data-part="trousers"] path[fill="#F6F3EB"]');
+      assert.ok(trouserPathAfterRed, 'Quần giữ nguyên màu #F6F3EB');
+
+      // 3. Chọn màu thứ hai: Xanh ngọc (hex theo catalog: #0E5A53)
+      const greenColor = ALLOWLIST_COLORS.find((c) => c.id === 'color-xanh-ngoc-bich')!;
+      const greenButton = screen.getByRole('button', { name: /Xanh ngọc/i });
+      fireEvent.click(greenButton);
+
+      // Assert robe fill đổi sang hex của Xanh ngọc ngay lập tức
+      const robeFlapGreen = document.querySelector(`g[data-part="robe"] path[fill="${greenColor.hex}"]`);
+      assert.ok(robeFlapGreen, `Áo phải đổi fill sang ${greenColor.hex} ngay lập tức`);
+
+      // Assert phụ kiện khăn đóng đen và quần vẫn tiếp tục giữ nguyên
+      const headwearPathAfterGreen = document.querySelector('g[data-part="headwear"] path[fill="#1C1F24"]');
+      assert.ok(headwearPathAfterGreen, 'Khăn đóng đen vẫn giữ màu #1C1F24 sau lần đổi màu thứ 2');
+      const trouserPathAfterGreen = document.querySelector('g[data-part="trousers"] path[fill="#F6F3EB"]');
+      assert.ok(trouserPathAfterGreen, 'Quần vẫn tiếp tục giữ nguyên màu #F6F3EB');
+
+      // 4. Assert tuyệt đối không gọi fetch khi đổi màu
+      const fetchCountAfter = fetchCalls.filter((u) => !u.includes('/api/health')).length;
+      assert.equal(fetchCountAfter, 0, 'Thao tác đổi màu không được gọi fetch/API');
     });
   });
 });

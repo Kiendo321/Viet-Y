@@ -114,3 +114,15 @@ Danh sách model IDs đang cấu hình trong mã nguồn (`server.ts`):
 
 > **Lưu ý minh bạch về tính khả dụng:**
 > Các định danh mô hình trên phản ánh cấu hình hiện tại trong mã nguồn. Trong môi trường kiểm thử thực tế hôm nay, các lượt gọi trực tiếp qua UI gặp phản hồi `503 High Demand` (quá tải) đối với Stylist và `429 Quota Exceeded` đối với Image Generation. Hệ thống **chưa chứng minh lượt gọi thành công trực tiếp** với tài khoản thanh toán và **không khẳng định trước mô hình có hỗ trợ hay không** khi chưa có kiểm chứng thực tế trong phiên thử nghiệm.
+
+---
+
+## 8. Thử Màu SVG Trực Tiếp (Local Vector Preview)
+
+- **Thử màu SVG hoạt động local**:
+  - Tại Bước 3 (`Sắc áo & Phụ kiện`) và hộp thoại xem nhanh trên bảng phối đồ `LookComposerPanel`, tính năng thử màu áo ngũ thân hoạt động hoàn toàn ở phía client (cục bộ trình duyệt) thông qua bản vẽ vector SVG tùy biến theo bảng màu Style A.
+  - Khi người dùng chọn các sắc áo trong danh mục (*Đỏ son trầm, Mực chàm cổ, Xanh ngọc bích, Vàng hoàng cúc, Trắng ngà, Sa kép đen*), sắc áo thay đổi tức thì mà **không gửi request mạng** và **không tiêu tốn hạn mức AI**.
+  - Phụ kiện đã chọn như khăn đóng đen (`#1C1F24`), quần suông và giày được giữ nguyên nhất quán; khăn phối đồng điệu tiệp tông màu áo.
+- **Tính năng AI Image Recolor chưa nghiệm thu**:
+  - Tính năng biến đổi màu trực tiếp trên ảnh bitmap AI (`/api/image/recolor`) vẫn đang ở trạng thái kỹ thuật thử nghiệm và **chưa nghiệm thu** do phụ thuộc vào hạn mức dịch vụ tạo ảnh.
+  - Bản thử màu SVG vector trực tiếp đáp ứng trọn vẹn nhu cầu quan sát và định hình phong cách học đường trước khi lưu phiếu tóm tắt văn hóa.

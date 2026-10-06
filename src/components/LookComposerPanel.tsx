@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Check, ArrowRight, ChevronDown } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Check, ArrowRight, ChevronDown, Eye, X } from 'lucide-react';
 import {
   ALLOWLIST_COLORS,
   OutfitSelection,
 } from '../data/catalog';
 import { AtlasTile } from './AtlasTile';
+import { OutfitColorPreview } from './OutfitColorPreview';
 
 interface LookComposerPanelProps {
   selection: OutfitSelection;
@@ -35,6 +36,60 @@ export const LookComposerPanel: React.FC<LookComposerPanelProps> = ({
   className = '',
 }) => {
   const [isDisclosureOpen, setIsDisclosureOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const triggerButtonRef = useRef<HTMLButtonElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  // Focus trap, scroll lock, and cleanup focus restoration for modal dialog
+  useEffect(() => {
+    if (!isPreviewModalOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    // Focus close button on open
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setIsPreviewModalOpen(false);
+        return;
+      }
+
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusables || focusables.length === 0) return;
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+      // Chỉ trả focus trong cleanup của lần modal mở
+      triggerButtonRef.current?.focus();
+    };
+  }, [isPreviewModalOpen]);
 
   const currentColor =
     ALLOWLIST_COLORS.find((c) => c.id === selection.colorId) || ALLOWLIST_COLORS[0];
@@ -163,6 +218,19 @@ export const LookComposerPanel: React.FC<LookComposerPanelProps> = ({
             );
           })}
         </div>
+
+        {/* Nút nhỏ xem thử màu trực tiếp */}
+        <div className="flex justify-end pt-0.5">
+          <button
+            ref={triggerButtonRef}
+            type="button"
+            onClick={() => setIsPreviewModalOpen(true)}
+            className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#8E101A] hover:text-[#700C14] hover:underline underline-offset-2 py-0.5 px-1 rounded-xs focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#8E101A]"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span>Xem thử màu trực tiếp</span>
+          </button>
+        </div>
       </div>
 
       {/* 3. Suggested Accessories - 3 Real Catalog Accessories Only (Fan excluded) */}
@@ -248,6 +316,106 @@ export const LookComposerPanel: React.FC<LookComposerPanelProps> = ({
           </div>
         )}
       </div>
+
+      {/* Dialog Modal xem thử màu trực tiếp */}
+      {isPreviewModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-2xs"
+          onClick={() => setIsPreviewModalOpen(false)}
+        >
+          <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="preview-color-dialog-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#FFFBF4] border border-[#DECFB9] rounded-md shadow-2xl max-w-sm w-full p-4 sm:p-5 text-[#30251F] max-h-[92vh] overflow-y-auto space-y-3.5 focus:outline-hidden"
+          >
+            {/* Dialog Header */}
+            <div className="flex items-center justify-between border-b border-[#DECFB9]/80 pb-2.5">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#9F1D26] font-semibold block">
+                  Phối màu trực quan
+                </span>
+                <h3 id="preview-color-dialog-title" className="font-serif font-bold text-base text-[#30251F]">
+                  Xem thử màu áo trực tiếp
+                </h3>
+              </div>
+              <button
+                ref={closeButtonRef}
+                type="button"
+                onClick={() => setIsPreviewModalOpen(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[#30251F]/70 hover:text-[#9F1D26] hover:bg-black/5 transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#9F1D26]"
+                aria-label="Đóng bảng xem thử"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Component OutfitColorPreview */}
+            <OutfitColorPreview selection={selection} compact={true} />
+
+            {/* 6 Color Swatches inside dialog (Chỉ đổi colorId, không đổi phụ kiện) */}
+            <div className="space-y-2 pt-1 border-t border-[#DECFB9]/70">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-medium text-[#30251F]/80">Chọn sắc áo khác</span>
+                <span className="text-[10px] font-mono text-[#486657] font-semibold">
+                  {currentColor.name}
+                </span>
+              </div>
+              <div className="grid grid-cols-6 gap-2 p-2 bg-white/70 rounded-xs border border-[#DECFB9]/60">
+                {ALLOWLIST_COLORS.map((col) => {
+                  const isSelected = selection.colorId === col.id;
+                  return (
+                    <button
+                      key={col.id}
+                      type="button"
+                      onClick={() => onUpdateSelection((prev) => ({ ...prev, colorId: col.id }))}
+                      className={`aspect-square rounded-full border transition-all flex items-center justify-center relative ${
+                        isSelected
+                          ? 'border-[#8E101A] ring-2 ring-[#8E101A]/50 scale-105 shadow-xs'
+                          : 'border-[#DECFB9] hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: col.hex }}
+                      aria-pressed={isSelected}
+                      title={col.name}
+                      aria-label={`Chọn màu ${col.name}`}
+                    >
+                      {isSelected && <Check className="w-3.5 h-3.5 text-white drop-shadow-xs" />}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] text-[#30251F]/60 italic text-center">
+                Thử màu không tốn lượt AI. Khăn tiệp tông sẽ theo màu áo; phụ kiện khác giữ nguyên.
+              </p>
+            </div>
+
+            {/* Dialog Footer Actions */}
+            <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#DECFB9]/70">
+              <button
+                type="button"
+                onClick={() => setIsPreviewModalOpen(false)}
+                className="px-3 py-1.5 border border-[#DECFB9] text-[#30251F] text-xs rounded-xs hover:bg-black/5 transition-colors"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPreviewModalOpen(false);
+                  onGoToStep(3);
+                }}
+                className="px-3.5 py-1.5 bg-[#8E101A] hover:bg-[#700C14] text-white text-xs font-semibold rounded-xs shadow-xs transition-colors flex items-center gap-1"
+              >
+                <span>Sang bước 3</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 };
