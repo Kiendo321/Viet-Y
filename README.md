@@ -126,3 +126,10 @@ Danh sách model IDs đang cấu hình trong mã nguồn (`server.ts`):
 - **Tính năng AI Image Recolor chưa nghiệm thu**:
   - Tính năng biến đổi màu trực tiếp trên ảnh bitmap AI (`/api/image/recolor`) vẫn đang ở trạng thái kỹ thuật thử nghiệm và **chưa nghiệm thu** do phụ thuộc vào hạn mức dịch vụ tạo ảnh.
   - Bản thử màu SVG vector trực tiếp đáp ứng trọn vẹn nhu cầu quan sát và định hình phong cách học đường trước khi lưu phiếu tóm tắt văn hóa.
+# Giao diện phối đồ C1 + C2 (07/10/2026)
+
+Bước 3 có sân khấu một bộ phối, lựa chọn sắc áo và phụ kiện theo nhóm, cận cảnh đóng mở, phóng to và lưu cấu hình. Trên điện thoại, hình bộ phối hiển thị trước bảng chọn và cận cảnh mặc định đóng. Header cùng quy trình sáu bước được giữ nguyên.
+
+Hình hiện tại là minh họa SVG, chưa mô phỏng độ vừa vặn hay dựng lại hiện vật. Phom và mẫu vải minh họa không phải bằng chứng văn hóa. Ảnh AI theo yêu cầu nằm ở bước 5 và cần kiểm chứng riêng với dịch vụ khả dụng. Báo cáo kiểm chứng tại `docs/QA-2026-10-06.md`, mục VII: 15/15 kiểm thử, lint và build thành công.
+
+

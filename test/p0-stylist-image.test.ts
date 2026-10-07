@@ -500,6 +500,117 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
       const fetchCountAfter = fetchCalls.filter((u) => !u.includes('/api/health')).length;
       assert.equal(fetchCountAfter, 0, 'Thao tác đổi màu không được gọi fetch/API');
     });
+
+    test('Bước 3 hồi quy 1: Tính nhất quán màu sắc giữa hình toàn thân và cận cảnh chi tiết (C1 + C2)', async () => {
+      globalThis.fetch = async (input: any) => {
+        return createMockResponse({ status: 'ok', hasApiKey: true });
+      };
+
+      render(React.createElement(App));
+      await navigateToStep(3);
+
+      // Cả hình toàn thân và các ô cận cảnh chi tiết (cổ đứng, 5 cúc) phải cùng dùng fill mặc định #1E232A
+      const initialRobeFills = document.querySelectorAll('g[data-part="robe"] path[fill="#1E232A"]');
+      assert.ok(initialRobeFills.length >= 2, 'Cả hình toàn thân và chi tiết cận cảnh phải có fill #1E232A');
+
+      // Đổi sang màu Đỏ son trầm
+      const redColor = ALLOWLIST_COLORS.find((c) => c.id === 'color-do-son-tram')!;
+      const redButton = screen.getByRole('button', { name: /Đỏ son trầm/i });
+      fireEvent.click(redButton);
+
+      // Tất cả hình toàn thân và cận cảnh đồng bộ chuyển sang #962A22
+      const updatedRobeFills = document.querySelectorAll(`g[data-part="robe"] path[fill="${redColor.hex}"]`);
+      assert.ok(updatedRobeFills.length >= 2, `Cả hình toàn thân và cận cảnh đều đồng bộ chuyển sang ${redColor.hex}`);
+    });
+
+    test('Bước 3 hồi quy 2: Tính loại trừ tương hỗ phụ kiện (exclusivity) và vẽ guốc mộc/khăn tiệp tông', async () => {
+      globalThis.fetch = async (input: any) => {
+        return createMockResponse({ status: 'ok', hasApiKey: true });
+      };
+
+      render(React.createElement(App));
+      await navigateToStep(3);
+
+      // 1. Chuyển sang Khăn phối màu hiện đại (tiệp tông áo)
+      const matchingTurbanBtn = screen.getByRole('button', { name: /Khăn phối màu hiện đại/i });
+      fireEvent.click(matchingTurbanBtn);
+
+      // Headwear đổi sang màu tiệp tông áo (mặc định #1E232A)
+      const matchingHeadwear = document.querySelector('g[data-part="headwear"] path[fill="#1E232A"]');
+      assert.ok(matchingHeadwear, 'Khăn phối đồng điệu phải tiệp màu áo');
+
+      // Khăn đóng đen bị loại trừ tương hỗ
+      const blackTurbanBtn = screen.getByRole('button', { name: /Khăn đóng đen/i });
+      assert.equal(blackTurbanBtn.getAttribute('aria-pressed'), 'false');
+
+      // 2. Chọn Guốc mộc truyền thống
+      const clogsBtn = screen.getByRole('button', { name: /Guốc mộc/i });
+      fireEvent.click(clogsBtn);
+
+      // Shoes group đổi sang màu gỗ của guốc (#8B5A2B), không vẽ như giày da đen
+      const woodenClogs = document.querySelector('g[data-part="shoes"] path[fill="#8B5A2B"]');
+      assert.ok(woodenClogs, 'Guốc mộc phải vẽ bằng màu gỗ #8B5A2B và có cấu trúc guốc riêng');
+
+      // 3. Chọn Tối giản: không phụ kiện -> Xóa toàn bộ phụ kiện
+      const noneBtn = screen.getByRole('button', { name: /Không thêm phụ kiện/i });
+      fireEvent.click(noneBtn);
+
+      // Khăn đổi về búi tóc tự nhiên (#2B2623)
+      const hairKnot = document.querySelector('g[data-part="headwear"] path[fill="#2B2623"]');
+      assert.ok(hairKnot, 'Khi chọn tối giản, đầu về búi tóc tự nhiên');
+
+      // Quần và giày trở về nền minh họa
+      const defaultTrousers = document.querySelector('g[data-part="trousers"] path[fill="#F6F3EB"]');
+      assert.ok(defaultTrousers, 'Quần trở về nền minh họa #F6F3EB');
+      const defaultShoes = document.querySelector('g[data-part="shoes"] path[fill="#1A1D22"]');
+      assert.ok(defaultShoes, 'Giày trở về nền minh họa #1A1D22');
+    });
+
+    test('Bước 3 hồi quy 3: Hộp thoại phóng to (Escape/scroll lock), nút Đặt lại bảo toàn userNote sang bước 4', async () => {
+      globalThis.fetch = async (input: any) => {
+        return createMockResponse({ status: 'ok', hasApiKey: true });
+      };
+
+      render(React.createElement(App));
+      await navigateToStep(3);
+
+      // 1. Nhập ghi chú phối đồ cá nhân
+      const noteInput = screen.getByPlaceholderText(/Dự định mặc trong lễ khai mạc/i) as HTMLTextAreaElement;
+      fireEvent.change(noteInput, { target: { value: 'Ghi chú văn hóa sinh viên 2026' } });
+      assert.equal(noteInput.value, 'Ghi chú văn hóa sinh viên 2026');
+
+      // 2. Mở hộp thoại Phóng to
+      const zoomBtn = screen.getByRole('button', { name: /Phóng to/i });
+      fireEvent.click(zoomBtn);
+
+      // Kiểm tra modal xuất hiện và body khóa scroll
+      assert.ok(screen.getByRole('dialog', { name: /Phóng to minh họa/i }));
+      assert.equal(document.body.style.overflow, 'hidden');
+
+      // Nhấn phím Escape để đóng modal
+      fireEvent.keyDown(window, { key: 'Escape' });
+      assert.equal(document.body.style.overflow, '');
+
+      // 3. Đổi màu áo sang Vàng hoàng cúc rồi bấm Đặt lại
+      const yellowBtn = screen.getByRole('button', { name: /Vàng hoàng cúc/i });
+      fireEvent.click(yellowBtn);
+
+      const resetBtn = screen.getByRole('button', { name: /Đặt lại/i });
+      fireEvent.click(resetBtn);
+
+      // Màu áo trở về mặc định Sa kép đen (#1E232A), ghi chú cá nhân vẫn được bảo toàn
+      const resetRobe = document.querySelector('g[data-part="robe"] path[fill="#1E232A"]');
+      assert.ok(resetRobe, 'Nút Đặt lại phải khôi phục áo về mặc định #1E232A');
+      assert.equal(noteInput.value, 'Ghi chú văn hóa sinh viên 2026');
+
+      // 4. Bấm sang bước 4: Ghi chú vẫn sống sót sang bước tiếp theo
+      const nextStepBtn = screen.getByRole('button', { name: /Sang bước 4: Gợi ý từ Gemini/i });
+      fireEvent.click(nextStepBtn);
+
+      await waitFor(() => {
+        assert.ok(screen.getByText(/Stylist Gemini gợi ý bộ phối/i));
+      });
+    });
   });
 });
 

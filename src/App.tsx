@@ -34,6 +34,7 @@ import {
 } from './data/catalog';
 import { GarmentDiagram } from './components/GarmentDiagram';
 import { OutfitColorPreview } from './components/OutfitColorPreview';
+import { Step3Workbench } from './components/Step3Workbench';
 import { ImageComparison } from './components/ImageComparison';
 import { CulturalCard } from './components/CulturalCard';
 import { SavedOutfitsDrawer, SavedOutfitEntry } from './components/SavedOutfitsDrawer';
@@ -489,7 +490,7 @@ export default function App() {
 
       {/* VIEW 2: 6-STEP STYLING FLOW */}
       {activeView === 'flow' && (
-        <main className="max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 flex-1 space-y-6">
+        <main className={`${currentStep === 3 ? "max-w-[1440px] py-6" : "max-w-4xl py-8"} mx-auto w-full px-4 sm:px-6 flex-1 space-y-6`}>
           {/* STEP 1: CHỌN DỊP MẶC */}
           {currentStep === 1 && (
             <section className="space-y-5">
@@ -654,216 +655,15 @@ export default function App() {
             </section>
           )}
 
-          {/* STEP 3: CHỌN SẮC ÁO, PHỤ KIỆN & PHONG CÁCH */}
+          {/* STEP 3: CHỌN SẮC ÁO, PHỤ KIỆN & PHONG CÁCH (C1 + C2 Redesigned Workbench) */}
           {currentStep === 3 && (
-            <section className="space-y-6">
-              <div className="border-b border-[#DECFB9] pb-3">
-                <span className="text-xs font-mono uppercase tracking-widest text-[#9F1D26] font-semibold">
-                  Bước 3 / 6
-                </span>
-                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#30251F] mt-1">
-                  Sắc áo, phụ kiện & phong cách
-                </h2>
-                <p className="text-xs text-[#30251F]/70 mt-1">
-                  Phân biệt rõ: Dữ kiện nguồn hiện vật vs Các gợi ý phối hiện đại mở rộng cho sinh viên.
-                </p>
-              </div>
-
-              {/* 2-column layout: Controls on left, sticky preview on right for desktop */}
-              <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
-                <div className="lg:col-span-7 space-y-6">
-                  {/* 1. Style Selector */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Compass className="w-4 h-4 text-[#9F1D26]" />
-                      <h3 className="font-serif font-bold text-sm text-[#30251F]">
-                        1. Chọn phong cách định hướng
-                      </h3>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {ALLOWLIST_STYLES.map((st) => {
-                        const isSelected = selection.styleId === st.id;
-                        return (
-                          <button
-                            key={st.id}
-                            type="button"
-                            aria-pressed={isSelected}
-                            onClick={() => setSelection((prev) => ({ ...prev, styleId: st.id }))}
-                            className={`text-left p-4 rounded-sm border transition-all ${
-                              isSelected
-                                ? 'border-[#9F1D26] bg-[#FFFBF4] ring-2 ring-[#9F1D26] shadow-xs'
-                                : 'border-[#DECFB9] bg-[#FFFBF4]/80 hover:border-[#9F1D26]/40'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${st.isSourceFact ? 'text-[#486657]' : 'text-[#9F1D26]'}`}>
-                                {st.badge}
-                              </span>
-                              {isSelected && <Check className="w-4 h-4 text-[#9F1D26]" />}
-                            </div>
-                            <h4 className="font-serif font-bold text-base text-[#30251F]">
-                              {st.name}
-                            </h4>
-                            <p className="text-xs text-[#30251F]/75 mt-1 leading-relaxed">
-                              {st.shortDesc}
-                            </p>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* 2. Color Palette Selector */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Palette className="w-4 h-4 text-[#9F1D26]" />
-                        <h3 className="font-serif font-bold text-sm text-[#30251F]">
-                          2. Chọn bảng màu thân áo
-                        </h3>
-                      </div>
-                      <span className="text-[11px] text-[#30251F]/60 font-serif italic">
-                        * Màu đen ngoài lót trắng là theo hiện vật nguồn; các màu khác là gợi ý mở rộng.
-                      </span>
-                    </div>
-
-                    {/* Live status text with selected color name */}
-                    <div
-                      aria-live="polite"
-                      className="text-[11px] font-mono text-[#486657] font-semibold flex items-center gap-1.5"
-                    >
-                      <span>Đang chọn sắc áo:</span>
-                      <span className="text-[#9F1D26]">{currentColor.name}</span>
-                      <span className="text-[#30251F]/60 font-normal">({currentColor.hex})</span>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {ALLOWLIST_COLORS.map((col) => {
-                        const isSelected = selection.colorId === col.id;
-                        return (
-                          <button
-                            key={col.id}
-                            type="button"
-                            aria-pressed={isSelected}
-                            onClick={() => setSelection((prev) => ({ ...prev, colorId: col.id }))}
-                            className={`p-3 text-left rounded-sm border transition-all bg-[#FFFBF4] ${
-                              isSelected
-                                ? 'border-[#9F1D26] ring-2 ring-[#9F1D26] shadow-xs'
-                                : 'border-[#DECFB9] hover:border-[#9F1D26]/40'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 mb-2">
-                              <span
-                                className="w-5 h-5 rounded-full border border-black/20 shrink-0 shadow-xs"
-                                style={{ backgroundColor: col.hex }}
-                              />
-                              <span className={`text-[10px] font-mono font-medium line-clamp-1 uppercase ${col.isSourceFact ? 'text-[#486657] font-bold' : 'text-[#9F1D26]'}`}>
-                                {col.badge}
-                              </span>
-                            </div>
-                            <h4 className="font-serif font-bold text-sm text-[#30251F] line-clamp-1">
-                              {col.name}
-                            </h4>
-                            <p className="text-[11px] text-[#30251F]/70 mt-1 line-clamp-2">
-                              {col.shortDesc}
-                            </p>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Mobile preview directly beneath color palette */}
-                    <div className="lg:hidden mt-3">
-                      <OutfitColorPreview selection={selection} compact={true} />
-                    </div>
-                  </div>
-
-                  {/* 3. Accessory Selector */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-[#9F1D26]" />
-                        <h3 className="font-serif font-bold text-sm text-[#30251F]">
-                          3. Phụ kiện đi kèm (Gợi ý phối cho sinh viên)
-                        </h3>
-                      </div>
-                      <span className="text-[11px] text-[#30251F]/60 font-serif italic">
-                        * Hiện vật nguồn chỉ mô tả chiếc áo
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                      {ALLOWLIST_ACCESSORIES.map((acc) => {
-                        const isSelected = selection.accessoryIds.includes(acc.id);
-                        return (
-                          <button
-                            key={acc.id}
-                            type="button"
-                            aria-pressed={isSelected}
-                            onClick={() => {
-                              if (acc.id === 'acc-none') {
-                                setSelection((prev) => ({ ...prev, accessoryIds: ['acc-none'] }));
-                              } else {
-                                const withoutNone = selection.accessoryIds.filter((id) => id !== 'acc-none');
-                                const alreadyIn = withoutNone.includes(acc.id);
-                                const nextIds = alreadyIn
-                                  ? withoutNone.filter((id) => id !== acc.id)
-                                  : [...withoutNone, acc.id];
-                                setSelection((prev) => ({
-                                  ...prev,
-                                  accessoryIds: nextIds.length > 0 ? nextIds : ['acc-none'],
-                                }));
-                              }
-                            }}
-                            className={`min-h-[44px] p-3 text-left rounded-sm border transition-all ${
-                              isSelected
-                                ? 'bg-[#FFFBF4] border-[#486657] ring-1 ring-[#486657]'
-                                : 'bg-[#FFFBF4] border-[#DECFB9] hover:border-[#9F1D26]/30'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-[10px] font-mono text-[#486657] uppercase font-semibold">
-                                {acc.badge}
-                              </span>
-                              {isSelected && <Check className="w-3.5 h-3.5 text-[#486657]" />}
-                            </div>
-                            <h4 className="font-serif font-semibold text-xs text-[#30251F]">
-                              {acc.name}
-                            </h4>
-                            <p className="text-[11px] text-[#30251F]/70 mt-0.5 line-clamp-2">
-                              {acc.shortDesc}
-                            </p>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column: Desktop Sticky Preview */}
-                <div className="hidden lg:block lg:col-span-5 lg:sticky lg:top-[144px] space-y-3">
-                  <OutfitColorPreview selection={selection} />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-[#DECFB9]">
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(2)}
-                  className="min-h-[44px] flex items-center gap-1.5 px-4 py-2 border border-[#DECFB9] text-[#30251F] text-xs font-semibold rounded-xs hover:bg-[#FFFBF4]"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Quay lại</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(4)}
-                  className="min-h-[44px] flex items-center gap-2 px-6 py-2.5 bg-[#9F1D26] hover:bg-[#79171E] text-white text-xs font-semibold rounded-xs shadow transition-all"
-                >
-                  <span>Sang bước 4: Gợi ý từ Gemini</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </section>
+            <Step3Workbench
+              selection={selection}
+              onUpdateSelection={setSelection}
+              onPrevStep={() => setCurrentStep(2)}
+              onNextStep={() => setCurrentStep(4)}
+              onSaveOutfit={handleSaveOutfit}
+            />
           )}
 
           {/* STEP 4: GỢI Ý TỪ GEMINI */}
