@@ -26,7 +26,7 @@ import {
 } from '../data/catalog';
 import { OutfitFigure } from './OutfitFigure';
 import { AccessoryThumbnail } from './AccessoryThumbnail';
-import { LeafBranchOrnament } from './HeritageOrnaments';
+import { photoAsset } from '../data/outfitPhotoAssets';
 
 interface Step3WorkbenchProps {
   selection: OutfitSelection;
@@ -227,7 +227,7 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
         }
         @media (max-width: 1023px) {
           .styling-workbench .workbench-preview { grid-row: 1; }
-          .styling-workbench .workbench-figure { max-width: 230px; }
+          .styling-workbench .workbench-figure { max-width: 185px; }
         }
       `}</style>
       {/* Step 3 Header */}
@@ -240,13 +240,13 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
             Sắc áo, phụ kiện & phong cách
           </h2>
           <p className="text-xs text-[#30251F]/70 mt-1 max-w-2xl">
-            Chọn sắc áo và phụ kiện. Xem bộ phối thay đổi ngay bên cạnh.
+            Chọn sắc áo và phụ kiện để thay ảnh phối trên mẫu có sẵn.
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-[11px] font-mono px-2 py-0.5 rounded-xs bg-[#486657]/10 text-[#486657] font-semibold border border-[#486657]/20">
-            Thử màu trực tiếp
+            Ảnh phối mẫu
           </span>
         </div>
       </div>
@@ -655,7 +655,7 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
                   type="button"
                   onClick={() => setIsZoomOpen(true)}
                   className="min-h-[44px] px-2.5 py-1 text-xs border border-[#DECFB9] bg-white/80 hover:bg-white text-[#30251F] font-medium rounded-xs flex items-center gap-1.5 shadow-2xs transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#9F1D26]"
-                  title="Phóng to bản vẽ minh họa"
+                  title="Phóng to ảnh phối mẫu"
                 >
                   <Maximize2 className="w-3.5 h-3.5 text-[#9F1D26]" />
                   <span>Phóng to</span>
@@ -713,14 +713,12 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
             <div className={`workbench-stage grid gap-5 py-4 ${isDetailRailOpen ? "details-open" : ""}`}>
               {/* Full Fashion Illustration Artwork */}
               <div className="w-full min-w-0 flex-1 flex flex-col items-center justify-center relative rounded-sm bg-[#eadbc3]/25 border border-[#decfb9]/50 overflow-hidden">
-                <div aria-hidden="true" className="absolute inset-y-5 left-4 w-10 border-x border-[#b18c52]/20 pointer-events-none" />
-                <LeafBranchOrnament className="absolute bottom-8 left-0 w-36 h-64 opacity-15 pointer-events-none" />
-                <LeafBranchOrnament flip className="absolute top-6 right-0 w-24 h-44 opacity-10 pointer-events-none" />
-                <div className="workbench-figure relative w-full max-w-[300px]">
+                <img src={photoAsset('stage-background')} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
+                <div className="workbench-figure relative w-full max-w-[250px]">
                   <OutfitFigure selection={selection} viewMode="full" className="w-full h-auto" />
                 </div>
-                <p className="relative text-[11px] text-[#30251F]/65 italic text-center mt-1 mb-4 px-3 font-serif">
-                  Bản minh họa phối màu · Phom áo chưa đối chiếu hiện vật
+                <p className="relative text-[11px] text-[#30251F]/80 text-center mt-1 mb-4 px-3 py-1 bg-[#FFFBF4]/85 rounded-xs font-serif">
+                  Ảnh phối mẫu · Minh họa AI trên người mẫu cố định
                 </p>
               </div>
 
@@ -743,7 +741,7 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
                       <OutfitFigure selection={selection} viewMode="collar-detail" className="w-full h-full" showShadow={false} />
                     </div>
                     <p className="text-[10px] text-[#30251F]/65 leading-tight">
-                      Cận cảnh cổ áo trong bản minh họa.
+                      Cận cảnh từ chính ảnh áo đang chọn.
                     </p>
                   </div>
 
@@ -770,7 +768,7 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
                       <OutfitFigure selection={selection} viewMode="fabric-swatch" className="w-full h-full" />
                     </div>
                     <p className="text-[10px] text-[#30251F]/65 leading-tight italic">
-                      Mô phỏng sắc màu, không phải mẫu vải hiện vật.
+                      Cắt từ ảnh áo AI, không phải mẫu vải hiện vật.
                     </p>
                   </div>
                 </div>
@@ -883,7 +881,7 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
                   • <strong>Duy nhất một hiện vật nguồn:</strong> Nguồn bài viết chỉ ghi nhận chiếc áo ngũ thân sa kép nam may bằng lụa La Khê (ngoài đen lót trong trắng). Các màu sắc (chàm, ngọc, đỏ son, vàng, ngà) và phụ kiện (khăn, quần, giày) là gợi ý phối hiện đại mở rộng dành cho sinh viên tham gia ngày hội, không phải hiện vật được bảo tàng chứng thực.
                 </p>
                 <p>
-                  • <strong>Giới hạn hình minh họa:</strong> Bộ phối giúp xem màu sắc và phụ kiện; chưa mô phỏng chất liệu, độ vừa vặn hay phom áo theo hiện vật.
+                  • <strong>Giới hạn hình minh họa:</strong> Ảnh AI được chuẩn bị trước để xem màu sắc và phụ kiện trên một người mẫu cố định. Hình ảnh không xác nhận chất liệu, độ vừa vặn hay phom áo theo hiện vật.
                 </p>
               </div>
             )}
@@ -947,7 +945,7 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
                 <span>Giày: <strong>{shoesStripLabel}</strong></span>
               </div>
               <p className="text-[10px] text-[#30251F]/60 italic text-center pt-1 font-serif">
-                Bản minh họa phối màu · Phom áo chưa đối chiếu hiện vật
+                Ảnh phối mẫu · Minh họa AI trên người mẫu cố định
               </p>
             </div>
 
@@ -967,4 +965,3 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
     </section>
   );
 };
-

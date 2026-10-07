@@ -1,0 +1,104 @@
+[
+  {
+    "key": "avatarGenResult",
+    "sourceFile": "exec-99c10225-22fd-4256-8552-8e5ca0ce892a.png",
+    "prompt": "See prompt briefs in PHOTO-ASSET-MVP.md; original prompt described fixed photoreal catalog pose and transparent cutouts.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "indigoMasterResult",
+    "sourceFile": "exec-d1ed458b-1de5-43dd-bc87-1b534e26f85e.png",
+    "prompt": "See prompt briefs in PHOTO-ASSET-MVP.md; original prompt described fixed photoreal catalog pose and transparent cutouts.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "photoBackgroundResult",
+    "sourceFile": "exec-0750b288-4c79-481c-a930-bfaf88f0d5a3.png",
+    "prompt": "See prompt briefs in PHOTO-ASSET-MVP.md; original prompt described fixed photoreal catalog pose and transparent cutouts.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "coatIndigo",
+    "sourceFile": "exec-586ae140-a070-4a45-ab4c-4b6f9306cec9.png",
+    "prompt": "See prompt briefs in PHOTO-ASSET-MVP.md; original prompt described fixed photoreal catalog pose and transparent cutouts.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "hatBlack",
+    "sourceFile": "exec-5d91e539-f050-4e04-b2da-e5c8bc6af65e.png",
+    "prompt": "See prompt briefs in PHOTO-ASSET-MVP.md; original prompt described fixed photoreal catalog pose and transparent cutouts.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "pantsDark",
+    "sourceFile": "exec-3d377541-de37-405a-bfa5-2dbc64e076bd.png",
+    "prompt": "See prompt briefs in PHOTO-ASSET-MVP.md; original prompt described fixed photoreal catalog pose and transparent cutouts.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "shoesClogs",
+    "sourceFile": "exec-219deea6-e9ce-4f6f-9630-c15d5a14ec0a.png",
+    "prompt": "See prompt briefs in PHOTO-ASSET-MVP.md; original prompt described fixed photoreal catalog pose and transparent cutouts.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "coatBlack",
+    "sourceFile": "exec-14ef124b-c0e2-416a-bf35-48612b32684e.png",
+    "prompt": "Edit ONLY the color of the photographed isolated Vietnamese áo ngũ thân inspired garment in this reference to near-black charcoal #1E232A. This is a prebuilt photographed color variant for a layer asset. EXACTLY preserve silhouette, collar, five brass fasteners on viewer left, sleeve length, seams, folds, framing and pixel scale. The identical garment stays at the identical canvas position. Do not add person, skin, trousers, hands or accessories. Preserve photoreal textile highlights and wrinkles. TRUE clean alpha background, no glow or shadow outside garment. 1024x1536 portrait. No text.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "coatGreen",
+    "sourceFile": "exec-4670fdfa-fec9-4805-9a5e-574866c7ba0a.png",
+    "prompt": "Edit ONLY the color of the photographed isolated Vietnamese áo ngũ thân inspired garment in this reference to deep jade green #0E5A53. This is a prebuilt photographed color variant for a layer asset. EXACTLY preserve silhouette, collar, five brass fasteners on viewer left, sleeve length, seams, folds, framing and pixel scale. The identical garment stays at the identical canvas position. Do not add person, skin, trousers, hands or accessories. Preserve photoreal textile highlights and wrinkles. TRUE clean alpha background, no glow or shadow outside garment. 1024x1536 portrait. No text.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "coatRed",
+    "sourceFile": "exec-225ebe8b-f4f8-4bad-ae66-2bddd4955f8c.png",
+    "prompt": "Edit ONLY the color of the photographed isolated Vietnamese áo ngũ thân inspired garment in this reference to muted lacquer crimson #962A22. This is a prebuilt photographed color variant for a layer asset. EXACTLY preserve silhouette, collar, five brass fasteners on viewer left, sleeve length, seams, folds, framing and pixel scale. The identical garment stays at the identical canvas position. Do not add person, skin, trousers, hands or accessories. Preserve photoreal textile highlights and wrinkles. TRUE clean alpha background, no glow or shadow outside garment. 1024x1536 portrait. No text.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "coatGold",
+    "sourceFile": "exec-a9f1cc50-4d97-4c90-ba5e-cf6e28728992.png",
+    "prompt": "Edit ONLY the color of the photographed isolated Vietnamese áo ngũ thân inspired garment in this reference to muted chrysanthemum ochre #A16A1E. This is a prebuilt photographed color variant for a layer asset. EXACTLY preserve silhouette, collar, five brass fasteners on viewer left, sleeve length, seams, folds, framing and pixel scale. The identical garment stays at the identical canvas position. Do not add person, skin, trousers, hands or accessories. Preserve photoreal textile highlights and wrinkles. TRUE clean alpha background, no glow or shadow outside garment. 1024x1536 portrait. No text.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "coatIvory",
+    "sourceFile": "exec-295580f4-23af-4867-a58d-8994d7965f2f.png",
+    "prompt": "Edit ONLY the color of the photographed isolated Vietnamese áo ngũ thân inspired garment in this reference to warm ivory #E8E2D2. This is a prebuilt photographed color variant for a layer asset. EXACTLY preserve silhouette, collar, five brass fasteners on viewer left, sleeve length, seams, folds, framing and pixel scale. The identical garment stays at the identical canvas position. Do not add person, skin, trousers, hands or accessories. Preserve photoreal textile highlights and wrinkles. TRUE clean alpha background, no glow or shadow outside garment. 1024x1536 portrait. No text.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "hatIndigo",
+    "sourceFile": "exec-a84b8768-f93d-4856-82f9-1056a7aef017.png",
+    "prompt": "Edit only the cloth color of this isolated photographed Vietnamese khăn đóng headwear to deep indigo #1D2A44. Preserve identical low wrapped shape, folds, opening, front camera, silhouette, position and scale. No human, jewelry, text or decorative invented symbols. Realistic photographic fabric, true transparent background, no glow. This is a separate prepared static asset variant, not a runtime color filter.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "hatGreen",
+    "sourceFile": "exec-fb45be60-a9d0-43c3-8c56-599cfd89e5d1.png",
+    "prompt": "Edit only the cloth color of this isolated photographed Vietnamese khăn đóng headwear to deep jade #0E5A53. Preserve identical low wrapped shape, folds, opening, front camera, silhouette, position and scale. No human, jewelry, text or decorative invented symbols. Realistic photographic fabric, true transparent background, no glow. This is a separate prepared static asset variant, not a runtime color filter.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "hatRed",
+    "sourceFile": "exec-cc5df72f-7a2e-4caa-a495-04cb3010feae.png",
+    "prompt": "Edit only the cloth color of this isolated photographed Vietnamese khăn đóng headwear to muted lacquer red #962A22. Preserve identical low wrapped shape, folds, opening, front camera, silhouette, position and scale. No human, jewelry, text or decorative invented symbols. Realistic photographic fabric, true transparent background, no glow. This is a separate prepared static asset variant, not a runtime color filter.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "hatGold",
+    "sourceFile": "exec-cf35a7d9-ef73-45c2-bc10-86cad155c2c2.png",
+    "prompt": "Edit only the cloth color of this isolated photographed Vietnamese khăn đóng headwear to muted chrysanthemum ochre #A16A1E. Preserve identical low wrapped shape, folds, opening, front camera, silhouette, position and scale. No human, jewelry, text or decorative invented symbols. Realistic photographic fabric, true transparent background, no glow. This is a separate prepared static asset variant, not a runtime color filter.",
+    "generator": "Codex built-in image_gen"
+  },
+  {
+    "key": "hatIvory",
+    "sourceFile": "exec-46f0b07c-e1d6-4f24-b660-720299546c14.png",
+    "prompt": "Edit only the cloth color of this isolated photographed Vietnamese khăn đóng headwear to warm ivory #E8E2D2. Preserve identical low wrapped shape, folds, opening, front camera, silhouette, position and scale. No human, jewelry, text or decorative invented symbols. Realistic photographic fabric, true transparent background, no glow. This is a separate prepared static asset variant, not a runtime color filter.",
+    "generator": "Codex built-in image_gen"
+  }
+]

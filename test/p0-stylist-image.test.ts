@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import React, { act } from 'react';
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import App from '../src/App.js';
+import { existsSync } from 'node:fs';
+import { resolvePhotoLayers } from '../src/data/outfitPhotoAssets.js';
+import { OutfitFigure } from '../src/components/OutfitFigure.js';
 import {
   validateAndLockStylistResponse,
   sanitizeApiErrorMessage,
@@ -174,9 +177,23 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
 
   describe('2. Real App Component UI & Lifecycle Tests (React Testing Library)', () => {
     let originalFetch: typeof globalThis.fetch;
+    let originalImage: typeof window.Image;
+    let failPhotoLoads = false;
+    const requestedPhotos: string[] = [];
 
     beforeEach(() => {
       originalFetch = globalThis.fetch;
+      originalImage = window.Image;
+      failPhotoLoads = false;
+      requestedPhotos.length = 0;
+      window.Image = class {
+        onload: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        set src(value: string) {
+          requestedPhotos.push(value);
+          queueMicrotask(() => failPhotoLoads ? this.onerror?.() : this.onload?.());
+        }
+      } as any;
       // Default health mock to satisfy App mount
       globalThis.fetch = async (input: any) => {
         const url = typeof input === 'string' ? input : input?.url || '';
@@ -199,6 +216,7 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
 
     afterEach(() => {
       globalThis.fetch = originalFetch;
+      window.Image = originalImage;
       cleanup();
     });
 
@@ -433,137 +451,70 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
       assert.ok(screen.getByRole('button', { name: /Sang bước 6: Thẻ văn hóa & Lưu/i }));
     });
 
-    test('Bước 3 thử màu SVG tức thì: Đổi 2 màu thì robe fill đổi, khăn đóng đen và quần giữ nguyên, fetch không bị gọi', async () => {
-      const fetchCalls: string[] = [];
-      globalThis.fetch = async (input: any) => {
-        const url = typeof input === 'string' ? input : input?.url || '';
-        fetchCalls.push(url);
-        if (url.includes('/api/health')) {
-          return createMockResponse({ status: 'ok', hasApiKey: true });
-        }
-        return createMockResponse({});
-      };
-
+    test('Đổi asset 6 màu: giữ avatar, khăn đen, quần; không gọi Gemini API', async () => {
+      const calls: string[] = [];
+      globalThis.fetch = async (input: any) => { calls.push(String(input)); return createMockResponse({ status: 'ok', hasApiKey: true }); };
       render(React.createElement(App));
       await navigateToStep(3);
-
-      // Verify Step 3 header is present
-      assert.ok(screen.getByText(/Sắc áo, phụ kiện & phong cách/i));
-
-      // 1. Kiểm tra màu áo ban đầu (Mặc định: Sa kép đen lót trắng - #1E232A)
-      const robeFlapInitial = document.querySelector('g[data-part="robe"] path[fill="#1E232A"]');
-      assert.ok(robeFlapInitial, 'Áo ban đầu phải có fill #1E232A');
-
-      // Khăn đóng đen (acc-khan-dong-den) mặc định được chọn, headwear fill là #1C1F24
-      const headwearPathInitial = document.querySelector('g[data-part="headwear"] path[fill="#1C1F24"]');
-      assert.ok(headwearPathInitial, 'Khăn đóng đen ban đầu phải có fill #1C1F24');
-
-      // Trousers mặc định (quần trắng nền minh họa) fill #F6F3EB
-      const trouserPathInitial = document.querySelector('g[data-part="trousers"] path[fill="#F6F3EB"]');
-      assert.ok(trouserPathInitial, 'Quần trắng nền minh họa ban đầu phải có fill #F6F3EB');
-
-      // Đảm bảo không có fetch nào ngoài /api/health lúc mount
-      const fetchCountBefore = fetchCalls.filter((u) => !u.includes('/api/health')).length;
-      assert.equal(fetchCountBefore, 0, 'Chưa có request nào ngoài health check');
-
-      // 2. Chọn màu thứ nhất: Đỏ son trầm (hex theo catalog: #962A22)
-      const redColor = ALLOWLIST_COLORS.find((c) => c.id === 'color-do-son-tram')!;
-      const redButton = screen.getByRole('button', { name: /Đỏ son trầm/i });
-      fireEvent.click(redButton);
-
-      // Assert robe fill đổi sang hex của Đỏ son trầm ngay lập tức
-      const robeFlapRed = document.querySelector(`g[data-part="robe"] path[fill="${redColor.hex}"]`);
-      assert.ok(robeFlapRed, `Áo phải đổi fill sang ${redColor.hex} ngay lập tức`);
-
-      // Assert phụ kiện khăn đóng đen vẫn đen (#1C1F24) và quần giữ nguyên (#F6F3EB)
-      const headwearPathAfterRed = document.querySelector('g[data-part="headwear"] path[fill="#1C1F24"]');
-      assert.ok(headwearPathAfterRed, 'Khăn đóng đen vẫn giữ màu #1C1F24 khi đổi màu áo');
-      const trouserPathAfterRed = document.querySelector('g[data-part="trousers"] path[fill="#F6F3EB"]');
-      assert.ok(trouserPathAfterRed, 'Quần giữ nguyên màu #F6F3EB');
-
-      // 3. Chọn màu thứ hai: Xanh ngọc (hex theo catalog: #0E5A53)
-      const greenColor = ALLOWLIST_COLORS.find((c) => c.id === 'color-xanh-ngoc-bich')!;
-      const greenButton = screen.getByRole('button', { name: /Xanh ngọc/i });
-      fireEvent.click(greenButton);
-
-      // Assert robe fill đổi sang hex của Xanh ngọc ngay lập tức
-      const robeFlapGreen = document.querySelector(`g[data-part="robe"] path[fill="${greenColor.hex}"]`);
-      assert.ok(robeFlapGreen, `Áo phải đổi fill sang ${greenColor.hex} ngay lập tức`);
-
-      // Assert phụ kiện khăn đóng đen và quần vẫn tiếp tục giữ nguyên
-      const headwearPathAfterGreen = document.querySelector('g[data-part="headwear"] path[fill="#1C1F24"]');
-      assert.ok(headwearPathAfterGreen, 'Khăn đóng đen vẫn giữ màu #1C1F24 sau lần đổi màu thứ 2');
-      const trouserPathAfterGreen = document.querySelector('g[data-part="trousers"] path[fill="#F6F3EB"]');
-      assert.ok(trouserPathAfterGreen, 'Quần vẫn tiếp tục giữ nguyên màu #F6F3EB');
-
-      // 4. Assert tuyệt đối không gọi fetch khi đổi màu
-      const fetchCountAfter = fetchCalls.filter((u) => !u.includes('/api/health')).length;
-      assert.equal(fetchCountAfter, 0, 'Thao tác đổi màu không được gọi fetch/API');
+      const source = (part: string) => document.querySelector(`[data-photo-view="full"] image[data-part="${part}"]`)?.getAttribute('href');
+      const avatar = source('avatar');
+      const pants = source('trousers');
+      const hat = source('headwear');
+      for (const color of ALLOWLIST_COLORS) {
+        fireEvent.click(screen.getByRole('button', { name: new RegExp(color.name.split(' (')[0], 'i') }));
+        assert.equal(source('avatar'), avatar);
+        assert.equal(source('trousers'), pants);
+        assert.equal(source('headwear'), hat);
+        const selection = { garmentId: ALLOWLIST_GARMENTS[0].id, colorId: color.id, accessoryIds: ['acc-khan-dong-den'], styleId: ALLOWLIST_STYLES[0].id, occasionId: 'test', userNote: '' };
+        for (const layer of resolvePhotoLayers(selection)) assert.ok(existsSync(new URL('../public' + layer.src, import.meta.url)), layer.src);
+        const expected = resolvePhotoLayers(selection).find(layer => layer.part === 'robe')!.src;
+        assert.equal(source('robe'), expected);
+        assert.equal(document.querySelector('image[data-part="robe"]')?.getAttribute('filter'), null);
+      }
+      assert.equal(calls.filter(url => !url.includes('/api/health')).length, 0);
     });
 
-    test('Bước 3 hồi quy 1: Tính nhất quán màu sắc giữa hình toàn thân và cận cảnh chi tiết (C1 + C2)', async () => {
-      globalThis.fetch = async (input: any) => {
-        return createMockResponse({ status: 'ok', hasApiKey: true });
-      };
-
+    test('Cận cảnh dùng đúng cùng ảnh áo với toàn thân', async () => {
       render(React.createElement(App));
       await navigateToStep(3);
-
-      // Cả hình toàn thân và các ô cận cảnh chi tiết (cổ đứng, 5 cúc) phải cùng dùng fill mặc định #1E232A
-      const initialRobeFills = document.querySelectorAll('g[data-part="robe"] path[fill="#1E232A"]');
-      assert.ok(initialRobeFills.length >= 2, 'Cả hình toàn thân và chi tiết cận cảnh phải có fill #1E232A');
-
-      // Đổi sang màu Đỏ son trầm
-      const redColor = ALLOWLIST_COLORS.find((c) => c.id === 'color-do-son-tram')!;
-      const redButton = screen.getByRole('button', { name: /Đỏ son trầm/i });
-      fireEvent.click(redButton);
-
-      // Tất cả hình toàn thân và cận cảnh đồng bộ chuyển sang #962A22
-      const updatedRobeFills = document.querySelectorAll(`g[data-part="robe"] path[fill="${redColor.hex}"]`);
-      assert.ok(updatedRobeFills.length >= 2, `Cả hình toàn thân và cận cảnh đều đồng bộ chuyển sang ${redColor.hex}`);
+      fireEvent.click(screen.getByRole('button', { name: /Đỏ son trầm/i }));
+      const robeImages = Array.from(document.querySelectorAll('[data-photo-view] image[data-part="robe"]'));
+      assert.ok(robeImages.length >= 4);
+      assert.ok(robeImages.every(image => image.getAttribute('href')?.endsWith('coat-red.webp')));
+      await waitFor(() => assert.equal(document.querySelector('[data-photo-view="full"]')?.getAttribute('aria-busy'), 'false'));
     });
 
-    test('Bước 3 hồi quy 2: Tính loại trừ tương hỗ phụ kiện (exclusivity) và vẽ guốc mộc/khăn tiệp tông', async () => {
-      globalThis.fetch = async (input: any) => {
-        return createMockResponse({ status: 'ok', hasApiKey: true });
-      };
-
+    test('Phụ kiện đổi ảnh độc lập, loại trừ cùng nhóm và tối giản tháo khăn', async () => {
       render(React.createElement(App));
       await navigateToStep(3);
+      fireEvent.click(screen.getByRole('button', { name: /Khăn phối màu hiện đại/i }));
+      assert.equal(screen.getByRole('button', { name: /Khăn đóng đen/i }).getAttribute('aria-pressed'), 'false');
+      fireEvent.click(screen.getByRole('button', { name: /Đỏ son trầm/i }));
+      assert.ok(document.querySelector('[data-photo-view="full"] image[data-part="headwear"]')?.getAttribute('href')?.endsWith('hat-red.webp'));
+      fireEvent.click(screen.getByRole('button', { name: /Quần âu tối màu/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Guốc mộc/i }));
+      assert.ok(document.querySelector('[data-photo-view="full"] image[data-part="trousers"]')?.getAttribute('href')?.endsWith('pants-dark.webp'));
+      assert.ok(document.querySelector('[data-photo-view="full"] image[data-part="shoes"]')?.getAttribute('href')?.endsWith('shoes-clogs.webp'));
+      fireEvent.click(screen.getByRole('button', { name: /Không thêm phụ kiện/i }));
+      assert.equal(document.querySelector('[data-photo-view="full"] image[data-part="headwear"]'), null);
+      assert.ok(document.querySelector('[data-photo-view="full"] image[data-part="trousers"]')?.getAttribute('href')?.endsWith('pants-white.webp'));
+    });
 
-      // 1. Chuyển sang Khăn phối màu hiện đại (tiệp tông áo)
-      const matchingTurbanBtn = screen.getByRole('button', { name: /Khăn phối màu hiện đại/i });
-      fireEvent.click(matchingTurbanBtn);
+    test('Mọi màu và nhóm phụ kiện đều trỏ đến file ảnh có thật', () => {
+      for (const color of ALLOWLIST_COLORS) for (const hat of ['acc-khan-dong-den', 'acc-khan-phoi-dong-dieu', 'acc-none']) for (const pants of ['acc-quan-au-toi-mau', 'acc-quan-trang-ong-rong']) for (const shoes of ['acc-guoc-moc-truyen-thong', 'acc-giay-oxford-derby']) {
+        const layers = resolvePhotoLayers({ garmentId: ALLOWLIST_GARMENTS[0].id, colorId: color.id, accessoryIds: [hat, pants, shoes], styleId: ALLOWLIST_STYLES[0].id, occasionId: 'test', userNote: '' });
+        for (const layer of layers) assert.ok(existsSync(new URL('../public' + layer.src, import.meta.url)), layer.src);
+      }
+    });
 
-      // Headwear đổi sang màu tiệp tông áo (mặc định #1E232A)
-      const matchingHeadwear = document.querySelector('g[data-part="headwear"] path[fill="#1E232A"]');
-      assert.ok(matchingHeadwear, 'Khăn phối đồng điệu phải tiệp màu áo');
-
-      // Khăn đóng đen bị loại trừ tương hỗ
-      const blackTurbanBtn = screen.getByRole('button', { name: /Khăn đóng đen/i });
-      assert.equal(blackTurbanBtn.getAttribute('aria-pressed'), 'false');
-
-      // 2. Chọn Guốc mộc truyền thống
-      const clogsBtn = screen.getByRole('button', { name: /Guốc mộc/i });
-      fireEvent.click(clogsBtn);
-
-      // Shoes group đổi sang màu gỗ của guốc (#8B5A2B), không vẽ như giày da đen
-      const woodenClogs = document.querySelector('g[data-part="shoes"] path[fill="#8B5A2B"]');
-      assert.ok(woodenClogs, 'Guốc mộc phải vẽ bằng màu gỗ #8B5A2B và có cấu trúc guốc riêng');
-
-      // 3. Chọn Tối giản: không phụ kiện -> Xóa toàn bộ phụ kiện
-      const noneBtn = screen.getByRole('button', { name: /Không thêm phụ kiện/i });
-      fireEvent.click(noneBtn);
-
-      // Khăn đổi về búi tóc tự nhiên (#2B2623)
-      const hairKnot = document.querySelector('g[data-part="headwear"] path[fill="#2B2623"]');
-      assert.ok(hairKnot, 'Khi chọn tối giản, đầu về búi tóc tự nhiên');
-
-      // Quần và giày trở về nền minh họa
-      const defaultTrousers = document.querySelector('g[data-part="trousers"] path[fill="#F6F3EB"]');
-      assert.ok(defaultTrousers, 'Quần trở về nền minh họa #F6F3EB');
-      const defaultShoes = document.querySelector('g[data-part="shoes"] path[fill="#1A1D22"]');
-      assert.ok(defaultShoes, 'Giày trở về nền minh họa #1A1D22');
+    test('Ảnh lỗi tải: không hiện bộ ghép thiếu lớp; có thể thử lại', async () => {
+      failPhotoLoads = true;
+      render(React.createElement(OutfitFigure, { selection: { garmentId: ALLOWLIST_GARMENTS[0].id, colorId: ALLOWLIST_COLORS[0].id, accessoryIds: [], styleId: ALLOWLIST_STYLES[0].id, occasionId: 'test', userNote: '' } }));
+      await screen.findByRole('alert');
+      assert.equal(document.querySelector('svg')?.style.visibility, 'hidden');
+      failPhotoLoads = false;
+      fireEvent.click(screen.getByRole('button', { name: /Thử tải lại ảnh/i }));
+      await waitFor(() => assert.equal(document.querySelector('svg')?.style.visibility, 'visible'));
     });
 
     test('Bước 3 hồi quy 3: Hộp thoại phóng to (Escape/scroll lock), nút Đặt lại bảo toàn userNote sang bước 4', async () => {
@@ -599,7 +550,7 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
       fireEvent.click(resetBtn);
 
       // Màu áo trở về mặc định Sa kép đen (#1E232A), ghi chú cá nhân vẫn được bảo toàn
-      const resetRobe = document.querySelector('g[data-part="robe"] path[fill="#1E232A"]');
+      const resetRobe = document.querySelector('image[data-part="robe"][href$="coat-black.webp"]');
       assert.ok(resetRobe, 'Nút Đặt lại phải khôi phục áo về mặc định #1E232A');
       assert.equal(noteInput.value, 'Ghi chú văn hóa sinh viên 2026');
 
@@ -632,3 +583,4 @@ function createMockResponse(data: any, status = 200) {
 function expectTextExists(text: string | RegExp) {
   assert.ok(screen.getByText(text));
 }
+

@@ -11,7 +11,7 @@ export interface OutfitColorPreviewProps {
 /**
  * OutfitColorPreview:
  * Backward-compatible card component for landing dialog and quick preview panels.
- * Delegates visual illustration to the shared OutfitFigure vector engine.
+ * Delegates visual illustration to the shared OutfitFigure photographic asset layers.
  */
 export const OutfitColorPreview: React.FC<OutfitColorPreviewProps> = ({
   selection,
@@ -82,11 +82,11 @@ export const OutfitColorPreview: React.FC<OutfitColorPreviewProps> = ({
           </div>
         </div>
         <span className="text-[10px] font-mono px-2 py-0.5 rounded-xs bg-[#486657]/10 text-[#486657] font-medium shrink-0">
-          Thử màu trực tiếp
+          Ảnh mẫu có sẵn
         </span>
       </div>
 
-      {/* SVG Canvas delegating to reusable OutfitFigure */}
+      {/* Photo asset viewport delegating to reusable OutfitFigure */}
       <div className="relative w-full flex items-center justify-center py-1">
         <div className={`w-full ${compact ? 'max-h-[260px]' : 'max-h-[330px]'} flex justify-center`}>
           <OutfitFigure selection={selection} viewMode="full" className="w-full h-auto" />
@@ -121,7 +121,7 @@ export const OutfitColorPreview: React.FC<OutfitColorPreviewProps> = ({
         )}
 
         <p className="text-[10px] text-[#30251F]/65 italic text-center pt-0.5 font-serif">
-          Bản minh họa phối màu · Phom áo chưa đối chiếu hiện vật
+          Ảnh phối mẫu · Minh họa AI trên người mẫu cố định
         </p>
       </div>
     </div>

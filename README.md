@@ -117,19 +117,12 @@ Danh sách model IDs đang cấu hình trong mã nguồn (`server.ts`):
 
 ---
 
-## 8. Thử Màu SVG Trực Tiếp (Local Vector Preview)
+## 8. Phối bằng asset ảnh trên mẫu cố định
 
-- **Thử màu SVG hoạt động local**:
-  - Tại Bước 3 (`Sắc áo & Phụ kiện`) và hộp thoại xem nhanh trên bảng phối đồ `LookComposerPanel`, tính năng thử màu áo ngũ thân hoạt động hoàn toàn ở phía client (cục bộ trình duyệt) thông qua bản vẽ vector SVG tùy biến theo bảng màu Style A.
-  - Khi người dùng chọn các sắc áo trong danh mục (*Đỏ son trầm, Mực chàm cổ, Xanh ngọc bích, Vàng hoàng cúc, Trắng ngà, Sa kép đen*), sắc áo thay đổi tức thì mà **không gửi request mạng** và **không tiêu tốn hạn mức AI**.
-  - Phụ kiện đã chọn như khăn đóng đen (`#1C1F24`), quần suông và giày được giữ nguyên nhất quán; khăn phối đồng điệu tiệp tông màu áo.
-- **Tính năng AI Image Recolor chưa nghiệm thu**:
-  - Tính năng biến đổi màu trực tiếp trên ảnh bitmap AI (`/api/image/recolor`) vẫn đang ở trạng thái kỹ thuật thử nghiệm và **chưa nghiệm thu** do phụ thuộc vào hạn mức dịch vụ tạo ảnh.
-  - Bản thử màu SVG vector trực tiếp đáp ứng trọn vẹn nhu cầu quan sát và định hình phong cách học đường trước khi lưu phiếu tóm tắt văn hóa.
-# Giao diện phối đồ C1 + C2 (07/10/2026)
+Bước 3 dùng ảnh AI tách nền: 6 màu áo, 6 màu khăn, quần trắng/quần tối và giày da/guốc mộc. Chọn màu chỉ thay URL asset đã chuẩn bị, giữ nguyên người mẫu. Các lớp ảnh chồng theo cùng hệ tọa độ, không chạy thuật toán đổi màu và không gọi API tạo ảnh khi chọn.
 
-Bước 3 có sân khấu một bộ phối, lựa chọn sắc áo và phụ kiện theo nhóm, cận cảnh đóng mở, phóng to và lưu cấu hình. Trên điện thoại, hình bộ phối hiển thị trước bảng chọn và cận cảnh mặc định đóng. Header cùng quy trình sáu bước được giữ nguyên.
+Giao diện C1 + C2 giữ header và sáu bước; một sân khấu phối, cận cảnh cổ/khuy/sắc vải, phóng to, đặt lại và lưu cấu hình. Mobile đưa ảnh phối lên trước bảng chọn, mặc định đóng cận cảnh.
 
-Hình hiện tại là minh họa SVG, chưa mô phỏng độ vừa vặn hay dựng lại hiện vật. Phom và mẫu vải minh họa không phải bằng chứng văn hóa. Ảnh AI theo yêu cầu nằm ở bước 5 và cần kiểm chứng riêng với dịch vụ khả dụng. Báo cáo kiểm chứng tại `docs/QA-2026-10-06.md`, mục VII: 15/15 kiểm thử, lint và build thành công.
+Ảnh được tạo bằng công cụ image_gen của Codex trong quá trình thiết kế, được gắn nhãn minh họa AI. Gemini vẫn đảm nhận stylist trong ứng dụng. Mẫu cố định không chứng minh độ vừa vặn, chất liệu hay phom hiện vật. Chưa có custom fit hoặc thử đồ bằng ảnh cá nhân. Tính năng AI tạo ảnh theo yêu cầu ở bước 5 có tình trạng dịch vụ riêng.
 
-
+Xem `docs/PHOTO-ASSET-MVP.md` để hiểu kiến trúc asset và prompt; `docs/PHOTO-ASSET-QA.md` ghi kiểm chứng bản này: 17/17 tests, lint, build và UI desktop/mobile.

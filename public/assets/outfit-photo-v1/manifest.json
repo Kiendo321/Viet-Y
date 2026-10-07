@@ -1,0 +1,182 @@
+{
+  "version": 1,
+  "canvas": [
+    1024,
+    1536
+  ],
+  "avatar": "fixed-generated-adult-model",
+  "runtimeColorMethod": "static-file-swap",
+  "layerOrder": [
+    "shoes",
+    "trousers",
+    "avatar",
+    "robe",
+    "headwear"
+  ],
+  "generator": "Codex built-in image_gen; prepared offline",
+  "culturalStatus": "AI styling illustration; not an authenticated museum artifact",
+  "assets": [
+    {
+      "file": "avatar.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 22306,
+      "sha256": "7696e56dbfc27f642f3361a0fd8fb4c69c72a54afcb1aa0dff1d292dbc3221ee"
+    },
+    {
+      "file": "coat-black.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 63682,
+      "sha256": "cd3f6ce41175b5d7a9cb63feba8babc8a4f822154b8f8071ab0e18cce3043d71"
+    },
+    {
+      "file": "coat-gold.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 94586,
+      "sha256": "d2f56cc261bf93184bf6bec524c39808e2f3dda52c6c7a7896b086f73d4394a2"
+    },
+    {
+      "file": "coat-green.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 88436,
+      "sha256": "f37d9c35f4a467c0d78947ed00f229f088b500d72fba7fc53aecfe0810a71f45"
+    },
+    {
+      "file": "coat-indigo.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 73818,
+      "sha256": "65d55d394dc89c853b2bdceeae0a23473c7b7df6d6477f7cd9accf06aac083e7"
+    },
+    {
+      "file": "coat-ivory.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 75856,
+      "sha256": "fb60cbc2f88be58ac259e98b9d319c14c0a8025400786745fe57f2a6f9258bf5"
+    },
+    {
+      "file": "coat-red.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 84098,
+      "sha256": "497f08eb3a060b7d30690e815b6fffaef12daf9b7480c7d276392deb61228419"
+    },
+    {
+      "file": "hat-black.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 7866,
+      "sha256": "e1305cd5e64247fbe45e4956155411ef3a5ff748377f29fbe2961155116cc801"
+    },
+    {
+      "file": "hat-gold.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 11556,
+      "sha256": "ed5c2e65435555d63436996c7ca0e15f408326d7fc413d0242015a30e1c50bc2"
+    },
+    {
+      "file": "hat-green.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 10388,
+      "sha256": "99a2aaf73ae59c5523fde618f35603159eb72d2ad38c4ee709b25262fcfb2666"
+    },
+    {
+      "file": "hat-indigo.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 9554,
+      "sha256": "83f911f7c96abb4d60b43ba7baa44b5fcd61a624c1f2de2d6f96cbe41b4fae1e"
+    },
+    {
+      "file": "hat-ivory.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 10096,
+      "sha256": "9b1a086fd7fc7281daa3bf47144df4c07139d796e2b7ee056b8ba8713912c3cd"
+    },
+    {
+      "file": "hat-red.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 10758,
+      "sha256": "fcac66550e5df10c9d853eb0d3ebcef9685ec626f711aa9a217620a78c8db4dc"
+    },
+    {
+      "file": "pants-dark.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 29712,
+      "sha256": "52e83810e746b340e63940774bf433b75dac513bd0eef35ea7711c48e451fa6f"
+    },
+    {
+      "file": "pants-white.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 13256,
+      "sha256": "65609c6655e4741baa795302d0ca55e4331ac4a3fe5e5b7e40c7ff60696a2fed"
+    },
+    {
+      "file": "shoes-clogs.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 13498,
+      "sha256": "0b05e3d99b1a2ce41e5dcd694f2501201785f24e11bd62309d7f432885dc826f"
+    },
+    {
+      "file": "shoes-oxford.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 10852,
+      "sha256": "72f8b5b7f95d62ae7afb6df25ddd54f119c30a7f465cbbf56cc0e6a69b633c7f"
+    },
+    {
+      "file": "stage-background.webp",
+      "size": [
+        1024,
+        1536
+      ],
+      "bytes": 168038,
+      "sha256": "ad2e3df52092413bec520e6a5ca78b8bb02b255041458a7fedf1b57d3fd7b7b7"
+    }
+  ]
+}
