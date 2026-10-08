@@ -22,10 +22,10 @@ npm run lint
 # 4. Chạy bộ kiểm thử tự động (Unit & React Component Tests với React Testing Library)
 npm test
 
-# 5. Biên dịch bundle sản xuất
+# 5. Build frontend (dist/) and production backend (server.js)
 npm run build
 
-# 6. Đặt NODE_ENV=production trong .env rồi khởi chạy máy chủ
+# 6. Start compiled backend; production mode is fixed at build time
 npm start
 ```
 
