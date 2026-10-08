@@ -1,0 +1,61 @@
+{
+  "version": 5,
+  "status": "prototype_reviewed",
+  "gender": "male",
+  "poseId": "relaxed_front",
+  "canvas": {
+    "width": 1024,
+    "height": 1536
+  },
+  "master": "references/master.png",
+  "assetMode": "generated_pose_specific_layers",
+  "culturalLabel": "AI contemporary styling inspired by áo ngũ thân; not authenticated reconstruction",
+  "independentLayers": true,
+  "runtimeColorMethod": "static-file-swap",
+  "availableCoatColorways": [
+    "indigo"
+  ],
+  "colorSwapDemoReady": false,
+  "customFitReady": false,
+  "integrationStatus": "not integrated or deployed",
+  "renderPasses": [
+    {
+      "asset": "layers/shoes-oxford.png",
+      "z": 1
+    },
+    {
+      "asset": "layers/trousers-white.png",
+      "z": 1
+    },
+    {
+      "asset": "layers/avatar-visible.png",
+      "z": 2,
+      "cssClipPath": "inset(0 0 55% 0)",
+      "role": "head_and_neck"
+    },
+    {
+      "asset": "layers/coat-indigo.png",
+      "z": 3
+    },
+    {
+      "asset": "layers/avatar-visible.png",
+      "z": 4,
+      "cssClipPath": "inset(45% 0 0 0)",
+      "cssTransform": "translateY(-1.5%)",
+      "role": "foreground_hands",
+      "translationAtNativeCanvas": [
+        0,
+        -23.04
+      ]
+    }
+  ],
+  "review": "layer-review.html",
+  "screenshot": "layer-review-final.png",
+  "limitations": [
+    "Separate AI generations are not pixel-identical extractions; face, fabric and edges have changed slightly.",
+    "Avatar contains exposed head/neck/hands only; no reconstructed full-body anatomy.",
+    "Hand placement is calibrated in CSS; raw avatar layer is not a transform-free drop-in replacement.",
+    "A second coat colorway and per-combination QA are required for actual color switching.",
+    "Only this male relaxed_front set is compatible; do not combine with v1 straight pose or B/C images."
+  ]
+}

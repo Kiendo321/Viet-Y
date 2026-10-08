@@ -1,0 +1,45 @@
+{
+  "tool": "Codex built-in image_gen",
+  "mode": "built-in image editing",
+  "date": "2026-10-08",
+  "editTarget": "references/master.png",
+  "assets": [
+    {
+      "file": "layers/coat-indigo.png",
+      "prompt": "Use case: precise-object-edit.\nEdit this image IN PLACE. Do not make a new product photograph.\nThe ONLY change is erasing everything except the worn indigo tunic to transparent.\nMaintain original full 1024x1536 canvas and original tunic pixel placement.\nTop of collar MUST stay around y250. Lowest tunic hem MUST stay around y1115.\nLeft sleeve edge near x294, right sleeve edge near x730. Both wrists near y765.\nLeave the top 245px and bottom 415px EMPTY TRANSPARENT. This empty margin is essential.\nDo NOT zoom the garment or re-center it. Do NOT extend the hem or alter sleeve lengths.\nRemove head, neck skin, hands, white trouser legs and black shoes only.\nPreserve the source's five fasteners and actual fabric pattern/lighting.\nOutput transparent PNG with garment in exactly the source coordinates; no background, halos or cast shadows."
+    },
+    {
+      "file": "layers/avatar-visible.png",
+      "prompt": "Use case: precise-object-edit / identity-preserve.\nEDIT this existing image IN PLACE on its original 1024x1536 canvas.\nCreate a foreground avatar cutout containing ONLY the man's existing head including hair, face and exposed neck, plus the two exposed hands/wrists.\nPreserve exact identity, anatomy, pose and absolute placement: hair top y46, head around x430..600; neck ends around y283. Viewer-left hand around x312..379,y754..866; viewer-right hand around x650..699,y765..884. Do not change scale or move any body part. Keep all three disconnected regions in their ORIGINAL locations on the full canvas.\nErase all indigo tunic, white trousers, black shoes and everything else to true transparency. No reconstructing torso or arms, no cropped portrait, no new garment, no sleeves, no neck accessories, no background/glow/shadow/text.\nRetain tiny wrist overlap for seamless layering on top of tunic cuffs; ends of neck/hands should not contain indigo clothing. This is a visible-body-parts layer for a clothed outfit editor, not a standalone photo. The huge empty canvas between head and hands and below hands MUST remain truly transparent."
+    },
+    {
+      "file": "layers/trousers-white.png",
+      "prompt": "Edit the attached original full-body male image IN PLACE. Erase head, hands, indigo garment and black shoes. Preserve ONLY the already visible white trouser fabric in its original location at the bottom of the image. Do not recreate or reframe trousers.\nOriginal canvas 1024x1536. WHITE FABRIC MUST STAY BELOW y1090, and finish at y1395 on left leg and y1350 on right leg. Entire top 1080 pixels blank transparent. Bottom140 pixels blank transparent. Keep existing white legs at x367..651, with existing pose/folds, not a generic pair of trousers.\nNo extension up to waist, no waistband, no hip section, no newly visible upper legs.\nNever zoom, re-center or crop to the subject. Keep its original offset at lower center.\nTransparent alpha where everything else was erased. No glow, shadows, floor, background, labels, mannequin, skin, or footwear. The output is a lower trouser cutout ready to overlay the SOURCE at x0,y0."
+    },
+    {
+      "file": "layers/shoes-oxford.png",
+      "prompt": "Edit the original full-body image IN PLACE. Keep ONLY the two existing BLACK OXFORD SHOES at the bottom of its original 1024x1536 canvas; erase all other pixels to true transparency. Keep exact original shoe pose, scale, leather highlights, outline and positions. Viewer-left shoe occupies roughly x365..492,y1380..1475. Viewer-right shoe occupies roughly x531..624,y1335..1415. All area above y1330 MUST remain transparent; keep this large empty top margin. No recentering, zooming, crop, product-photo layout or new footwear design. Retain the actual shoes only; erase white trouser cuffs and skin. No body, trousers, legs, socks, sole shadow, floor, glow, haze, text or background. This is a small disconnected footwear layer at the very bottom of the source canvas for exact x0,y0 overlay."
+    }
+  ],
+  "transparentBackground": true,
+  "discardedAttempts": [
+    {
+      "reason": "Coat enlarged/recentered",
+      "prompt": "Use case: background-extraction / precise-object-edit.\nInput image1 is the EDIT TARGET: a 1024x1536 full-body adult male in relaxed_front pose. Extract ONLY the indigo tunic as a transparent garment layer, keeping the original tunic at EXACT SAME absolute pixel coordinates, scale, orientation, sleeve positions, folds, collar, five metal clasps, texture, lighting and hem silhouette. Keep the 1024x1536 full canvas, do not crop/recenter/enlarge. The garment occupies roughly x290..731, y250..1118. Keep sleeve cuffs stopping exactly at the original wrists. Erase the entire head, hair, neck skin, hands, white trousers and shoes to true alpha transparency. The collar opening should be transparent where the neck was visible. No mannequin, body, stand, hanger, legs, hands, floor, background haze/glow, cast shadows, text, logos or new details. The tunic is photographed in its worn shape, not laid flat. Every pixel outside the garment is fully transparent. We need this layer to overlay the original image and align with its exposed head, hands, white trouser cuffs and shoes. Do not redesign or change pose."
+    },
+    {
+      "reason": "Trousers moved upward",
+      "prompt": "Use case: precise-object-edit.\nEDIT the attached full-body image IN PLACE. Output ONLY the WHITE TROUSER fabric layer on the ORIGINAL 1024x1536 canvas, with the same positions, asymmetric leg pose, scale, folds and ankle openings.\nVisible white trousers start around y1100 under the tunic and stop near y1395 viewer-left and y1350 viewer-right. Preserve these locations. The visible trouser region is roughly x367..652. Extend only the hidden upper edge upward to y1060 so the tunic can cover it; do not invent a complete enlarged pair of trousers.\nEverything above y1060 MUST be fully transparent. Everything below y1400 MUST be fully transparent. Keep the full empty canvas; NO cropping, zooming, re-centering, or product-photo composition.\nRemove the tunic, head, hands, skin, and BOTH black shoes. Cut trouser cuffs accurately at the same original shoe openings, keep trouser cloth shape.\nNo body, shoes, background, haze, floor, shadows, text, logos or accessories. Genuine transparent alpha except the white fabric. This layer overlays the original source at origin 0,0 with no transform."
+    },
+    {
+      "reason": "Avatar correction rescaled head and hands; rejected",
+      "prompt": "Use case: precise-object-edit.\nImage1 is the EDIT TARGET: transparent head/neck and two hands layer on 1024x1536 canvas. Image2 is ONLY the alignment reference: worn indigo tunic layer on same canvas.\nKeep head, hair, face and neck in image1 entirely unchanged, with exact position/scale. Keep the full canvas and true alpha.\nFix ONLY the two hands to connect to the sleeve cuffs in image2 when overlaid at origin0,0. Move viewer-left hand up about18pixels so the top of its wrist is y754; move viewer-right hand up about25pixels so top of wrist is y765. Keep each hand's horizontal placement and relaxed natural pose. Make hand size about the same as the original source adult model, not enlarged.\nKeep a short 8px overlap of wrist under the sleeve cuff, no visible gap, smooth anatomical connection.\nDo NOT include any tunic pixels in output. Only head/neck and two hands, all other pixels completely transparent. Do not move/recenter/zoom head or overall canvas, no glow/haze/shadow/body/clothing/background/text.",
+      "inputs": [
+        "layers/avatar-visible.png",
+        "layers/coat-indigo.png"
+      ]
+    }
+  ],
+  "rasterPostProcessing": "None. Original generated alpha retained. Pillow used only for measurement/hashes.",
+  "reviewRendering": "Actual HTML image stack rendered with headless Chrome. Separate CSS clip regions for head and hands; hands translated upward 1.5%. No AI composite substituted."
+}

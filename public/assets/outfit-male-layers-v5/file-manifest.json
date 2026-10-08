@@ -1,0 +1,80 @@
+{
+  "files": [
+    {
+      "file": "layers/avatar-visible.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "alphaRange": [
+        0,
+        254
+      ],
+      "fullyTransparentPixels": 1518717,
+      "visibleBounds": [
+        304,
+        44,
+        717,
+        930
+      ],
+      "sha256": "3fc81f18a131d90e7328a43a4e29f5be997c3e0662e8b4329de95d755e5050f9"
+    },
+    {
+      "file": "layers/coat-indigo.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "alphaRange": [
+        0,
+        254
+      ],
+      "fullyTransparentPixels": 1246609,
+      "visibleBounds": [
+        286,
+        247,
+        740,
+        1128
+      ],
+      "sha256": "69d2e9ee44cc080d7948bfd87b080a91800c6febbe7a66582050e563223cede0"
+    },
+    {
+      "file": "layers/shoes-oxford.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "alphaRange": [
+        0,
+        254
+      ],
+      "fullyTransparentPixels": 1548133,
+      "visibleBounds": [
+        346,
+        1329,
+        657,
+        1487
+      ],
+      "sha256": "d32a1fce2a206f8d00d731c12b59a48c14636adff73e62e382f9ae918dc9eba0"
+    },
+    {
+      "file": "layers/trousers-white.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "alphaRange": [
+        0,
+        254
+      ],
+      "fullyTransparentPixels": 1500469,
+      "visibleBounds": [
+        360,
+        1083,
+        652,
+        1382
+      ],
+      "sha256": "9a3fb90a28acb55d4945bcd0cbd4c27b592335372d375fbfaa1caea900b92b2e"
+    }
+  ]
+}
