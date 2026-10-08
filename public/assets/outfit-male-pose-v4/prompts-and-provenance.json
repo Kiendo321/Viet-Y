@@ -1,0 +1,39 @@
+{
+  "tool": "Codex built-in image_gen",
+  "date": "2026-10-08",
+  "reference": "references/male-indigo-reference.png",
+  "referenceOrigin": "Original generated male indigo master used for the current app's fixed-model assets",
+  "assets": [
+    {
+      "poseId": "relaxed_front",
+      "file": "nguthan-male-indigo-relaxed-front-draft.png",
+      "prompt": "Use case: identity-preserve editorial fashion photography. Edit the attached existing generated adult Vietnamese male model and keep his exact face, short swept black hair, physique and outfit. The outfit is the same indigo áo ngũ thân inspired tunic with standing band collar, narrow ivory inner edging, long sleeves, straight knee-below length, wearer-right/viewer-left five fasteners arranged as in the reference, white loose trousers and polished black Oxford shoes. Preserve color, construction and garment details; this is contemporary AI styling, not an authenticated artifact. Change ONLY posture to pose A relaxed_front: face and torso broadly front-facing, shoulders relaxed rather than squared military stance, weight gently on one leg, other knee soft and one shoe slightly advanced; both hands relaxed beside the outer thighs with natural elbows, fingers and asymmetry. A real Vietnamese university student in a professional outfit photoshoot, calm subtle friendly smile and natural skin/cloth texture, not mannequin or A/T pose. Keep the entire collar and front closure unobstructed. Same neutral soft upper camera-left key light. Portrait 1024x1536, whole head to complete shoes, top of head roughly y70 and soles roughly y1475, centered with side margins. GENUINE alpha transparency outside the physical body and clothes; no floor, scene, background haze, glow, shadow, text, jewelry, props or headwear. Output one complete full-body outfit master suitable for later pose-specific garment layer extraction.",
+      "transparentBackground": true
+    },
+    {
+      "poseId": "soft_three_quarter",
+      "file": "nguthan-male-indigo-soft-three-quarter-draft.png",
+      "prompt": "Use case: identity-preserve editorial fashion photography. Reference is the original generated adult Vietnamese male model in an indigo áo ngũ thân inspired tunic. Keep exactly the same adult face, short swept black hair, build, standing band collar with narrow ivory inner edging, five wearer-right/viewer-left front fasteners, long sleeves, straight long tunic, white loose trousers and black Oxford shoes. Create pose B soft_three_quarter: torso turned about 25 degrees toward camera-left with face gently turned to camera; relaxed shoulders, weight comfortably on rear leg, front foot lightly advanced. One arm hangs naturally, the other elbow softly bends with the hand resting beside the outer hip, NOT in a pocket or covering the closure. Gentle confident half-smile. A believable young adult student outfit photoshoot, not stiff catalog mannequin, dramatic royal/warrior posture or a T pose. Maintain garment cut and realistic fine cloth texture with folds responding to the body turn. Same soft neutral upper camera-left studio light. Full body portrait1024x1536, centered, head and both shoes fully visible; head near y70, soles near y1475 and comfortable margins. Output the complete dressed model on true transparent alpha with no scene, floor, background glow/haze, cast shadow, accessories, headwear, jewelry, text or logos. This is contemporary AI-generated Vietnamese styling; do not add historical insignia or claim artifact reconstruction.",
+      "transparentBackground": true
+    },
+    {
+      "poseId": "gentle_step",
+      "file": "nguthan-male-indigo-gentle-step-draft.png",
+      "prompt": "Use case: identity-preserve editorial fashion photograph, full-body transparent outfit master. Keep the original reference adult Vietnamese male student's exact face and hair, indigo áo ngũ thân inspired tunic with stand collar and narrow ivory inner edge, long sleeves, same five fasteners on wearer-right/viewer-left, white loose trousers and polished black Oxford shoes. Pose C gentle_step: small natural slow step toward camera, torso only slightly angled, one foot planted forward and rear heel gently raised; believable weight balance and relaxed arm counter-swing with slight elbow bends. Natural shoulders, soft friendly expression, no dramatic stride, no military/martial posture, not an A/T mannequin pose. Show modest motion in tunic hem and trouser folds, no dramatic wind, no floating fabric. Realistic anatomy, hands with five fingers, knees/ankles/shoes, fine textured cloth and natural skin. Same soft upper camera-left studio key light and neutral color balance. Portrait1024x1536, head and complete shoes visible, centered, top near y70, lowest shoe near y1475, no cropped extremities. Complete model/outfit on genuine transparent alpha; pixels outside physical subject fully transparent. No setting, floor, shadow, glow, background haze, headwear, props, jewelry, captions, watermark or cultural insignia. Contemporary AI styling illustration, not an authenticated museum artifact. Preserve the front garment closure and original outfit details.",
+      "transparentBackground": true
+    }
+  ],
+  "backgroundsReusedFrom": "viet-phuc-pose-v3 / originally viet-phuc-expansion-v2",
+  "comparison": {
+    "file": "pose-comparison-ai-review.png",
+    "prompt": "Create a professional fashion contact sheet from these three transparent full-body images of the SAME adult Vietnamese male in the SAME indigo áo ngũ thân inspired tunic, white trousers and black Oxford shoes. Three equal portrait panels side by side in a wide canvas: left uses image1 relaxed front pose, center uses image2 soft three-quarter pose, right uses image3 gentle stepping pose. Preserve each provided pose, face, outfit, five clasps, collar and colors closely. Each panel uses the campus courtyard in image4 as its photographic setting, with the subject standing on the ground, believable soft contact shadow and harmonious daylight. All subjects at same scale, entire head to shoes visible with generous margins. Professional contemporary university photoshoot with realistic skin and indigo fabric detail, natural poses. No extra accessories or headwear, no redesign, no historical insignia, no labels, text, logos, UI, frames or watermarks. This is an aesthetic AI-generated comparison, not pixel-exact compositing. Full opaque background.",
+    "inputs": [
+      "nguthan-male-indigo-relaxed-front-draft.png",
+      "nguthan-male-indigo-soft-three-quarter-draft.png",
+      "nguthan-male-indigo-gentle-step-draft.png",
+      "backgrounds/campus.png"
+    ],
+    "role": "AI-regenerated aesthetic preview, not pixel-exact composite",
+    "transparentBackground": false
+  }
+}

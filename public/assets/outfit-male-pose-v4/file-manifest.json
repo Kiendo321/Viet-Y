@@ -1,0 +1,128 @@
+{
+  "files": [
+    {
+      "file": "backgrounds/campus.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGB",
+      "bytes": 2233088,
+      "sha256": "a0bec22c960517d83713c24f19ce9b175b64e8bd4ccd495cba27e8fd09923917"
+    },
+    {
+      "file": "backgrounds/stage.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGB",
+      "bytes": 2312465,
+      "sha256": "93be05e6aadf087b2887a11b50f18da63706c6713b29ab7ad51ff52e0e265325"
+    },
+    {
+      "file": "backgrounds/studio-tet.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGB",
+      "bytes": 2477987,
+      "sha256": "548b7f2c34a954a42b98974226abffff2ff739b429e91c4dd09be438a586f363"
+    },
+    {
+      "file": "nguthan-male-indigo-gentle-step-draft.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "bytes": 1503994,
+      "sha256": "f499fb803dfbbfc11ff49968865f5fe9c0f0860241d86f37323e5c7a180a9048",
+      "alphaRange": [
+        0,
+        254
+      ],
+      "fullyTransparentPixels": 1147217,
+      "visibleBounds": [
+        289,
+        44,
+        763,
+        1483
+      ]
+    },
+    {
+      "file": "nguthan-male-indigo-relaxed-front-draft.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "bytes": 1448344,
+      "sha256": "75a5136e2186acccc26f39d57a167252d79daed41de02da56b5438b94e898e7d",
+      "alphaRange": [
+        0,
+        254
+      ],
+      "fullyTransparentPixels": 1140294,
+      "visibleBounds": [
+        290,
+        46,
+        731,
+        1481
+      ]
+    },
+    {
+      "file": "nguthan-male-indigo-soft-three-quarter-draft.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "bytes": 1477176,
+      "sha256": "f4f6bb9cfaa3263a23e1341bc3431a3be82dd59442c3858689ef4e9eba685c04",
+      "alphaRange": [
+        0,
+        254
+      ],
+      "fullyTransparentPixels": 1154418,
+      "visibleBounds": [
+        300,
+        47,
+        743,
+        1474
+      ]
+    },
+    {
+      "file": "pose-comparison-ai-review.png",
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "bytes": 2396789,
+      "sha256": "4a3926db8ca929f87d4ba63b7c20a8c29efdff37015ff08b726ba62c6295fbf2"
+    },
+    {
+      "file": "references/male-indigo-reference.png",
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "bytes": 1431103,
+      "sha256": "89d7247bb6f8bbe9911f4d8e0084d4e2d5b0e11a20f4994e4e993cdda572670e",
+      "alphaRange": [
+        0,
+        254
+      ],
+      "fullyTransparentPixels": 1124371,
+      "visibleBounds": [
+        286,
+        48,
+        739,
+        1472
+      ]
+    }
+  ]
+}

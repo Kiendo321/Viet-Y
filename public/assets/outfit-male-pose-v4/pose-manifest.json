@@ -1,0 +1,73 @@
+{
+  "version": 4,
+  "status": "draft_pose_master",
+  "modelId": "male-nguthan-reference-v1",
+  "garmentKey": "ngu_than_nam_styling",
+  "canvas": {
+    "width": 1024,
+    "height": 1536
+  },
+  "colorway": "indigo-white-trousers-black-oxfords",
+  "swappableLayers": false,
+  "defaultPoseProposal": "relaxed_front",
+  "poses": [
+    {
+      "poseId": "relaxed_front",
+      "src": "nguthan-male-indigo-relaxed-front-draft.png",
+      "layerMode": "complete_outfit_master",
+      "supportedBackgrounds": [
+        "campus",
+        "studio-tet",
+        "stage"
+      ],
+      "independentColorSwapReady": false
+    },
+    {
+      "poseId": "soft_three_quarter",
+      "src": "nguthan-male-indigo-soft-three-quarter-draft.png",
+      "layerMode": "complete_outfit_master",
+      "supportedBackgrounds": [
+        "campus",
+        "studio-tet",
+        "stage"
+      ],
+      "independentColorSwapReady": false
+    },
+    {
+      "poseId": "gentle_step",
+      "src": "nguthan-male-indigo-gentle-step-draft.png",
+      "layerMode": "complete_outfit_master",
+      "supportedBackgrounds": [
+        "campus",
+        "studio-tet",
+        "stage"
+      ],
+      "independentColorSwapReady": false
+    }
+  ],
+  "mvpPlan": {
+    "relaxed_front": {
+      "plannedMode": "independent_layers",
+      "ready": false,
+      "requiredLayers": [
+        "footwear",
+        "trousers",
+        "avatar",
+        "garment",
+        "foreground_hands_if_occluded",
+        "pose_aligned_headwear"
+      ]
+    },
+    "soft_three_quarter": {
+      "plannedMode": "complete_lookbook_preset"
+    },
+    "gentle_step": {
+      "plannedMode": "complete_lookbook_preset"
+    }
+  },
+  "culturalLabel": "AI contemporary styling illustration inspired by áo ngũ thân, not an authenticated artifact",
+  "integrationStatus": "not integrated or deployed",
+  "review": {
+    "html": "pose-review.html"
+  }
+}
