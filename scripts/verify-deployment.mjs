@@ -6,14 +6,14 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const base = (process.argv[2] || '').replace(/\/$/, '');
-assert.match(base, /^https:\/\/viet-y-(?:171206540455\.asia-southeast1|[a-z0-9-]+)\.run\.app$/);
+assert.match(base, /^https:\/\/(?:viet-y-171206540455\.asia-southeast1\.run\.app|(?:ux-preview---)?viet-y-ivo7erh2oq-as\.a\.run\.app)$/);
 const get = url => fetch(`${base}${url}`, { signal: AbortSignal.timeout(45000) });
 const checks = [];
 const healthResponse = await get('/api/health');
 assert.equal(healthResponse.status, 200);
 const health = await healthResponse.json();
 assert.equal(health.status, 'ok');
-checks.push({ name: 'public health', status: 'pass', hasApiKey: health.hasApiKey });
+checks.push({ name: 'public health', status: 'pass', hasApiKey: health.hasApiKey, provider: health.provider, configured: health.configured });
 const homepage = await get('/');
 assert.equal(homepage.status, 200);
 assert.match(homepage.headers.get('content-type'), /text\/html/);

@@ -333,9 +333,11 @@ Atmosphere:
           client.models.generateContent({
             model: modelName,
             contents: {
+              role: 'user',
               parts: [{ text: prompt }],
             },
             config: {
+              responseModalities: ['TEXT', 'IMAGE'],
               imageConfig: {
                 aspectRatio: '3:4',
               },
@@ -411,7 +413,7 @@ Strict constraints:
 - Only change the hue and color tone of the robe fabric to match ${targetColor.name}.
     `.trim();
 
-    const imageModelsToTry = ['gemini-3.1-flash-image', 'gemini-3.1-flash-lite-image'];
+    const imageModelsToTry = [IMAGE_GENERATION_MODEL];
     let lastError: any = null;
 
     for (const modelName of imageModelsToTry) {
@@ -432,6 +434,7 @@ Strict constraints:
           client.models.generateContent({
             model: modelName,
             contents: {
+              role: 'user',
               parts: [
                 {
                   inlineData: {
@@ -445,6 +448,7 @@ Strict constraints:
               ],
             },
             config: {
+              responseModalities: ['TEXT', 'IMAGE'],
               imageConfig: {
                 aspectRatio: '3:4',
               },
