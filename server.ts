@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
+import { createGenaiClient, genaiSettings } from './src/services/genaiConfig.js';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI, Type, ThinkingLevel } from '@google/genai';
 import {
@@ -22,10 +23,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Single source of truth for model identifiers
-export const PRIMARY_TEXT_MODEL = 'gemini-3.8-flash';
-export const BACKUP_TEXT_MODEL = 'gemini-3.7-flash';
+export const PRIMARY_TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || 'gemini-3.8-flash';
+export const BACKUP_TEXT_MODEL = process.env.GEMINI_BACKUP_TEXT_MODEL || 'gemini-3.7-flash';
 export const TEXT_STYLIST_MODEL = PRIMARY_TEXT_MODEL;
-export const IMAGE_GENERATION_MODEL = 'gemini-3.1-flash-image';
+export const IMAGE_GENERATION_MODEL = process.env.GEMINI_IMAGE_MODEL || 'gemini-3.1-flash-image';
 
 const validGarmentIds = new Set(ALLOWLIST_GARMENTS.map((g) => g.id));
 const validColorIds = new Set(ALLOWLIST_COLORS.map((c) => c.id));
@@ -33,18 +34,7 @@ const validAccessoryIds = new Set(ALLOWLIST_ACCESSORIES.map((a) => a.id));
 const validStyleIds = new Set(ALLOWLIST_STYLES.map((s) => s.id));
 
 function getGenAIClient(): GoogleGenAI | null {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey.trim() === '' || apiKey === 'MY_GEMINI_API_KEY') {
-    return null;
-  }
-  return new GoogleGenAI({
-    apiKey,
-    httpOptions: {
-      headers: {
-        'User-Agent': 'aistudio-build',
-      },
-    },
-  });
+  return createGenaiClient();
 }
 
 async function startServer() {
@@ -57,6 +47,8 @@ async function startServer() {
     res.setHeader('Content-Type', 'application/json; charset=utf-8').json({
       status: 'ok',
       hasApiKey: hasKey,
+      provider: genaiSettings().provider,
+      configured: genaiSettings().configured,
       stylistModel: PRIMARY_TEXT_MODEL,
       backupStylistModel: BACKUP_TEXT_MODEL,
       imageModel: IMAGE_GENERATION_MODEL,
@@ -75,7 +67,7 @@ async function startServer() {
       if (!client) {
         res.status(200).json({
           error: 'API_KEY_MISSING',
-          message: 'Chưa có cấu hình GEMINI_API_KEY hợp lệ trên máy chủ. Bạn có thể sử dụng tính năng tự phối đồ thủ công bên dưới.',
+          message: 'Chưa cấu hình dịch vụ Gemini trên máy chủ. Bạn vẫn có thể tự phối và lưu lookbook.',
           canFallbackManual: true,
           source: 'curated_fallback',
           model: null,
@@ -102,12 +94,12 @@ QUY TẮC BẮT BUỘC:
    - styleId: "style-tham-chieu-tu-lieu".
    - garmentId: "garment-ngu-than-nam-sa-kep".
    - BẮT BUỘC colorId: "color-sa-kep-den-lot-trang" (đúng màu hiện vật nguồn: ngoài đen, lót trong trắng).
-   - accessoryId: chọn từ allowlist (ví dụ "acc-khan-dong-den" hoặc "acc-khong-phu-kien").
+   - accessoryId: chọn từ allowlist (ví dụ "acc-khan-dong-den" hoặc "acc-none").
 3. BỘ PHỐI 2 (Remix đương đại):
    - styleId: "style-remix-duong-dai".
    - garmentId: "garment-ngu-than-nam-sa-kep".
    - colorId: chọn màu trẻ trung từ allowlist (ví dụ "color-xanh-ngoc-bich", "color-muc-cham-co", "color-do-son-tram").
-   - accessoryId: chọn từ allowlist (ví dụ "acc-quan-au-toi-mau", "acc-giay-tay-da-den", "acc-tui-vai-canvas").
+   - accessoryId: chọn từ allowlist (ví dụ "acc-quan-au-toi-mau" hoặc "acc-giay-oxford-derby").
 4. Đảm bảo đúng 2 bộ với 2 styleId khác nhau: 1 bộ "style-tham-chieu-tu-lieu" và 1 bộ "style-remix-duong-dai".
 
 DANH MỤC ALLOWLIST CHO PHÉP:
@@ -268,18 +260,22 @@ Ghi chú bổ sung: ${preference || 'Chuẩn bị cho Ngày hội văn hóa sinh
   // Image Generation endpoint (Nano Banana 2: gemini-3.1-flash-image)
   app.post('/api/image/generate', async (req: Request, res: Response): Promise<void> => {
     const client = getGenAIClient();
-    const { colorId, accessoryId, styleId, customNote } = req.body;
+    const { colorId, accessoryId, accessoryIds, styleId, customNote } = req.body;
+    const chosenAccessoryIds = Array.isArray(accessoryIds) ? accessoryIds : [accessoryId || 'acc-none'];
+    if (!validColorIds.has(colorId) || !validStyleIds.has(styleId) || chosenAccessoryIds.length > 7 || chosenAccessoryIds.some((id: unknown) => typeof id !== 'string' || !validAccessoryIds.has(id))) {
+      res.status(400).json({ error: 'INVALID_SELECTION', message: 'Lựa chọn chưa nằm trong danh mục hỗ trợ.' });
+      return;
+    }
 
     if (!client) {
       res.status(503).json({
         error: 'API_KEY_MISSING',
-        message: 'Chưa có GEMINI_API_KEY để gọi mô hình tạo ảnh AI.',
+        message: 'Chưa cấu hình dịch vụ Gemini để tạo ảnh AI.',
       });
       return;
     }
 
     const selectedColor = ALLOWLIST_COLORS.find((c) => c.id === colorId) || ALLOWLIST_COLORS[0];
-    const selectedAccessory = ALLOWLIST_ACCESSORIES.find((a) => a.id === accessoryId) || ALLOWLIST_ACCESSORIES[0];
     const selectedStyle = ALLOWLIST_STYLES.find((s) => s.id === styleId) || ALLOWLIST_STYLES[0];
 
     // Detailed culturally respectful concept prompt
@@ -290,16 +286,16 @@ Ghi chú bổ sung: ${preference || 'Chuẩn bị cho Ngày hội văn hóa sinh
       colorPrompt = `The robe body is tailored in an elegant ${selectedColor.name} hue (${selectedColor.hex}), with fine lustrous Vietnamese silk texture and subtle weave reflections.`;
     }
 
-    let accessoryPrompt = '';
-    if (selectedAccessory.id === 'acc-khan-dong-den') {
-      accessoryPrompt = 'He wears a traditional black wrapped turban (khăn đóng) folded neatly across the forehead in the authentic Vietnamese scholar style.';
-    } else if (selectedAccessory.id === 'acc-khan-phoi-dong-dieu') {
-      accessoryPrompt = 'He wears a contemporary neatly wrapped fabric turban harmoniously matched with the outfit palette.';
-    } else if (selectedAccessory.id === 'acc-quan-trang-ong-rong') {
-      accessoryPrompt = 'Paired with classic loose-fitting white silk trousers hanging straight and clean.';
-    } else if (selectedAccessory.id === 'acc-quan-au-toi-mau') {
-      accessoryPrompt = 'Paired with neat tailored dark modern trousers and polished leather shoes, styled for an energetic university cultural day.';
-    }
+    const accessoryDirections: Record<string, string> = {
+      'acc-khan-dong-den': 'A neat black Vietnamese wrapped turban (khăn đóng).',
+      'acc-khan-phoi-dong-dieu': 'A wrapped turban matching the selected robe color, a contemporary styling suggestion.',
+      'acc-quan-trang-ong-rong': 'Loose, straight white trousers.',
+      'acc-quan-au-toi-mau': 'Neat tailored dark trousers.',
+      'acc-giay-oxford-derby': 'Polished Oxford or Derby leather shoes.',
+      'acc-guoc-moc-truyen-thong': 'Simple wooden clogs, a styling suggestion.',
+      'acc-none': 'No headwear or added accessories; neutral white trousers and plain dark footwear.',
+    };
+    const accessoryPrompt = chosenAccessoryIds.map((id: string) => accessoryDirections[id]).filter(Boolean).join(' ');
 
     const prompt = `
 Editorial concept fashion photograph of a handsome young Vietnamese university student proudly wearing traditional Vietnamese men's attire ("Áo ngũ thân nam tay chẽn") during a university campus cultural festival.
@@ -316,7 +312,7 @@ Atmosphere:
 - High aesthetic lighting, realistic natural fabric drapery, crisp textile weave, dignified and youthful pride.
     `.trim();
 
-    const imageModelsToTry = ['gemini-3.1-flash-image', 'gemini-3.1-flash-lite-image'];
+    const imageModelsToTry = [IMAGE_GENERATION_MODEL];
     let lastError: any = null;
 
     for (const modelName of imageModelsToTry) {

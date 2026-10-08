@@ -1,6 +1,8 @@
 param(
   [Parameter(Mandatory=$true)][string]$Image,
-  [string]$RevisionName = ('viet-y-runtime-' + (Get-Date).ToUniversalTime().ToString('yyyyMMddHHmmss'))
+  [string]$RevisionName = ('viet-y-runtime-' + (Get-Date).ToUniversalTime().ToString('yyyyMMddHHmmss')),
+  [switch]$Preview,
+  [switch]$UseVertexAI
 )
 $ErrorActionPreference = 'Stop'
 if ($Image -notmatch '^asia-southeast1-docker\.pkg\.dev/c3-app-162/viet-y/app(?:@sha256:[a-f0-9]{64}|:[a-zA-Z0-9._-]+)$') {
@@ -21,6 +23,16 @@ try {
   $runtimeContainer.image = $Image
   $runtimeContainer.command = @('node')
   $runtimeContainer.args = @('server.js')
+  if ($UseVertexAI) {
+    $vertexSettings = @{
+      GOOGLE_GENAI_USE_VERTEXAI = 'true'
+      GOOGLE_CLOUD_PROJECT = 'c3-app-162'
+      GOOGLE_CLOUD_LOCATION = 'global'
+    }
+    $runtimeContainer.env = @($runtimeContainer.env | Where-Object { -not $vertexSettings.ContainsKey($_.name) }) + @(
+      $vertexSettings.GetEnumerator() | ForEach-Object { [PSCustomObject]@{ name = $_.Key; value = $_.Value } }
+    )
+  }
   # Replace AI Studio prebuilt-source config with the verified production image.
   foreach ($annotation in @('run.googleapis.com/sources', 'run.googleapis.com/base-images')) {
     $runtimeService.spec.template.metadata.annotations.PSObject.Properties.Remove($annotation)
@@ -30,7 +42,16 @@ try {
   foreach ($annotation in @('run.googleapis.com/operation-id', 'run.googleapis.com/urls', 'run.googleapis.com/ingress-status', 'serving.knative.dev/creator', 'serving.knative.dev/lastModifier')) {
     $runtimeService.metadata.annotations.PSObject.Properties.Remove($annotation)
   }
-  $runtimeService.spec.traffic = @([PSCustomObject]@{ latestRevision = $true; percent = 100 })
+  if ($Preview) {
+    # Pin existing traffic to resolved revisions: latestRevision must not move it to this preview.
+    $liveTraffic = @($runtimeService.status.traffic | Where-Object { $_.percent -gt 0 })
+    if (($liveTraffic | Measure-Object -Property percent -Sum).Sum -ne 100) { throw 'Could not resolve current production traffic.' }
+    $runtimeService.spec.traffic = @($liveTraffic | ForEach-Object {
+      [PSCustomObject]@{ revisionName = $_.revisionName; percent = $_.percent }
+    }) + @([PSCustomObject]@{ revisionName = $RevisionName; percent = 0; tag = 'ux-preview' })
+  } else {
+    $runtimeService.spec.traffic = @([PSCustomObject]@{ latestRevision = $true; percent = 100 })
+  }
   # Existing env values stay in memory and are preserved, never logged or saved.
   $runtimeBody = [ordered]@{
     apiVersion = 'serving.knative.dev/v1'
@@ -50,6 +71,7 @@ try {
     generation = $runtimeResponse.metadata.generation
     requestedRevision = $RevisionName
     image = $Image
+    preview = [bool]$Preview
     envNamesPreserved = @($runtimeContainer.env | ForEach-Object { $_.name })
   } | ConvertTo-Json -Depth 4
 } finally {

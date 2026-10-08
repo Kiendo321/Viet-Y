@@ -218,14 +218,14 @@ export const EditorialLanding: React.FC<EditorialLandingProps> = ({
 
             {/* Tagline */}
             <p className="font-serif text-[15px] min-[375px]:text-base md:text-xl xl:text-[25px] text-[#30251F]/90 font-normal italic leading-snug">
-              Phối theo gu, hiểu nét Việt
+              Phối ngũ thân cho ngày hội ở trường
             </p>
 
             {/* CTA Pill Button (Red pill with slender arrow) */}
             <div className="pt-0.5 space-y-2">
               <button
                 type="button"
-                onClick={() => onGoToStep(1)}
+                onClick={() => onGoToStep(3)}
                 className="w-[215px] min-[375px]:w-[230px] md:w-[260px] min-h-[44px] sm:min-h-[50px] bg-[#8E101A] hover:bg-[#700C14] text-white font-medium text-xs sm:text-sm rounded-full shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2.5 sm:gap-3 group active:scale-[0.98] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8E101A]"
               >
                 <span className="tracking-wide">Phối ngay</span>
@@ -237,7 +237,7 @@ export const EditorialLanding: React.FC<EditorialLandingProps> = ({
                 <span className="font-mono text-[#8E101A] font-bold uppercase tracking-wider text-[9px]">
                   Minh họa AI
                 </span>
-                <span>· Gợi ý phối hiện đại</span>
+                <span>· Ảnh cảm hứng</span>
               </div>
             </div>
           </div>

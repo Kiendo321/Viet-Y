@@ -1,26 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  Sparkles,
-  BookOpen,
-  Bookmark,
-  Share2,
-  Check,
-  ChevronRight,
-  ChevronLeft,
-  RefreshCw,
-  Info,
-  Calendar,
-  Layers,
-  Palette,
-  Compass,
-  Image as ImageIcon,
-  AlertTriangle,
-  RotateCcw,
-  CheckCircle2,
-  ExternalLink,
-  ArrowRight,
-  ChevronDown
-} from 'lucide-react';
+import { Bookmark, ChevronRight } from 'lucide-react';
 import {
   OCCASION_DATA,
   ALLOWLIST_GARMENTS,
@@ -32,21 +11,21 @@ import {
   OutfitSelection,
   StylistRecommendation,
 } from './data/catalog';
-import { GarmentDiagram } from './components/GarmentDiagram';
-import { OutfitColorPreview } from './components/OutfitColorPreview';
 import { Step3Workbench } from './components/Step3Workbench';
-import { ImageComparison } from './components/ImageComparison';
 import { CulturalCard } from './components/CulturalCard';
 import { SavedOutfitsDrawer, SavedOutfitEntry } from './components/SavedOutfitsDrawer';
 import { EditorialLanding } from './components/EditorialLanding';
+import { AiTools } from './components/AiTools';
+import { LookbookCard } from './components/LookbookCard';
+import { selectionKey, readSavedOutfits, persistOutfits } from './services/outfitStorage';
 import { BraidedFlowerLogo } from './components/HeritageOrnaments';
 
 export default function App() {
-  // Navigation view: 'landing' (editorial showcase) vs 'flow' (6-step styling workflow)
+  // Landing, workbench, and lookbook share one selection.
   const [activeView, setActiveView] = useState<'landing' | 'flow'>('landing');
 
-  // Current active step (1 to 6) in the styling flow
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  // Internal view IDs retained for existing landing links: 2 = sources, 3 = workbench, 6 = lookbook.
+  const [currentStep, setCurrentStep] = useState<number>(3);
 
   // Selection state
   const [selection, setSelection] = useState<OutfitSelection>({
@@ -75,25 +54,20 @@ export default function App() {
   const [imageStatusCode, setImageStatusCode] = useState<number | null>(null);
   const [imageErrorCode, setImageErrorCode] = useState<string | null>(null);
   const [originalAiImage, setOriginalAiImage] = useState<string | null>(null);
-  const [recoloredAiImage, setRecoloredAiImage] = useState<string | null>(null);
-  const [isRecoloring, setIsRecoloring] = useState<boolean>(false);
-  const [recolorError, setRecolorError] = useState<string | null>(null);
 
   // Saved outfits state (localStorage)
   const [savedOutfits, setSavedOutfits] = useState<SavedOutfitEntry[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
-  const [hasSavedCurrent, setHasSavedCurrent] = useState<boolean>(false);
-
-  // Hero image load error state
-  const [heroImageError, setHeroImageError] = useState<boolean>(false);
+  const [activeSavedId, setActiveSavedId] = useState<string | null>(null);
+  const [storageError, setStorageError] = useState<string | null>(null);
+  const [generatedSelectionKey, setGeneratedSelectionKey] = useState<string | null>(null);
+  const hasSavedCurrent = savedOutfits.some(entry => selectionKey(entry.selection) === selectionKey(selection));
+  const isDirty = !hasSavedCurrent && activeSavedId !== null;
 
   // Load saved outfits from localStorage on mount
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('viet_phuc_remix_outfits');
-      if (saved) {
-        setSavedOutfits(JSON.parse(saved));
-      }
+      setSavedOutfits(readSavedOutfits(localStorage));
     } catch (e) {
       console.warn('Could not read saved outfits from localStorage:', e);
     }
@@ -219,7 +193,6 @@ export default function App() {
       accessoryIds: [rec.accessoryId],
       styleId: rec.styleId,
     }));
-    setHasSavedCurrent(false);
   };
 
   // Handle AI Image Generation (Double-submit protected, no false quota promises, keeps fallback diagram)
@@ -242,6 +215,7 @@ export default function App() {
         body: JSON.stringify({
           colorId: selection.colorId,
           accessoryId: selection.accessoryIds[0] || 'acc-none',
+          accessoryIds: selection.accessoryIds,
           styleId: selection.styleId,
           customNote: selection.userNote,
         }),
@@ -260,8 +234,9 @@ export default function App() {
         throw new Error(msg);
       }
 
+      if (typeof data.imageUrl !== 'string' || !/^data:image\/(png|jpeg|webp);base64,/.test(data.imageUrl)) throw new Error('Máy chủ chưa trả về ảnh hợp lệ.');
+      setGeneratedSelectionKey(selectionKey(selection));
       setOriginalAiImage(data.imageUrl);
-      setRecoloredAiImage(null);
     } catch (err: any) {
       console.error('Image generation failed:', err);
       if (err?.name === 'AbortError') {
@@ -277,1037 +252,93 @@ export default function App() {
     }
   };
 
-  // Handle AI Image Recolor
-  const handleRecolorImage = async (newColorId: string) => {
-    if (!originalAiImage || isRecoloring) return;
-
-    setIsRecoloring(true);
-    setRecolorError(null);
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-    }, 25000);
-
-    try {
-      const res = await fetch('/api/image/recolor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          previousImageBase64: originalAiImage,
-          newColorId,
-          currentColorName: currentColor.name,
-        }),
-        signal: controller.signal,
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data.message || 'Lỗi khi đổi màu sắc áo.');
-      }
-
-      setRecoloredAiImage(data.imageUrl);
-      setSelection((prev) => ({ ...prev, colorId: newColorId }));
-      setHasSavedCurrent(false);
-    } catch (err: any) {
-      console.error('Recolor failed:', err);
-      if (err?.name === 'AbortError') {
-        setRecolorError('Yêu cầu đổi màu vượt quá thời gian chờ (timeout 25s). Đã bảo lưu ảnh hiện tại.');
-      } else {
-        setRecolorError(err?.message || 'Không thể thực hiện đổi sắc áo.');
-      }
-    } finally {
-      clearTimeout(timeoutId);
-      setIsRecoloring(false);
-    }
-  };
-
-  // Handle Save Outfit to localStorage
-  const handleSaveOutfit = () => {
-    const entry: SavedOutfitEntry = {
-      id: `outfit-${Date.now()}`,
-      savedAt: new Date().toLocaleDateString('vi-VN', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      selection,
-      colorName: currentColor.name,
-      colorHex: currentColor.hex,
-      styleName: currentStyle.name,
-      accessoryNames: currentAccessories.map((a) => a.name),
-    };
-
-    const updated = [entry, ...savedOutfits];
-    setSavedOutfits(updated);
-    try {
-      localStorage.setItem('viet_phuc_remix_outfits', JSON.stringify(updated));
-    } catch (e) {
-      console.warn('LocalStorage save failed:', e);
-    }
-    setHasSavedCurrent(true);
-  };
-
-  const handleDeleteSavedOutfit = (id: string) => {
-    const updated = savedOutfits.filter((item) => item.id !== id);
-    setSavedOutfits(updated);
-    try {
-      localStorage.setItem('viet_phuc_remix_outfits', JSON.stringify(updated));
-    } catch (e) {
-      console.warn('LocalStorage delete failed:', e);
-    }
-  };
-
-  const handleLoadSavedOutfit = (entry: SavedOutfitEntry) => {
-    setSelection(entry.selection);
-    setIsDrawerOpen(false);
-    setHasSavedCurrent(true);
+  const navigate = (step: number) => {
     setActiveView('flow');
-    setCurrentStep(3);
+    setCurrentStep(step === 1 ? 3 : step);
+    // Native scrolling is only attempted in a real browser.
+    if (typeof window.scrollTo === 'function' && !navigator.userAgent.includes('jsdom')) window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
-  const stepsList = [
-    { num: 1, label: 'Dịp mặc' },
-    { num: 2, label: 'Hiện vật nguồn' },
-    { num: 3, label: 'Sắc áo & Phụ kiện' },
-    { num: 4, label: 'Gợi ý Gemini' },
-    { num: 5, label: 'Minh họa AI' },
-    { num: 6, label: 'Phiếu tóm tắt' },
-  ];
+  const handleSaveOutfit = (saveAsNew = false): boolean => {
+    if (hasSavedCurrent && !saveAsNew) return true;
+    const existingId = !saveAsNew ? activeSavedId : null;
+    const entry: SavedOutfitEntry = {
+      id: existingId || `outfit-${crypto.randomUUID()}`,
+      savedAt: new Date().toLocaleString('vi-VN'),
+      selection: { ...selection, accessoryIds: [...selection.accessoryIds] },
+      colorName: currentColor.name, colorHex: currentColor.hex,
+      styleName: currentStyle.name, accessoryNames: currentAccessories.map(a => a.name),
+    };
+    const updated = [entry, ...savedOutfits.filter(item => item.id !== entry.id)].slice(0, 40);
+    try {
+      persistOutfits(localStorage, updated);
+      setSavedOutfits(updated); setActiveSavedId(entry.id); setStorageError(null);
+      return true;
+    } catch {
+      setStorageError('Chưa lưu được trên trình duyệt này. Bộ phối vẫn còn trên màn hình; hãy tải thẻ lookbook để giữ lại.');
+      return false;
+    }
+  };
+  const handleDeleteSavedOutfit = (id: string): boolean => {
+    const updated = savedOutfits.filter(item => item.id !== id);
+    try {
+      persistOutfits(localStorage, updated);
+      setSavedOutfits(updated); setStorageError(null);
+      if (activeSavedId === id) setActiveSavedId(null);
+      return true;
+    } catch { setStorageError('Chưa xóa được bộ phối trên thiết bị.'); return false; }
+  };
+  const handleLoadSavedOutfit = (entry: SavedOutfitEntry) => {
+    setSelection({ ...entry.selection, accessoryIds: [...entry.selection.accessoryIds] });
+    setActiveSavedId(entry.id); setIsDrawerOpen(false); setStorageError(null); navigate(3);
+  };
+  const closeDrawer = React.useCallback(() => setIsDrawerOpen(false), []);
+  const aiImage = generatedSelectionKey === selectionKey(selection) ? originalAiImage : null;
+  const saveLabel = hasSavedCurrent ? 'Đã lưu bộ phối' : isDirty ? 'Cập nhật bản đã lưu' : 'Lưu bản phối';
 
-  return (
-    <div className="min-h-screen bg-[#F7F0E4] text-[#30251F] flex flex-col font-sans selection:bg-[#9F1D26]/15 selection:text-[#30251F]">
-      {/* 1. EDITORIAL LANDING VIEW */}
-      {activeView === 'landing' && (
-        <EditorialLanding
-          selection={selection}
-          onUpdateSelection={setSelection}
-          onGoToStep={(step) => {
-            setActiveView('flow');
-            setCurrentStep(step);
-          }}
-          onOpenSavedDrawer={() => setIsDrawerOpen(true)}
-          savedCount={savedOutfits.length}
-        />
-      )}
-
-      {/* 2. 6-STEP STYLING FLOW HEADER */}
-      {activeView === 'flow' && (
-        <header className="sticky top-0 z-40 bg-[#F7F0E4]/95 backdrop-blur-md border-b border-[#DECFB9]">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
-            {/* Brand Emblem & Wordmark */}
-            <button
-              type="button"
-              onClick={() => setActiveView('landing')}
-              className="flex items-center gap-2.5 text-left group focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8E101A] rounded-xs"
-              aria-label="Về trang mở đầu Việt phục Remix"
-            >
-              <BraidedFlowerLogo className="w-8 h-8 shrink-0" />
-              <div>
-                <span className="font-serif-display font-bold text-lg text-[#30251F] tracking-tight group-hover:text-[#8E101A] transition-colors block leading-tight">
-                  Việt phục Remix
-                </span>
-                <span className="text-[10px] text-[#30251F]/60 font-medium uppercase tracking-wider block font-sans">
-                  Gợi ý trang phục học đường
-                </span>
-              </div>
-            </button>
-
-            {/* Clean Editorial Navigation */}
-            <nav className="flex items-center gap-4 sm:gap-6 text-xs font-medium">
-              <button
-                type="button"
-                onClick={() => setCurrentStep(1)}
-                className="min-h-[44px] flex items-center text-[#8E101A] font-semibold border-b-2 border-[#8E101A]"
-              >
-                Phối đồ
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setCurrentStep(2)}
-                className="min-h-[44px] flex items-center text-[#30251F]/80 hover:text-[#8E101A] transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8E101A] rounded-xs"
-              >
-                Tư liệu
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsDrawerOpen(true)}
-                className="min-h-[44px] flex items-center gap-1.5 text-[#30251F] hover:text-[#8E101A] transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#8E101A] rounded-xs"
-              >
-                <Bookmark className="w-3.5 h-3.5 text-[#8E101A]" />
-                <span>Đã lưu</span>
-                <span className="text-[11px] text-[#30251F]/60 font-mono">({savedOutfits.length})</span>
-              </button>
-            </nav>
-          </div>
-
-          {/* Stepper Bar (Active only when in 6-step styling workflow) */}
-          <div className="border-t border-[#DECFB9]/60 bg-[#FFFBF4]/80 py-2">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
-              <div className="overflow-x-auto no-scrollbar flex items-center gap-1 min-w-0 flex-1">
-                {stepsList.map((s, idx) => {
-                  const isActive = currentStep === s.num;
-                  const isPast = currentStep > s.num;
-                  return (
-                    <React.Fragment key={s.num}>
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep(s.num)}
-                        className={`min-h-[38px] shrink-0 whitespace-nowrap flex items-center gap-1.5 py-1 px-3 text-xs font-medium rounded-xs transition-all ${
-                          isActive
-                            ? 'bg-[#8E101A] text-white shadow-xs font-semibold'
-                            : isPast
-                            ? 'text-[#486657] hover:bg-[#DECFB9]/30 font-medium'
-                            : 'text-[#30251F]/50 hover:text-[#30251F]'
-                        }`}
-                      >
-                        <span className="font-mono text-[11px] opacity-85">{s.num}.</span>
-                        <span>{s.label}</span>
-                        {isPast && <Check className="w-3 h-3 text-[#486657]" />}
-                      </button>
-                      {idx < stepsList.length - 1 && (
-                        <span className="text-[#DECFB9] text-xs px-1">·</span>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setActiveView('landing')}
-                className="text-xs text-[#30251F]/70 hover:text-[#8E101A] shrink-0 font-medium underline underline-offset-4 hidden sm:inline-block"
-              >
-                ← Trang mở đầu
-              </button>
-            </div>
-          </div>
-        </header>
-      )}
-
-      {/* VIEW 2: 6-STEP STYLING FLOW */}
-      {activeView === 'flow' && (
-        <main className={`${currentStep === 3 ? "max-w-[1440px] py-6" : "max-w-4xl py-8"} mx-auto w-full px-4 sm:px-6 flex-1 space-y-6`}>
-          {/* STEP 1: CHỌN DỊP MẶC */}
-          {currentStep === 1 && (
-            <section className="space-y-5">
-              <div className="border-b border-[#DECFB9] pb-3">
-                <span className="text-xs font-mono uppercase tracking-widest text-[#9F1D26] font-semibold">
-                  Bước 1 / 6
-                </span>
-                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#30251F] mt-1">
-                  Chọn bối cảnh & dịp mặc
-                </h2>
-                <p className="text-xs text-[#30251F]/70 mt-1">
-                  Bối cảnh Ngày hội văn hóa ở trường: sinh viên tìm hiểu trang phục truyền thống qua tư liệu hiện vật cụ thể và gợi ý phối đồ học đường.
-                </p>
-              </div>
-
-              {/* Occasion Card */}
-              <div className="bg-[#FFFBF4] border border-[#DECFB9] p-5 sm:p-6 rounded-sm shadow-xs space-y-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2 text-xs text-[#9F1D26] font-mono uppercase tracking-wider mb-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>Dịp được chỉ định cho đề án</span>
-                    </div>
-                    <h3 className="font-serif text-2xl font-bold text-[#30251F]">
-                      {OCCASION_DATA.name}
-                    </h3>
-                    <p className="text-xs text-[#30251F]/60 font-serif italic mt-0.5">
-                      {OCCASION_DATA.subTitle}
-                    </p>
-                    <p className="text-xs text-[#30251F]/80 mt-3 leading-relaxed">
-                      {OCCASION_DATA.description}
-                    </p>
-                  </div>
-                  <span className="px-2.5 py-1 bg-[#30251F] text-white text-[10px] font-mono uppercase tracking-wider shrink-0 rounded-xs">
-                    Mặc định
-                  </span>
-                </div>
-
-                {/* Guidelines for students */}
-                <div className="mt-4 pt-4 border-t border-[#DECFB9]">
-                  <h4 className="font-serif font-bold text-xs uppercase tracking-wider text-[#30251F] mb-2.5">
-                    Lưu ý thực tế cho sinh viên tham gia ngày hội (đối chiếu tư liệu):
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {OCCASION_DATA.studentTips.map((tip, i) => (
-                      <div key={i} className="flex items-start gap-2 text-xs text-[#30251F]/80">
-                        <span className="text-[#486657] font-bold mt-0.5">•</span>
-                        <span>{tip}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-2">
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(2)}
-                  className="min-h-[44px] flex items-center gap-2 px-6 py-2.5 bg-[#9F1D26] hover:bg-[#79171E] text-white text-xs font-semibold rounded-xs shadow transition-all"
-                >
-                  <span>Sang bước 2: Hiện vật tham chiếu</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </section>
-          )}
-
-          {/* STEP 2: CHỌN MẪU THAM CHIẾU TƯ LIỆU */}
-          {currentStep === 2 && (
-            <section className="space-y-5">
-              <div className="border-b border-[#DECFB9] pb-3">
-                <span className="text-xs font-mono uppercase tracking-widest text-[#9F1D26] font-semibold">
-                  Bước 2 / 6
-                </span>
-                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#30251F] mt-1">
-                  Mẫu nghiên cứu tham chiếu
-                </h2>
-                <p className="text-xs text-[#30251F]/70 mt-1">
-                  Dữ kiện nguồn duy nhất: Bài viết của Bảo tàng Lịch sử Quốc gia về hiện vật tiếp nhận.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                {/* Garment details card */}
-                <div className="md:col-span-7 space-y-4">
-                  <div className="bg-[#FFFBF4] border border-[#DECFB9] p-5 rounded-sm shadow-xs space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono uppercase tracking-wider text-[#486657] font-semibold">
-                        HIỆN VẬT THAM CHIẾU NGUỒN
-                      </span>
-                      <span className="text-[11px] bg-[#F7F0E4] border border-[#DECFB9] px-2 py-0.5 text-[#30251F] font-medium rounded-xs">
-                        1 hiện vật nguồn
-                      </span>
-                    </div>
-
-                    <h3 className="font-serif text-xl font-bold text-[#30251F]">
-                      {currentGarment.name}
-                    </h3>
-
-                    {/* Scientific Scope Limitation */}
-                    <div className="bg-[#9F1D26]/5 border-l-2 border-[#9F1D26] p-3 text-xs text-[#79171E] leading-relaxed">
-                      <p className="font-semibold mb-0.5">Giới hạn khoa học:</p>
-                      <p>
-                        Đây là mô tả của MỘT hiện vật cụ thể do Bảo tàng Lịch sử Quốc gia tiếp nhận, không khái quát hóa cho mọi áo ngũ thân. Không tự thêm cổ đứng, chiều dài tay, biểu tượng màu sắc hay ý nghĩa không có trong nguồn.
-                      </p>
-                    </div>
-
-                    {/* Exact Facts from Museum Article */}
-                    <div className="bg-[#F7F0E4] p-3.5 rounded-xs border border-[#DECFB9] space-y-2 text-xs">
-                      <div className="font-semibold text-[#30251F] flex items-center gap-1.5">
-                        <BookOpen className="w-3.5 h-3.5 text-[#9F1D26]" />
-                        <span>Dữ kiện nguồn từ bài viết Bảo tàng:</span>
-                      </div>
-                      <ul className="space-y-1.5 text-[#30251F]/85 pl-1">
-                        <li>• <strong>Người may & chất liệu:</strong> {CULTURAL_ARTIFACT_MUSEUM.sourceFacts.craft} {CULTURAL_ARTIFACT_MUSEUM.sourceFacts.material}</li>
-                        <li>• <strong>Cấu tạo hai lớp:</strong> {CULTURAL_ARTIFACT_MUSEUM.sourceFacts.layers}</li>
-                        <li>• <strong>Hệ thống cúc:</strong> {CULTURAL_ARTIFACT_MUSEUM.sourceFacts.buttons}</li>
-                        <li>• <strong>Ống tay:</strong> {CULTURAL_ARTIFACT_MUSEUM.sourceFacts.sleeves}</li>
-                        <li>• <strong>Hoa văn:</strong> {CULTURAL_ARTIFACT_MUSEUM.sourceFacts.patterns}</li>
-                        <li>• <strong>Phong thái:</strong> {CULTURAL_ARTIFACT_MUSEUM.sourceFacts.bearing}</li>
-                      </ul>
-                    </div>
-
-                    <div className="pt-1 flex items-center justify-between text-xs">
-                      <a
-                        href={CULTURAL_ARTIFACT_MUSEUM.sourceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[#486657] hover:underline font-semibold"
-                      >
-                        <span>Xem nguồn: Bài viết Bảo tàng Lịch sử Quốc gia</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Vector diagram preview */}
-                <div className="md:col-span-5">
-                  <GarmentDiagram selectedColor={currentColor} styleMode={currentStyle.name} />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-2">
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(1)}
-                  className="min-h-[44px] flex items-center gap-1.5 px-4 py-2 border border-[#DECFB9] text-[#30251F] text-xs font-semibold rounded-xs hover:bg-[#FFFBF4]"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Quay lại bước 1</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(3)}
-                  className="min-h-[44px] flex items-center gap-2 px-6 py-2.5 bg-[#9F1D26] hover:bg-[#79171E] text-white text-xs font-semibold rounded-xs shadow transition-all"
-                >
-                  <span>Sang bước 3: Sắc áo & Phụ kiện</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </section>
-          )}
-
-          {/* STEP 3: CHỌN SẮC ÁO, PHỤ KIỆN & PHONG CÁCH (C1 + C2 Redesigned Workbench) */}
-          {currentStep === 3 && (
-            <Step3Workbench
-              selection={selection}
-              onUpdateSelection={setSelection}
-              onPrevStep={() => setCurrentStep(2)}
-              onNextStep={() => setCurrentStep(4)}
-              onSaveOutfit={handleSaveOutfit}
-            />
-          )}
-
-          {/* STEP 4: GỢI Ý TỪ GEMINI */}
-          {currentStep === 4 && (
-            <section className="space-y-6">
-              <div className="border-b border-[#DECFB9] pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <span className="text-xs font-mono uppercase tracking-widest text-[#9F1D26] font-semibold">
-                    Bước 4 / 6
-                  </span>
-                  <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#30251F] mt-1">
-                    Stylist Gemini gợi ý bộ phối
-                  </h2>
-                  <p className="text-xs text-[#30251F]/70 mt-1">
-                    Hệ thống AI đề xuất 2 phương án thời trang dựa trên danh mục kiểm duyệt nghiêm ngặt.
-                  </p>
-                </div>
-
-                {/* Primary Call Button */}
-                <button
-                  type="button"
-                  disabled={step4Status === 'loading'}
-                  onClick={handleAskStylist}
-                  className="min-h-[44px] flex items-center justify-center gap-2 px-6 py-2.5 bg-[#9F1D26] hover:bg-[#79171E] disabled:bg-[#9F1D26]/50 text-white text-xs font-semibold rounded-xs shadow transition-colors shrink-0"
-                >
-                  {step4Status === 'loading' ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Đang gọi Gemini stylist...</span>
-                    </>
-                  ) : step4Status === 'success' ? (
-                    <>
-                      <Sparkles className="w-4 h-4" />
-                      <span>Gọi lại Gemini gợi ý</span>
-                    </>
-                  ) : step4Status === 'fallback' || step4Status === 'error' ? (
-                    <>
-                      <Sparkles className="w-4 h-4" />
-                      <span>Thử gọi lại Gemini</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4" />
-                      <span>Nhờ Gemini gợi ý 2 bộ phối</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Status Notification Banner (Explicit state machine: idle | loading | success | fallback | error) */}
-              {step4Status === 'idle' && (
-                <div className="p-4 bg-[#FFFBF4] border border-[#DECFB9] text-[#30251F] rounded-sm text-xs flex items-start gap-3 shadow-xs">
-                  <Info className="w-4 h-4 text-[#B18C52] shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-semibold block text-[#30251F]">
-                      Mẫu tham khảo ban đầu — chưa gọi Gemini
-                    </span>
-                    <p className="text-[#30251F]/80 text-[11px] mt-0.5 leading-relaxed">
-                      Bấm nút <strong>&ldquo;Nhờ Gemini gợi ý 2 bộ phối&rdquo;</strong> ở trên để máy chủ gọi mô hình AI phân tích cấu hình hiện tại của bạn. Hai thẻ bên dưới hiện là mẫu tham khảo ban đầu từ bộ sưu tập tư liệu.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {step4Status === 'loading' && (
-                <div className="p-4 bg-[#FFFBF4] border-2 border-[#9F1D26]/30 text-[#30251F] rounded-sm text-xs flex items-start gap-3 shadow-xs">
-                  <RefreshCw className="w-4 h-4 text-[#9F1D26] animate-spin shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-semibold block text-[#9F1D26]">
-                      Đang xử lý: Đang kết nối và phân tích gợi ý từ Gemini...
-                    </span>
-                    <p className="text-[#30251F]/80 text-[11px] mt-0.5 leading-relaxed">
-                      Yêu cầu đang được gửi tới mô hình AI trên máy chủ để đối chiếu danh mục allowlist. Vui lòng đợi trong giây lát, chưa có kết quả phản hồi.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {step4Status === 'success' && (
-                <div className="p-4 bg-[#FFFBF4] border-2 border-[#486657] text-[#30251F] rounded-sm text-xs flex items-center justify-between shadow-xs">
-                  <div className="flex items-center gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-[#486657]" />
-                    <span>
-                      Gợi ý trực tiếp từ: <strong className="font-mono text-[#486657]">Gemini Stylist</strong> ({actualModelUsed || 'gemini-3.8-flash'}, đối chiếu danh mục chuẩn).
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-[#486657] font-mono uppercase tracking-wider font-semibold">
-                    2 đề xuất AI
-                  </span>
-                </div>
-              )}
-
-              {step4Status === 'fallback' && (
-                <div className="p-4 bg-[#FFFBF4] border-2 border-[#B18C52] text-[#30251F] rounded-sm text-xs space-y-1.5 shadow-xs">
-                  <div className="flex items-center gap-2 font-semibold text-[#79171E]">
-                    <AlertTriangle className="w-4 h-4 text-[#9F1D26]" />
-                    <span>Mẫu tĩnh dự phòng — Gemini chưa phản hồi</span>
-                  </div>
-                  <p className="text-[#30251F]/80 text-[11px] leading-relaxed">
-                    <strong>Thông báo hệ thống:</strong> {suggestError || 'Mô hình AI hiện đang bận hoặc quá thời gian chờ.'}
-                  </p>
-                  <p className="text-[#30251F]/70 text-[11px]">
-                    Hệ thống bảo đảm tính minh bạch, không ngụy tạo kết quả AI. Bạn có thể chọn mẫu tĩnh dự phòng bên dưới hoặc tiếp tục tự phối thủ công ở bước 3.
-                  </p>
-                </div>
-              )}
-
-              {step4Status === 'error' && (
-                <div className="p-4 bg-[#FFFBF4] border-2 border-[#9F1D26] text-[#30251F] rounded-sm text-xs space-y-1.5 shadow-xs">
-                  <div className="flex items-center gap-2 font-semibold text-[#9F1D26]">
-                    <AlertTriangle className="w-4 h-4 text-[#9F1D26]" />
-                    <span>Lỗi kết nối máy chủ</span>
-                  </div>
-                  <p className="text-[#30251F]/80 text-[11px] leading-relaxed">
-                    <strong>Chi tiết:</strong> {suggestError || 'Không thể kết nối đến máy chủ.'}
-                  </p>
-                  <p className="text-[#30251F]/70 text-[11px]">
-                    Hệ thống chuyển sang hiển thị mẫu tĩnh dự phòng để đảm bảo trải nghiệm không bị gián đoạn.
-                  </p>
-                </div>
-              )}
-
-              {/* Technical Details Disclosure (Tucked cleanly away from the main experience) */}
-              <details className="text-xs text-[#30251F]/75 bg-[#FFFBF4] border border-[#DECFB9] p-3 rounded-xs group">
-                <summary className="cursor-pointer font-medium hover:text-[#9F1D26] flex items-center justify-between list-none">
-                  <span className="flex items-center gap-1.5">
-                    <Info className="w-3.5 h-3.5 text-[#B18C52]" />
-                    <span>Chi tiết kỹ thuật (Trạng thái & máy chủ)</span>
-                  </span>
-                  <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
-                </summary>
-                <div className="mt-2.5 pt-2.5 border-t border-[#DECFB9] space-y-1 text-[11px] text-[#30251F]/80 font-mono">
-                  <p>• Trạng thái UI: <code>{step4Status}</code></p>
-                  <p>• Mã trạng thái dịch vụ: <code>{step4StatusCode ?? (step4Status === 'loading' ? 'Đang gửi request' : 'Chưa gửi')}</code></p>
-                  {step4ErrorCode && <p>• Mã lỗi hệ thống: <code>{step4ErrorCode}</code></p>}
-                  <p>• Mô hình chính: <code>gemini-3.8-flash</code> (thinkingLevel: LOW, timeout 12s)</p>
-                  <p>• Mô hình dự phòng: <code>gemini-3.7-flash</code> (kích hoạt khi 429/503/timeout)</p>
-                  <p>• Mô hình phản hồi thực tế: <code>{actualModelUsed || (step4Status === 'loading' ? 'Đang gọi...' : 'Chưa có')}</code></p>
-                  <p>• Nguồn dữ liệu: <code>{suggestSource || (step4Status === 'idle' ? 'Mẫu tham khảo khởi tạo' : step4Status === 'loading' ? 'Đang truy vấn...' : 'curated_fallback')}</code></p>
-                  <p>• Ràng buộc: Khóa reason/badge theo chuẩn tư liệu bảo tàng, chống ảo giác.</p>
-                </div>
-              </details>
-
-              {/* 2 Suggested Outfits Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {suggestions.map((rec) => {
-                  const recColor = ALLOWLIST_COLORS.find((c) => c.id === rec.colorId);
-                  const recAccessory = ALLOWLIST_ACCESSORIES.find((a) => a.id === rec.accessoryId);
-                  const recStyle = ALLOWLIST_STYLES.find((s) => s.id === rec.styleId);
-                  const isSelected =
-                    selection.colorId === rec.colorId &&
-                    selection.accessoryIds.includes(rec.accessoryId) &&
-                    selection.styleId === rec.styleId;
-
-                  const sourceBadge =
-                    step4Status === 'idle'
-                      ? 'Mẫu tham khảo — chưa gọi Gemini'
-                      : step4Status === 'loading'
-                      ? 'Mẫu tham khảo — chưa phải kết quả request'
-                      : step4Status === 'success'
-                      ? `Gemini • ${actualModelUsed || 'gemini-3.8-flash'}`
-                      : step4Status === 'error'
-                      ? 'Mẫu tĩnh dự phòng (Lỗi kết nối)'
-                      : 'Mẫu tĩnh dự phòng — Gemini chưa phản hồi';
-
-                  const badgeColorClass =
-                    step4Status === 'idle'
-                      ? 'text-[#30251F]/60'
-                      : step4Status === 'loading'
-                      ? 'text-[#B18C52]'
-                      : step4Status === 'success'
-                      ? 'text-[#486657]'
-                      : step4Status === 'error'
-                      ? 'text-[#9F1D26]'
-                      : 'text-[#B18C52]';
-
-                  return (
-                    <div
-                      key={rec.id}
-                      className={`bg-[#FFFBF4] border-2 p-5 rounded-sm flex flex-col justify-between transition-all ${
-                        isSelected
-                          ? 'border-[#9F1D26] shadow-md ring-1 ring-[#9F1D26]'
-                          : 'border-[#DECFB9] hover:border-[#9F1D26]/30'
-                      }`}
-                    >
-                      <div className="space-y-3">
-                        {/* Prominent source status label on card */}
-                        <div className="flex flex-col gap-1 border-b border-[#DECFB9] pb-2">
-                          <span className={`text-[10px] font-mono uppercase tracking-wider font-semibold ${badgeColorClass}`}>
-                            {sourceBadge}
-                          </span>
-                          <div className="flex items-center justify-between">
-                            <span className="text-[11px] font-mono text-[#9F1D26] font-bold">
-                              {rec.highlightTag}
-                            </span>
-                            {isSelected && (
-                              <span className="text-[11px] text-[#486657] font-semibold flex items-center gap-1">
-                                <Check className="w-3 h-3" />
-                                Đang áp dụng
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <h3 className="font-serif text-lg font-bold text-[#30251F]">
-                          {rec.title}
-                        </h3>
-
-                        <div className="space-y-1.5 text-xs text-[#30251F]/85 bg-[#F7F0E4] p-3 rounded-xs border border-[#DECFB9]">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="w-3.5 h-3.5 rounded-full border border-black/20 shrink-0"
-                              style={{ backgroundColor: recColor?.hex }}
-                            />
-                            <span><strong>Màu áo:</strong> {recColor?.name}</span>
-                          </div>
-                          <p><strong>Phong cách:</strong> {recStyle?.name}</p>
-                          <p><strong>Phụ kiện:</strong> {recAccessory?.name}</p>
-                        </div>
-
-                        <p className="text-xs text-[#30251F]/75 italic leading-relaxed">
-                          &ldquo;{rec.reason}&rdquo;
-                        </p>
-                      </div>
-
-                      <div className="pt-4 mt-3 border-t border-[#DECFB9] flex items-center justify-between">
-                        <button
-                          type="button"
-                          onClick={() => handleApplySuggestion(rec)}
-                          className={`w-full min-h-[44px] py-2 px-3 text-xs font-semibold rounded-xs transition-colors flex items-center justify-center gap-1.5 ${
-                            isSelected
-                              ? 'bg-[#486657] text-white'
-                              : 'bg-[#9F1D26] hover:bg-[#79171E] text-white'
-                          }`}
-                        >
-                          {isSelected ? (
-                            <>
-                              <Check className="w-3.5 h-3.5" />
-                              <span>Đã chọn bộ phối này</span>
-                            </>
-                          ) : (
-                            <span>Chọn áp dụng bộ phối này</span>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Manual Edit summary banner */}
-              <div className="bg-[#FFFBF4] border border-[#DECFB9] p-4 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
-                <div>
-                  <h4 className="font-serif font-bold text-xs uppercase tracking-wider text-[#30251F]">
-                    Bộ phối hiện hành của bạn:
-                  </h4>
-                  <p className="text-xs text-[#30251F]/80 mt-0.5">
-                    Áo {currentColor.name} · {currentStyle.name} · {currentAccessories.map((a) => a.name).join(', ') || 'Không phụ kiện'}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(3)}
-                  className="min-h-[44px] flex items-center text-xs font-semibold text-[#9F1D26] hover:underline shrink-0"
-                >
-                  Tùy chỉnh thủ công tại bước 3 →
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between pt-2">
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(3)}
-                  className="min-h-[44px] flex items-center gap-1.5 px-4 py-2 border border-[#DECFB9] text-[#30251F] text-xs font-semibold rounded-xs hover:bg-[#FFFBF4]"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Quay lại</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(5)}
-                  className="min-h-[44px] flex items-center gap-2 px-6 py-2.5 bg-[#9F1D26] hover:bg-[#79171E] text-white text-xs font-semibold rounded-xs shadow transition-all"
-                >
-                  <span>Sang bước 5: Tạo minh họa AI</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </section>
-          )}
-
-          {/* STEP 5: TẠO HÌNH ẢNH AI MINH HỌA */}
-          {currentStep === 5 && (
-            <section className="space-y-6">
-              <div className="border-b border-[#DECFB9] pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <span className="text-xs font-mono uppercase tracking-widest text-[#9F1D26] font-semibold">
-                    Bước 5 / 6
-                  </span>
-                  <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#30251F] mt-1">
-                    Minh họa hình ảnh concept
-                  </h2>
-                  <p className="text-xs text-[#30251F]/70 mt-1">
-                    Mô hình hình ảnh AI Studio (<span className="font-mono text-[#486657]">gemini-3.1-flash-image</span>).
-                  </p>
-                </div>
-
-                {/* Primary Image Generate Button */}
-                <button
-                  type="button"
-                  disabled={isGeneratingImage}
-                  onClick={handleGenerateAiImage}
-                  className="min-h-[44px] flex items-center justify-center gap-2 px-6 py-2.5 bg-[#9F1D26] hover:bg-[#79171E] disabled:bg-[#9F1D26]/50 text-white text-xs font-semibold rounded-xs shadow transition-colors shrink-0"
-                >
-                  {isGeneratingImage ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Mô hình đang sinh ảnh...</span>
-                    </>
-                  ) : (
-                    <>
-                      <ImageIcon className="w-4 h-4" />
-                      <span>{originalAiImage ? 'Tạo lại minh họa AI mới' : 'Bấm tạo minh họa AI'}</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Error or quota warning */}
-              {imageError && (
-                <div className="p-4 bg-[#FFFBF4] border border-[#B18C52] text-[#30251F] rounded-sm text-xs space-y-2 shadow-xs">
-                  <div className="flex items-center gap-2 font-semibold text-[#79171E]">
-                    <AlertTriangle className="w-4 h-4 text-[#9F1D26]" />
-                    <span>Thông báo tạo ảnh AI: {imageError}</span>
-                  </div>
-                  <p className="text-[#30251F]/80 text-[11px] leading-relaxed">
-                    Hệ thống không tự động thử lại để tránh phát sinh chi phí. Bạn vẫn có thể tiếp tục phối màu, phụ kiện và lưu cấu hình bộ phối bình thường.
-                  </p>
-                  {(imageStatusCode || imageErrorCode) && (
-                    <details className="text-[11px] text-[#30251F]/70 pt-1 group">
-                      <summary className="cursor-pointer font-medium hover:text-[#9F1D26] list-none flex items-center gap-1">
-                        <Info className="w-3 h-3 text-[#B18C52]" />
-                        <span>Xem chi tiết mã phản hồi</span>
-                      </summary>
-                      <div className="mt-1.5 p-2 bg-white/60 border border-[#DECFB9]/60 rounded-xs font-mono text-[10px] space-y-0.5">
-                        {imageStatusCode && <p>• HTTP Status: <code>{imageStatusCode}</code></p>}
-                        {imageErrorCode && <p>• Mã lỗi hệ thống: <code>{imageErrorCode}</code></p>}
-                        <p>• Mô hình cấu hình: <code>gemini-3.1-flash-image</code></p>
-                        <p>• Trạng thái: Giữ nguyên sơ đồ minh họa và thông số phối đồ</p>
-                      </div>
-                    </details>
-                  )}
-                </div>
-              )}
-
-              {/* Main Visual Display */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                <div className="md:col-span-7">
-                  {originalAiImage ? (
-                    <ImageComparison
-                      originalImage={originalAiImage}
-                      recoloredImage={recoloredAiImage}
-                      selectedColor={currentColor}
-                      isRecoloring={isRecoloring}
-                      recolorError={recolorError}
-                      onRecolor={handleRecolorImage}
-                      onResetRecolor={() => setRecoloredAiImage(null)}
-                    />
-                  ) : (
-                    <div className="space-y-3">
-                      <GarmentDiagram selectedColor={currentColor} styleMode={currentStyle.name} />
-                      <div className="text-center">
-                        <button
-                          type="button"
-                          disabled={isGeneratingImage}
-                          onClick={handleGenerateAiImage}
-                          className="w-full min-h-[44px] py-2.5 px-4 bg-[#9F1D26] hover:bg-[#79171E] disabled:bg-[#9F1D26]/40 text-white text-xs font-semibold rounded-xs shadow transition-colors flex items-center justify-center gap-2"
-                        >
-                          {isGeneratingImage ? (
-                            <>
-                              <RefreshCw className="w-4 h-4 animate-spin" />
-                              <span>Đang gọi mô hình tạo ảnh...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Sparkles className="w-4 h-4" />
-                              <span>Bấm &ldquo;Tạo minh họa bằng AI&rdquo; để xem ảnh mẫu</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Sidebar with Configuration Specs */}
-                <div className="md:col-span-5 space-y-4">
-                  <div className="bg-[#FFFBF4] border border-[#DECFB9] p-4 sm:p-5 rounded-sm space-y-3 shadow-xs">
-                    <div className="flex items-center gap-1.5 text-xs text-[#486657] font-mono uppercase tracking-wider font-semibold">
-                      <Layers className="w-3.5 h-3.5" />
-                      <span>Thông số bộ phối hiện tại</span>
-                    </div>
-
-                    <h3 className="font-serif text-lg font-bold text-[#30251F]">
-                      {currentGarment.name}
-                    </h3>
-
-                    <div className="space-y-2 text-xs border-t border-[#DECFB9] pt-2 text-[#30251F]/85">
-                      <div>
-                        <span className="font-semibold block text-[#30251F]">Màu sắc áo:</span>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span
-                            className="w-3.5 h-3.5 rounded-full border border-black/20"
-                            style={{ backgroundColor: currentColor.hex }}
-                          />
-                          <span>{currentColor.name}</span>
-                        </div>
-                      </div>
-                      <div>
-                        <span className="font-semibold block text-[#30251F]">Phong cách:</span>
-                        <p className="text-[#30251F]/70">{currentStyle.name}</p>
-                      </div>
-                      <div>
-                        <span className="font-semibold block text-[#30251F]">Phụ kiện:</span>
-                        <p className="text-[#30251F]/70">
-                          {currentAccessories.map((a) => a.name).join(', ') || 'Không thêm phụ kiện'}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Disclaimers & Ethics */}
-                    <div className="pt-2 border-t border-[#DECFB9] text-[11px] text-[#30251F]/70 space-y-1.5 leading-relaxed">
-                      <p className="font-medium text-[#9F1D26]">
-                        Quy chuẩn công nghệ:
-                      </p>
-                      <p>
-                        • Ảnh concept được tạo từ mô tả văn bản; không sử dụng ảnh hiện vật bảo tàng hay ảnh cá nhân.
-                      </p>
-                      <p>
-                        • Ảnh minh họa AI không phải hiện vật sa kép, không khẳng định hoa văn hay chất liệu trong ảnh là tư liệu bảo tàng.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Quick Save button right in Step 5 */}
-                  <button
-                    type="button"
-                    onClick={handleSaveOutfit}
-                    className={`w-full min-h-[44px] py-2.5 px-4 text-xs font-semibold rounded-xs border transition-colors flex items-center justify-center gap-2 ${
-                      hasSavedCurrent
-                        ? 'bg-[#486657] text-white border-[#486657]'
-                        : 'bg-[#FFFBF4] hover:bg-[#F7F0E4] text-[#30251F] border-[#DECFB9]'
-                    }`}
-                  >
-                    {hasSavedCurrent ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        <span>Đã lưu vào bộ nhớ trình duyệt</span>
-                      </>
-                    ) : (
-                      <>
-                        <Bookmark className="w-4 h-4 text-[#9F1D26]" />
-                        <span>Lưu bộ phối này</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-2">
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(4)}
-                  className="min-h-[44px] flex items-center gap-1.5 px-4 py-2 border border-[#DECFB9] text-[#30251F] text-xs font-semibold rounded-xs hover:bg-[#FFFBF4]"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Quay lại bước 4</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(6)}
-                  className="min-h-[44px] flex items-center gap-2 px-6 py-2.5 bg-[#9F1D26] hover:bg-[#79171E] text-white text-xs font-semibold rounded-xs shadow transition-all"
-                >
-                  <span>Sang bước 6: Thẻ văn hóa & Lưu</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </section>
-          )}
-
-          {/* STEP 6: THẺ TƯ LIỆU VĂN HÓA & HOÀN TẤT */}
-          {currentStep === 6 && (
-            <section className="space-y-6">
-              <div className="border-b border-[#DECFB9] pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                  <span className="text-xs font-mono uppercase tracking-widest text-[#9F1D26] font-semibold">
-                    Bước 6 / 6
-                  </span>
-                  <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#30251F] mt-1">
-                    Thẻ tư liệu văn hóa & Hoàn tất
-                  </h2>
-                  <p className="text-xs text-[#30251F]/70 mt-1">
-                    Tôn vinh nguồn sử liệu chính thức duy nhất, lưu cấu hình trình duyệt và xuất phiếu phối đồ cho ngày hội.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleSaveOutfit}
-                    className={`min-h-[44px] px-5 py-2 text-xs font-semibold rounded-xs border transition-colors flex items-center gap-1.5 ${
-                      hasSavedCurrent
-                        ? 'bg-[#486657] text-white border-[#486657]'
-                        : 'bg-[#9F1D26] hover:bg-[#79171E] text-white border-transparent shadow'
-                    }`}
-                  >
-                    {hasSavedCurrent ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        <span>Đã lưu bộ phối</span>
-                      </>
-                    ) : (
-                      <>
-                        <Bookmark className="w-4 h-4" />
-                        <span>Lưu bộ phối vào máy</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* Cultural Card with Museum Link */}
-              <CulturalCard />
-
-              {/* Final Outfit Summary Slip */}
-              <div className="bg-[#FFFBF4] border border-[#DECFB9] p-5 rounded-sm space-y-4 shadow-xs">
-                <div className="flex items-center justify-between border-b border-[#DECFB9] pb-2">
-                  <div className="text-xs font-mono uppercase tracking-wider text-[#30251F] font-semibold">
-                    Phiếu tóm tắt bộ phối sinh viên
-                  </div>
-                  <span className="text-[11px] font-mono text-[#486657] font-semibold">
-                    Ngày hội văn hóa học đường
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                  <div>
-                    <span className="text-[#30251F]/60 block mb-0.5">Trang phục:</span>
-                    <span className="font-serif font-bold text-sm text-[#30251F]">{currentGarment.name}</span>
-                  </div>
-                  <div>
-                    <span className="text-[#30251F]/60 block mb-0.5">Sắc áo:</span>
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className="w-3.5 h-3.5 rounded-full border border-black/20"
-                        style={{ backgroundColor: currentColor.hex }}
-                      />
-                      <span className="font-medium text-[#30251F]">{currentColor.name}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-[#30251F]/60 block mb-0.5">Phụ kiện & Phong cách:</span>
-                    <span className="text-[#30251F] font-medium">
-                      {currentAccessories.map((a) => a.name).join(', ') || 'Không phụ kiện'} ({currentStyle.name})
-                    </span>
-                  </div>
-                </div>
-
-                <div className="bg-[#F7F0E4] p-3 text-xs text-[#30251F]/80 rounded-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 border border-[#DECFB9]">
-                  <div className="space-y-0.5">
-                    <span className="font-semibold text-[#30251F]">Lưu ý phiên lưu trữ:</span>
-                    <p className="text-[11px] text-[#30251F]/70">
-                      Cấu hình lưu lâu dài trên trình duyệt của bạn qua localStorage. Ảnh AI chỉ lưu trong phiên hiện tại trừ khi bạn đã tải xuống.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const text = `[Việt phục Remix - Ngày hội văn hóa]\nÁo: Ngũ thân nam tay chẽn (${currentColor.name})\nPhong cách: ${currentStyle.name}\nPhụ kiện: ${currentAccessories.map((a) => a.name).join(', ')}`;
-                      navigator.clipboard.writeText(text);
-                      alert('Đã sao chép tóm tắt bộ phối vào bộ nhớ tạm để chia sẻ với bạn bè!');
-                    }}
-                    className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-1.5 text-xs bg-[#FFFBF4] border border-[#DECFB9] text-[#30251F] rounded-xs hover:border-[#9F1D26] shrink-0 font-medium"
-                  >
-                    <Share2 className="w-3.5 h-3.5 text-[#9F1D26]" />
-                    <span>Sao chép tóm tắt</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-2">
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(5)}
-                  className="min-h-[44px] flex items-center gap-1.5 px-4 py-2 border border-[#DECFB9] text-[#30251F] text-xs font-semibold rounded-xs hover:bg-[#FFFBF4]"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Quay lại ảnh minh họa</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCurrentStep(1);
-                    setActiveView('landing');
-                  }}
-                  className="min-h-[44px] flex items-center gap-1.5 px-4 py-2 bg-[#9F1D26] text-white text-xs font-semibold rounded-xs hover:bg-[#79171E] shadow transition-colors"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Về trang mở đầu</span>
-                </button>
-              </div>
-            </section>
-          )}
-        </main>
-      )}
-
-      {/* Editorial Magazine Footer */}
-      <footer className="mt-auto border-t border-[#DECFB9] bg-[#F7F0E4] py-8 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#30251F]/70">
-          <div>
-            <span className="font-serif font-bold text-[#30251F]">Việt phục Remix</span> · Ứng dụng gợi ý phối trang phục học đường trên nền tảng tư liệu bảo tàng.
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <a
-              href={CULTURAL_ARTIFACT_MUSEUM.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-[#9F1D26] hover:underline font-medium"
-            >
-              Hồ sơ Bảo tàng Lịch sử Quốc gia
-            </a>
-            <span>·</span>
-            <span>Nguồn tham khảo: Bài viết hiện vật Bảo tàng Lịch sử Quốc gia tiếp nhận</span>
-          </div>
+  return <div className="min-h-screen bg-[#F7F0E4] text-[#30251F] flex flex-col font-sans">
+    {activeView === 'landing' ? <EditorialLanding selection={selection} onUpdateSelection={setSelection}
+      onGoToStep={navigate} onOpenSavedDrawer={() => setIsDrawerOpen(true)} savedCount={savedOutfits.length}/> : <>
+      <header className="sticky top-0 z-40 bg-[#F7F0E4]/95 backdrop-blur-md border-b border-[#DECFB9]">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+          <button type="button" onClick={() => setActiveView('landing')} className="flex items-center gap-2.5 text-left min-h-11" aria-label="Về trang mở đầu Việt phục Remix">
+            <BraidedFlowerLogo className="w-8 h-8 shrink-0"/><div><span className="font-serif-display font-bold text-lg block leading-tight">Việt phục Remix</span><span className="hidden sm:block text-xs text-[#59473A]">Phối áo ngũ thân cho ngày hội ở trường</span></div>
+          </button>
+          <nav className="flex items-center gap-3 sm:gap-6 text-sm" aria-label="Điều hướng sản phẩm">
+            <button type="button" onClick={() => navigate(3)} className="min-h-11 text-[#8E101A] font-semibold">Phối đồ</button>
+            <button type="button" onClick={() => navigate(2)} className="min-h-11 hidden sm:block">Tư liệu</button>
+            <button type="button" onClick={() => setIsDrawerOpen(true)} className="min-h-11 flex items-center gap-1"><Bookmark size={16}/><span>Đã lưu ({savedOutfits.length})</span></button>
+          </nav>
         </div>
-      </footer>
-
-      {/* Saved Outfits Drawer Modal */}
-      <SavedOutfitsDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        savedOutfits={savedOutfits}
-        onLoadOutfit={handleLoadSavedOutfit}
-        onDeleteOutfit={handleDeleteSavedOutfit}
-      />
-    </div>
-  );
+        <nav className="max-w-[1440px] mx-auto px-4 sm:px-6 flex items-center gap-4 pb-2 text-sm" aria-label="Luồng tạo bộ phối">
+          <button type="button" onClick={() => navigate(3)} aria-current={currentStep === 3 ? 'step' : undefined} className={`min-h-11 px-4 rounded-sm ${currentStep === 3 ? 'bg-[#8E101A] text-white' : ''}`}>1. Xưởng phối</button>
+          <ChevronRight size={14}/>
+          <button type="button" onClick={() => navigate(6)} aria-current={currentStep === 6 ? 'step' : undefined} className={`min-h-11 px-4 rounded-sm ${currentStep === 6 ? 'bg-[#8E101A] text-white' : ''}`}>2. Lookbook</button>
+          <span role="status" className="ml-auto hidden sm:block text-xs text-[#486657]">{hasSavedCurrent ? 'Đã lưu' : isDirty ? 'Chưa lưu thay đổi' : 'Chưa lưu'}</span>
+        </nav>
+      </header>
+      <main className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 py-6 flex-1 space-y-5">
+        {storageError && <div role="alert" className="p-4 bg-[#FFFBF4] border border-[#9F1D26] text-sm text-[#9F1D26]">{storageError}</div>}
+        {currentStep === 2 ? <section className="max-w-4xl mx-auto space-y-4"><button type="button" onClick={() => navigate(3)} className="min-h-11 underline">Trở về xưởng phối</button><CulturalCard/></section> : currentStep === 6 ? <>
+          <LookbookCard selection={selection} onEdit={() => navigate(3)} onSave={() => handleSaveOutfit()} saved={hasSavedCurrent} dirty={isDirty}/>
+          {isDirty && <button type="button" onClick={() => handleSaveOutfit(true)} className="min-h-11 px-4 border border-[#DECFB9] rounded-sm text-sm">Lưu thành bộ phối mới</button>}
+        </> : <Step3Workbench selection={selection} onUpdateSelection={setSelection} onPrevStep={() => navigate(2)}
+          onNextStep={() => navigate(6)} onSaveOutfit={() => handleSaveOutfit()} saveLabel={saveLabel} saved={hasSavedCurrent} dirty={isDirty}
+          onSaveAsNew={() => handleSaveOutfit(true)} aiTools={<AiTools selection={selection} status={step4Status} suggestions={suggestions}
+            source={suggestSource} model={actualModelUsed} error={suggestError} errorCode={step4ErrorCode}
+            onAsk={handleAskStylist} onApply={handleApplySuggestion} image={aiImage} imageBusy={isGeneratingImage}
+            imageError={imageError} imageErrorCode={imageErrorCode} onGenerate={handleGenerateAiImage}/>}/>
+        }
+      </main>
+    </>}
+    <footer className="mt-auto border-t border-[#DECFB9] py-6 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto text-sm text-[#59473A] space-y-3">
+        <p className="font-serif font-bold text-[#30251F]">Việt phục Remix · Xưởng phối cho ngày hội ở trường</p>
+        <div className="flex flex-wrap gap-4"><a href={CULTURAL_ARTIFACT_MUSEUM.sourceUrl} target="_blank" rel="noreferrer" className="underline text-[#486657]">Tư liệu bảo tàng</a><a href="https://github.com/Kiendo321/Viet-Y/issues" target="_blank" rel="noreferrer" className="underline">Góp ý sản phẩm</a></div>
+        <details><summary className="cursor-pointer min-h-11">Về bản thử nghiệm & dữ liệu của bạn</summary><div className="space-y-2 max-w-3xl"><p>MVP dành cho học sinh, sinh viên khám phá áo ngũ thân nam trên mẫu dựng sẵn. Hiện hỗ trợ một dịp: ngày hội Việt phục ở trường, sáu sắc áo và các nhóm phụ kiện.</p><p>Bộ phối được lưu trên trình duyệt này. Nếu xóa dữ liệu trình duyệt, bản lưu cũng mất. Khi bấm gọi Gemini, lựa chọn và ghi chú được gửi tới dịch vụ AI của Google; ứng dụng chưa sử dụng ảnh cá nhân.</p><p>Ảnh phối là asset minh họa AI đã chuẩn bị. Ảnh Gemini tạo theo yêu cầu chỉ giữ trong phiên; tải ảnh trước khi đóng trang. Thông tin văn hóa dẫn về tư liệu bảo tàng; các màu remix và phụ kiện là đề xuất sáng tạo.</p></div></details>
+      </div>
+    </footer>
+    <SavedOutfitsDrawer isOpen={isDrawerOpen} onClose={closeDrawer} savedOutfits={savedOutfits}
+      onLoadOutfit={handleLoadSavedOutfit} onDeleteOutfit={handleDeleteSavedOutfit}/>
+  </div>;
 }

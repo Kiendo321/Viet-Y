@@ -33,7 +33,12 @@ interface Step3WorkbenchProps {
   onUpdateSelection: (updater: (prev: OutfitSelection) => OutfitSelection) => void;
   onPrevStep: () => void;
   onNextStep: () => void;
-  onSaveOutfit?: () => void;
+  onSaveOutfit?: () => boolean;
+  onSaveAsNew?: () => boolean;
+  saveLabel?: string;
+  saved?: boolean;
+  dirty?: boolean;
+  aiTools?: React.ReactNode;
 }
 
 // Short display names for the 6 allowlist colors
@@ -57,6 +62,11 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
   onPrevStep,
   onNextStep,
   onSaveOutfit,
+  onSaveAsNew,
+  saveLabel = 'Lưu bản phối',
+  saved = false,
+  dirty = false,
+  aiTools,
 }) => {
   // Detail rail toggle (default open on wide screens)
   const [isDetailRailOpen, setIsDetailRailOpen] = useState<boolean>(() =>
@@ -74,6 +84,7 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
 
   // Save feedback toast
   const [saveToast, setSaveToast] = useState<string | null>(null);
+  useEffect(() => { setSaveToast(null); }, [selection]);
 
   // Focus management & Escape key handling for Zoom modal
   useEffect(() => {
@@ -193,9 +204,7 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
 
   // Save outfit trigger
   const handleSaveCurrent = () => {
-    if (onSaveOutfit) {
-      onSaveOutfit();
-    }
+    if (!onSaveOutfit?.()) return;
     setSaveToast('Đã lưu cấu hình bản phối vào bộ sưu tập!');
     setTimeout(() => setSaveToast(null), 3000);
   };
@@ -226,15 +235,18 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
           .styling-workbench .workbench-details { border-top: 0; border-left: 1px solid #decfb9; padding-top: 0; padding-left: 16px; }
         }
         @media (max-width: 1023px) {
-          .styling-workbench .workbench-preview { grid-row: 1; }
-          .styling-workbench .workbench-figure { max-width: 185px; }
+          .styling-workbench .workbench-preview { display: block; }
+          .styling-workbench .workbench-preview > .workbench-paper { display: none; }
+          .styling-workbench .workbench-mobile-preview { display: flex; position: sticky; top: 120px; z-index: 20; }
+          .styling-workbench .workbench-inspector { font-size: 14px; }
         }
+        @media (min-width: 1024px) { .styling-workbench .workbench-mobile-preview { display: none; } }
       `}</style>
       {/* Step 3 Header */}
       <div className="border-b border-[#DECFB9] pb-3 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
         <div>
           <span className="text-xs font-mono uppercase tracking-widest text-[#9F1D26] font-semibold block">
-            Bước 3 / 6 · Xưởng phối đồ Việt phục
+            Xưởng phối đồ Việt phục
           </span>
           <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#30251F] mt-0.5">
             Sắc áo, phụ kiện & phong cách
@@ -248,6 +260,19 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
           <span className="text-[11px] font-mono px-2 py-0.5 rounded-xs bg-[#486657]/10 text-[#486657] font-semibold border border-[#486657]/20">
             Ảnh phối mẫu
           </span>
+        </div>
+      </div>
+
+      <div className="workbench-mobile-preview bg-[#F7EEDD] border border-[#DECFB9] rounded-sm p-3 gap-4 items-center shadow-sm">
+        <OutfitFigure selection={selection} className="h-[158px] w-[76px] shrink-0"/>
+        <div className="flex-1 min-w-0 space-y-2">
+          <p className="font-serif font-bold text-lg">Ngũ thân · {COLOR_SHORT_NAMES[currentColor.id]}</p>
+          <p className="text-xs text-[#59473A]">Mẫu dựng sẵn · Minh họa AI</p>
+          <p role="status" className="text-xs text-[#486657]">{saved ? 'Đã lưu' : dirty ? 'Chưa lưu thay đổi' : 'Chọn màu và phụ kiện bên dưới'}</p>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={event => { zoomTriggerRef.current = event.currentTarget; setIsZoomOpen(true); }} className="min-h-11 border border-[#DECFB9] rounded-sm px-3 text-sm">Xem ảnh lớn</button>
+            <button type="button" onClick={onNextStep} className="min-h-11 bg-[#8E101A] text-white rounded-sm px-3 text-sm">Hoàn tất</button>
+          </div>
         </div>
       </div>
 
@@ -323,7 +348,10 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
                     type="button"
                     aria-pressed={isSelected}
                     aria-label={st.name}
-                    onClick={() => onUpdateSelection((prev) => ({ ...prev, styleId: st.id }))}
+                    onClick={() => onUpdateSelection((prev) => ({ ...prev, styleId: st.id,
+                      colorId: st.id === 'style-tham-chieu-tu-lieu' ? ALLOWLIST_COLORS[0].id : prev.colorId === ALLOWLIST_COLORS[0].id ? 'color-muc-cham-co' : prev.colorId,
+                      accessoryIds: st.id === 'style-tham-chieu-tu-lieu' ? ['acc-khan-dong-den', 'acc-quan-trang-ong-rong'] : ['acc-quan-au-toi-mau', 'acc-giay-oxford-derby'],
+                    }))}
                     className={`py-2 px-2 text-center rounded-2xs transition-all text-xs ${
                       isSelected
                         ? 'bg-[#9F1D26] text-white font-semibold shadow-xs'
@@ -338,6 +366,7 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
                 );
               })}
             </div>
+            <p className="text-xs text-[#59473A]">Chọn một bộ mẫu khởi đầu; bạn có thể sửa từng màu và phụ kiện sau đó. Phụ kiện là gợi ý phối, không phải dữ kiện hiện vật.</p>
           </div>
 
           {/* 3. SIX Round Fabric Swatches with Short Names */}
@@ -384,7 +413,9 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
                     aria-pressed={isSelected}
                     aria-label={col.name}
                     title={col.name}
-                    onClick={() => onUpdateSelection((prev) => ({ ...prev, colorId: col.id }))}
+                    onClick={() => onUpdateSelection((prev) => ({ ...prev, colorId: col.id,
+                      styleId: col.isSourceFact ? prev.styleId : 'style-remix-duong-dai',
+                    }))}
                     className="min-h-[56px] flex flex-col items-center gap-1.5 group rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9F1D26]"
                   >
                     <div
@@ -595,12 +626,13 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
 
           {/* 6. Navigation Buttons */}
           <div className="pt-3 border-t border-[#DECFB9] flex flex-col gap-2">
+            {dirty && <button type="button" onClick={() => onSaveAsNew?.()} className="min-h-11 px-4 border border-[#DECFB9] rounded-sm text-sm">Lưu thành bộ phối mới</button>}
             <button
               type="button"
               onClick={onNextStep}
               className="w-full min-h-[44px] flex items-center justify-center gap-2 px-5 py-2.5 bg-[#9F1D26] hover:bg-[#79171E] text-white text-xs font-semibold rounded-xs shadow transition-all"
             >
-              <span>Sang bước 4: Gợi ý từ Gemini</span>
+              <span>Hoàn tất & xem lookbook</span>
               <ChevronRight className="w-4 h-4" />
             </button>
             <button
@@ -609,7 +641,7 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
               className="w-full min-h-[38px] flex items-center justify-center gap-1.5 px-3 py-1.5 border border-[#DECFB9] text-[#30251F] text-xs font-semibold rounded-xs hover:bg-white/80 transition-all"
             >
               <ChevronLeft className="w-4 h-4" />
-              <span>Quay lại bước 2: Hiện vật nguồn</span>
+              <span>Đọc tư liệu trang phục</span>
             </button>
           </div>
         </aside>
@@ -653,7 +685,7 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
                 <button
                   ref={zoomTriggerRef}
                   type="button"
-                  onClick={() => setIsZoomOpen(true)}
+                  onClick={event => { zoomTriggerRef.current = event.currentTarget; setIsZoomOpen(true); }}
                   className="min-h-[44px] px-2.5 py-1 text-xs border border-[#DECFB9] bg-white/80 hover:bg-white text-[#30251F] font-medium rounded-xs flex items-center gap-1.5 shadow-2xs transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#9F1D26]"
                   title="Phóng to ảnh phối mẫu"
                 >
@@ -692,11 +724,12 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
                 <button
                   type="button"
                   onClick={handleSaveCurrent}
+                  disabled={saved}
                   className="min-h-[44px] px-3 py-1 text-xs bg-[#8E101A] hover:bg-[#700C14] text-white font-semibold rounded-xs flex items-center gap-1.5 shadow-2xs transition-all focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-[#8E101A]"
                   title="Lưu bản phối này vào danh sách"
                 >
                   <Bookmark className="w-3.5 h-3.5" />
-                  <span>Lưu bản phối</span>
+                  <span>{saveLabel}</span>
                 </button>
               </div>
             </div>
@@ -846,6 +879,7 @@ export const Step3Workbench: React.FC<Step3WorkbenchProps> = ({
               </div>
             </div>
           </div>
+          {aiTools}
 
           {/* Source Accordion: Tư liệu & phối hiện đại */}
           <div className="bg-[#FFFBF4] border border-[#DECFB9] rounded-sm p-4 text-xs space-y-2">

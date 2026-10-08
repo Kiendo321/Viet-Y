@@ -27,6 +27,15 @@
   font-family: var(--font-serif-display);
 }
 
+.saved-outfits-dialog button { min-height: 44px; }
+.saved-outfits-dialog p, .saved-outfits-dialog h4 { font-size: 14px; }
+.styling-workbench .workbench-inspector span.text-\[9px\],
+.styling-workbench .workbench-inspector span.text-\[10px\] { font-size: 12px; }
+button:focus-visible, a:focus-visible, summary:focus-visible {
+  outline: 2px solid #8E101A;
+  outline-offset: 3px;
+}
+
 /* Subtle paper texture */
 .paper-texture {
   background-color: #F7EEDD;

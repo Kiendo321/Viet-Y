@@ -185,6 +185,7 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
       originalFetch = globalThis.fetch;
       originalImage = window.Image;
       failPhotoLoads = false;
+      localStorage.clear();
       requestedPhotos.length = 0;
       window.Image = class {
         onload: (() => void) | null = null;
@@ -221,31 +222,10 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
     });
 
     async function navigateToStep(stepNum: number) {
-      // Navigate from landing into flow
-      const exploreButtons = screen.getAllByRole('button', { name: /Phối đồ|Vào phòng phối/i });
-      if (exploreButtons.length > 0) {
-        fireEvent.click(exploreButtons[0]);
-      }
-      // Click target step button
-      const stepLabels: Record<number, RegExp> = {
-        1: /1\.\s*Dịp mặc/i,
-        2: /2\.\s*Hiện vật nguồn/i,
-        3: /3\.\s*Sắc áo & Phụ kiện/i,
-        4: /4\.\s*Gợi ý Gemini/i,
-        5: /5\.\s*Minh họa AI/i,
-        6: /6\.\s*Phiếu tóm tắt/i,
-      };
-      const stepButton = await screen.findByRole('button', { name: stepLabels[stepNum] });
-      fireEvent.click(stepButton);
-      await waitFor(() => {
-        if (stepNum === 3) {
-          assert.ok(screen.getByText(/Sắc áo, phụ kiện & phong cách/i));
-        } else if (stepNum === 4) {
-          assert.ok(screen.getByText(/Stylist Gemini gợi ý bộ phối/i));
-        } else if (stepNum === 5) {
-          assert.ok(screen.getByText(/Minh họa hình ảnh concept/i));
-        }
-      });
+      fireEvent.click(screen.getByRole('button', { name: /^Phối ngay$/i }));
+      if (stepNum === 4) fireEvent.click(screen.getByText('Gợi ý Gemini · tùy chọn'));
+      if (stepNum === 5) fireEvent.click(screen.getByText('Tạo minh họa Gemini · tùy chọn'));
+      await waitFor(() => assert.ok(screen.getByText(/Sắc áo, phụ kiện & phong cách/i)));
     }
 
     test('Loading không hiện lỗi/fallback, thẻ minh họa ghi rõ là mẫu tham khảo chưa phải kết quả request', async () => {
@@ -284,7 +264,7 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
 
       // WHILE LOADING:
       // 1. Banner must explicitly say it is processing
-      const loadingBanner = screen.getByText(/Đang xử lý: Đang kết nối và phân tích gợi ý từ Gemini.../i);
+      const loadingBanner = screen.getByText(/Đang kết nối Gemini/i);
       assert.ok(loadingBanner);
 
       // 2. Banner must NOT contain error, fallback, or timeout warnings
@@ -298,7 +278,7 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
       assert.ok(sampleBadges.length >= 2, 'Cả hai thẻ phải gắn nhãn mẫu tham khảo đang xử lý');
 
       // 4. Button must display loading spinner text and be disabled
-      assert.ok(screen.getByText(/Đang gọi Gemini stylist.../i));
+      assert.ok(screen.getByText(/Đang gọi Gemini stylist/i));
       assert.equal(askButton.hasAttribute('disabled'), true);
 
       // Clean up pending fetch
@@ -390,16 +370,16 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
 
       // Wait for UI to update to fallback
       await waitFor(() => {
-        assert.ok(screen.getAllByText(/Mẫu tĩnh dự phòng — Gemini chưa phản hồi/i).length > 0);
+        assert.ok(screen.getByText(/AI chưa sẵn sàng/i));
       });
 
       // Verify honest status and absence of fake model claims
       const bodyText = document.body.textContent || '';
       assert.match(bodyText, /503 High Demand/);
-      assert.match(bodyText, /Hệ thống bảo đảm tính minh bạch, không ngụy tạo kết quả AI/);
+      assert.doesNotMatch(bodyText, /Đã nhận gợi ý trực tiếp từ Gemini/);
 
       // Verify card badges
-      const fallbackBadges = screen.getAllByText(/Mẫu tĩnh dự phòng — Gemini chưa phản hồi/i);
+      const fallbackBadges = screen.getAllByText(/Mẫu phối có sẵn · Ảnh asset/i);
       assert.ok(fallbackBadges.length >= 2);
     });
 
@@ -426,15 +406,15 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
       await navigateToStep(5);
 
       // Verify Step 5 is loaded
-      assert.ok(screen.getByText(/Minh họa hình ảnh concept/i));
+      assert.ok(screen.getByText(/Tạo minh họa Gemini · tùy chọn/i));
 
       // Click generate image
-      const generateButton = screen.getByRole('button', { name: /Bấm tạo minh họa AI/i });
+      const generateButton = screen.getByRole('button', { name: /^Tạo minh họa AI$/i });
       fireEvent.click(generateButton);
 
       // Wait for 429 error response handling
       await waitFor(() => {
-        assert.ok(screen.getByText(/Thông báo tạo ảnh AI:/i));
+        assert.ok(screen.getByText(/Chưa tạo được ảnh AI/i));
       });
 
       // 1. Không có thẻ ảnh AI nào được sinh ra (giữ sơ đồ cấu tạo)
@@ -442,13 +422,14 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
       assert.equal(aiImages.length, 0, 'Tuyệt đối không được hiển thị ảnh AI giả mạo khi 429');
 
       // 2. Sơ đồ cấu tạo và cấu hình trang phục được bảo toàn nguyên vẹn
-      assert.ok(screen.getByText(/Sơ đồ cấu trúc tham chiếu/i));
-      assert.ok(screen.getByText(/Thông số bộ phối hiện tại/i));
+      assert.ok(document.querySelector('[data-photo-view="full"] image[data-part="robe"]'));
+      assert.ok(screen.getByText(/Sắc áo, phụ kiện & phong cách/i));
       assert.ok(screen.getByText(/Áo dài ngũ thân sa kép nam — Hiện vật tham chiếu/i));
 
       // 3. Nút quay lại bước 4 và sang bước 6 hoạt động bình thường
-      assert.ok(screen.getByRole('button', { name: /Quay lại bước 4/i }));
-      assert.ok(screen.getByRole('button', { name: /Sang bước 6: Thẻ văn hóa & Lưu/i }));
+      assert.ok(screen.getByRole('button', { name: /Hoàn tất & xem lookbook/i }));
+      fireEvent.click(screen.getByRole('button', { name: /Hoàn tất & xem lookbook/i }));
+      assert.ok(screen.getByRole('button', { name: /Tải thẻ lookbook PNG/i }));
     });
 
     test('Đổi asset 6 màu: giữ avatar, khăn đen, quần; không gọi Gemini API', async () => {
@@ -478,7 +459,7 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
       render(React.createElement(App));
       await navigateToStep(3);
       fireEvent.click(screen.getByRole('button', { name: /Đỏ son trầm/i }));
-      const robeImages = Array.from(document.querySelectorAll('[data-photo-view] image[data-part="robe"]'));
+      const robeImages = Array.from(document.querySelectorAll('.workbench-stage [data-photo-view] image[data-part="robe"]'));
       assert.ok(robeImages.length >= 4);
       assert.ok(robeImages.every(image => image.getAttribute('href')?.endsWith('coat-red.webp')));
       await waitFor(() => assert.equal(document.querySelector('[data-photo-view="full"]')?.getAttribute('aria-busy'), 'false'));
@@ -496,7 +477,7 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
       assert.ok(document.querySelector('[data-photo-view="full"] image[data-part="trousers"]')?.getAttribute('href')?.endsWith('pants-dark.webp'));
       assert.ok(document.querySelector('[data-photo-view="full"] image[data-part="shoes"]')?.getAttribute('href')?.endsWith('shoes-clogs.webp'));
       fireEvent.click(screen.getByRole('button', { name: /Không thêm phụ kiện/i }));
-      assert.equal(document.querySelector('[data-photo-view="full"] image[data-part="headwear"]'), null);
+      assert.equal(document.querySelector('[data-photo-view="full"]')?.querySelector('image[data-part="headwear"]'), null);
       assert.ok(document.querySelector('[data-photo-view="full"] image[data-part="trousers"]')?.getAttribute('href')?.endsWith('pants-white.webp'));
     });
 
@@ -555,11 +536,11 @@ describe('P0 Quality Assurance Suite (Production Code & Real App Testing)', () =
       assert.equal(noteInput.value, 'Ghi chú văn hóa sinh viên 2026');
 
       // 4. Bấm sang bước 4: Ghi chú vẫn sống sót sang bước tiếp theo
-      const nextStepBtn = screen.getByRole('button', { name: /Sang bước 4: Gợi ý từ Gemini/i });
+      const nextStepBtn = screen.getByRole('button', { name: /Hoàn tất & xem lookbook/i });
       fireEvent.click(nextStepBtn);
 
       await waitFor(() => {
-        assert.ok(screen.getByText(/Stylist Gemini gợi ý bộ phối/i));
+        assert.ok(screen.getByText(/Ghi chú văn hóa sinh viên 2026/i));
       });
     });
   });
