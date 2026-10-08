@@ -1,11 +1,13 @@
 {
-  "checkedAt": "2026-10-08T03:41:53.378Z",
+  "checkedAt": "2026-10-08T17:34:48.945Z",
   "url": "https://viet-y-171206540455.asia-southeast1.run.app",
   "checks": [
     {
       "name": "public health",
       "status": "pass",
-      "hasApiKey": true
+      "hasApiKey": true,
+      "provider": "vertex_ai",
+      "configured": true
     },
     {
       "name": "homepage and SPA",

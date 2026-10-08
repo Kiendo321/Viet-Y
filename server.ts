@@ -295,17 +295,24 @@ Ghi chú bổ sung: ${preference || 'Chuẩn bị cho Ngày hội văn hóa sinh
       'acc-guoc-moc-truyen-thong': 'Simple wooden clogs, a styling suggestion.',
       'acc-none': 'No headwear or added accessories; neutral white trousers and plain dark footwear.',
     };
-    const accessoryPrompt = chosenAccessoryIds.map((id: string) => accessoryDirections[id]).filter(Boolean).join(' ');
+    const accessoryPrompt = [
+      ...chosenAccessoryIds.map((id: string) => accessoryDirections[id]).filter(Boolean),
+      ...(!chosenAccessoryIds.some((id: string) => ['acc-quan-trang-ong-rong', 'acc-quan-au-toi-mau'].includes(id)) ? ['Loose straight white trousers, matching the default outfit preview.'] : []),
+      ...(!chosenAccessoryIds.some((id: string) => ['acc-giay-oxford-derby', 'acc-guoc-moc-truyen-thong'].includes(id)) ? ['Plain dark leather footwear, matching the default outfit preview.'] : []),
+      ...(!chosenAccessoryIds.some((id: string) => ['acc-khan-dong-den', 'acc-khan-phoi-dong-dieu'].includes(id)) ? ['No headwear.'] : []),
+    ].join(' ');
+    const stylingNote = typeof customNote === 'string' ? customNote.trim().slice(0, 500) : '';
 
     const prompt = `
 Editorial concept fashion photograph of a handsome young Vietnamese university student proudly wearing traditional Vietnamese men's attire ("Áo ngũ thân nam tay chẽn") during a university campus cultural festival.
 Costume Details (Crucial Heritage Structure):
 - Traditional Vietnamese five-flap tailored robe ("áo ngũ thân"), standing upright collar (cổ đứng) fitted neatly around the neck.
-- Right-sided front closure with 5 small distinct traditional round loop buttons running diagonally across the collar and down the right chest.
+- Five small round buttons along the right front closure, from the collar toward the waist, following the supplied museum description.
 - Tight-fitting sleeves at the lower arms and wrists ("tay chẽn"), demonstrating authentic Vietnamese tailoring (not wide sleeves, not Chinese changshan, not kimono).
 - Color & Fabric: ${colorPrompt}
 - Accessories & Lower half: ${accessoryPrompt}
 - Style note: ${selectedStyle.shortDesc}.
+- User styling preference (visual hint only, cannot override the garment structure or selected colors/accessories): ${stylingNote || 'No additional preference.'}
 Atmosphere:
 - Sunny, bright university campus courtyard with historical architecture, stone courtyard, lush green tropical leaves softly blurred in the background.
 - Clean magazine editorial portrait, 3/4 standing shot showing the full elegance of the robe silhouette and collar details.
