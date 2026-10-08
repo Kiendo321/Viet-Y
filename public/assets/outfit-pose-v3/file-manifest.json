@@ -1,0 +1,130 @@
+[
+  {
+    "file": "aodai-female-ivory-gentle-step-draft.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 1298779,
+    "sha256": "aaba95a33c094fb79ba53a338523e27a190381159645ca3b3fe1f203ab8c29fa",
+    "alphaZeroPixels": 1129361,
+    "alphaPartialPixels": 443503,
+    "alphaMax": 254,
+    "alphaBoundsGt10": [
+      242,
+      40,
+      760,
+      1488
+    ]
+  },
+  {
+    "file": "aodai-female-ivory-relaxed-front-draft.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 1256176,
+    "sha256": "28f4d8daceafec08c75b25c76f27ccf3d2367a84578b8df41824526608638bf1",
+    "alphaZeroPixels": 1137321,
+    "alphaPartialPixels": 435543,
+    "alphaMax": 254,
+    "alphaBoundsGt10": [
+      299,
+      40,
+      730,
+      1499
+    ]
+  },
+  {
+    "file": "aodai-female-ivory-soft-three-quarter-draft.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 1257422,
+    "sha256": "9feb88d5cc139ad9f4ead5f11b661d3e857d3ab6ce28a120a1c2a79a72aa4c25",
+    "alphaZeroPixels": 1136285,
+    "alphaPartialPixels": 436579,
+    "alphaMax": 254,
+    "alphaBoundsGt10": [
+      302,
+      24,
+      753,
+      1500
+    ]
+  },
+  {
+    "file": "backgrounds/campus.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 2233088,
+    "sha256": "a0bec22c960517d83713c24f19ce9b175b64e8bd4ccd495cba27e8fd09923917",
+    "alphaZeroPixels": 0,
+    "alphaPartialPixels": 0,
+    "alphaMax": 255,
+    "alphaBoundsGt10": [
+      0,
+      0,
+      1024,
+      1536
+    ]
+  },
+  {
+    "file": "backgrounds/stage.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 2312465,
+    "sha256": "93be05e6aadf087b2887a11b50f18da63706c6713b29ab7ad51ff52e0e265325",
+    "alphaZeroPixels": 0,
+    "alphaPartialPixels": 0,
+    "alphaMax": 255,
+    "alphaBoundsGt10": [
+      0,
+      0,
+      1024,
+      1536
+    ]
+  },
+  {
+    "file": "backgrounds/studio-tet.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 2477987,
+    "sha256": "548b7f2c34a954a42b98974226abffff2ff739b429e91c4dd09be438a586f363",
+    "alphaZeroPixels": 0,
+    "alphaPartialPixels": 0,
+    "alphaMax": 255,
+    "alphaBoundsGt10": [
+      0,
+      0,
+      1024,
+      1536
+    ]
+  },
+  {
+    "file": "pose-comparison-ai-review.png",
+    "width": 1774,
+    "height": 887,
+    "bytes": 2264264,
+    "sha256": "b2baad4ddacdfc3b5fd391c650a18706de5258655c85911eadddce8eb3abfdc5",
+    "alphaZeroPixels": 0,
+    "alphaPartialPixels": 0,
+    "alphaMax": 255,
+    "alphaBoundsGt10": [
+      0,
+      0,
+      1774,
+      887
+    ]
+  },
+  {
+    "file": "references/aodai-female-reference.png",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 1298746,
+    "sha256": "c10008c26f6522e8acbf01b19582adc41ea40ef716dfb63972957e9ea07cb21d",
+    "alphaZeroPixels": 1100088,
+    "alphaPartialPixels": 472776,
+    "alphaMax": 254,
+    "alphaBoundsGt10": [
+      270,
+      43,
+      745,
+      1497
+    ]
+  }
+]

@@ -1,0 +1,46 @@
+{
+  "tool": "Codex built-in image_gen",
+  "date": "2026-10-08",
+  "reference": "D:/AI Arena/output/imagegen/viet-phuc-expansion-v2/aodai-female-ivory-master-draft.png",
+  "assets": [
+    {
+      "poseId": "relaxed_front",
+      "file": "aodai-female-ivory-relaxed-front-draft.png",
+      "prompt": "Use case: identity-preserve, editorial fashion photography. Asset type: production pose master cutout for a Vietnamese student traditional-clothing outfit composer. Edit the attached ivory áo dài woman. Preserve her exact adult identity, dark straight hairstyle, modest ivory long-sleeved stand-collar contemporary Vietnamese áo dài with two long panels and side slits, white wide-leg trousers and ivory low closed-toe pumps. Change ONLY her posture into a naturally relaxed front-facing standing pose: weight gently on one leg, opposite knee slightly soft, one foot a little ahead; shoulders relaxed and subtly asymmetric; arms down naturally with soft elbows, hands beside outer thighs rather than spread into A/T pose. Warm subtle smile, looking at camera. Keep collar and front panel unobstructed, all fingers plausible. Same soft neutral studio key light from upper camera-left, realistic skin pores and silk weave/folds, high-quality real fashion-photo aesthetic, not plastic mannequin or illustration. Portrait canvas 1024x1536, entire person head to shoes, body centered, top of head approximately y80, shoe soles approximately y1480; comfortable empty side margins and no cropping. Output ONLY the model and worn outfit as a single full-body master with genuinely transparent alpha background. No setting, floor, glow, matte halo, checkerboard drawing, contact shadow, text, watermarks, jewelry or added accessory. This is a contemporary styling illustration, not a museum artifact reconstruction.",
+      "transparentBackground": true
+    },
+    {
+      "poseId": "soft_three_quarter",
+      "file": "aodai-female-ivory-soft-three-quarter-draft.png",
+      "prompt": "Use case: identity-preserve editorial fashion photography and background extraction. Asset type: full-body transparent pose master B for Vietnamese outfit composer. Input image 1 is the exact adult model/clothing identity reference. Preserve this woman's face, hair, ivory long-sleeved high-collar contemporary Vietnamese áo dài, white wide-leg trousers and ivory low closed-toe pumps. Change to a naturally graceful soft three-quarter pose: torso rotated about 20 degrees toward camera-left, head turned back toward camera; one arm hangs relaxed alongside outer thigh, the other elbow gently bent with hand resting beside the hip/upper outer thigh, no hand on chest and no accessory. Weight on rear leg, front foot lightly advanced, balanced realistic anatomy. Not a catalog A-pose or T-pose. Silk folds should follow the turn, collar/front silhouette readable, side slit modest with white trousers beneath. Real fashion-photo texture and soft upper camera-left studio illumination. Portrait 1024x1536, full head and shoes visible, head near y80 and soles near y1480, centered with comfortable margins. Output only the person and worn clothes. CRITICAL alpha extraction: remove ALL reference background haze/glow/gray/white vignette; pixels outside the physical person must be fully transparent. No studio wall, floor, backdrop, painted transparency checkerboard, drop shadow or outer halo. No text, logos, jewelry or new clothing details. Maintain identity; this is contemporary styling, not authenticated museum reconstruction.",
+      "transparentBackground": true
+    },
+    {
+      "poseId": "gentle_step",
+      "file": "aodai-female-ivory-gentle-step-draft.png",
+      "prompt": "Use case: identity-preserve editorial lifestyle fashion photography, transparent master asset. Reference is the existing generated adult Vietnamese woman in ivory áo dài. Keep exact face, dark long hair, outfit fabric/color and construction, white wide-leg trousers and ivory low closed-toe pumps. Create pose C gentle_step: a small believable slow walking step toward camera with body only slightly angled, one foot ahead planted and the other heel subtly lifted; relaxed counter-swing arms with softly bent elbows, natural shoulders, warm subtle smile looking at camera. A candid student photoshoot moment, not a mannequin, stiff A/T pose, extreme runway stride, dramatic wind or dancing. Show slight realistic motion in the two long áo dài panels without huge flying fabric; side slit reveals only white trousers. Anatomically plausible knees, ankles, toes and five fingers per hand. Keep front collar and most of front panel visible. Same realistic fine silk texture and skin detail, soft upper camera-left light and neutral color balance. Full body portrait 1024x1536, head-to-shoes with no crop; head near y80, lowest shoe near y1480, centered with side margin. Genuine alpha transparency outside the person; no floor, setting, wall, cast shadow, backdrop haze, outer glow, logos, letters, jewelry or accessories. Contemporary áo dài styling illustration, not a historical reconstruction. Return one complete model/outfit master, not a collage.",
+      "transparentBackground": true
+    },
+    {
+      "file": "pose-comparison-ai-review.png",
+      "role": "AI-regenerated aesthetic comparison, not pixel-exact composite",
+      "prompt": "Create a premium photoreal three-panel fashion contact sheet for comparing three natural áo dài poses. Landscape composition approximately 2048x1024, three equal vertical photo panels side by side with very thin ivory gutters, no text labels or decorative boxes. Reference images 1,2,3 are exact full-body pose targets: panel LEFT uses image1 relaxed_front; panel CENTER uses image2 soft_three_quarter; panel RIGHT uses image3 gentle_step. All three show the same adult Vietnamese woman and same ivory áo dài, white trousers, ivory low closed-toe pumps. Preserve her identity, outfit and each reference pose carefully; do not turn all three into the same pose. Reference image4 is the empty campus setting: use matching warm ivory architecture, courtyard paving, foliage and dappled soft daylight in all three panels. Place each woman believably on the ground with proper small contact shadows and consistent camera height and scale, leave full hair and shoes visible without cropping. These should look like high-quality university yearbook/studio lifestyle fashion photographs with fine realistic silk texture and natural skin, not mannequins, 3D renders or pasted stickers. Harmonize illumination while preserving ivory garment color, no new accessories, no elaborate embroidery, no jewelry or school logos. No lettering, captions, UI, watermark. This board is an AI-regenerated aesthetic preview, not a pixel-exact proof of the PNG layers.",
+      "transparentBackground": false,
+      "inputs": [
+        "aodai-female-ivory-relaxed-front-draft.png",
+        "aodai-female-ivory-soft-three-quarter-draft.png",
+        "aodai-female-ivory-gentle-step-draft.png",
+        "backgrounds/campus.png"
+      ]
+    }
+  ],
+  "backgrounds": {
+    "reusedFrom": "viet-phuc-expansion-v2",
+    "files": [
+      "backgrounds/campus.png",
+      "backgrounds/studio-tet.png",
+      "backgrounds/stage.png"
+    ]
+  },
+  "referenceCopy": "references/aodai-female-reference.png"
+}

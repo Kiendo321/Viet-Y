@@ -1,0 +1,54 @@
+{
+  "version": 3,
+  "status": "draft_pose_master",
+  "modelId": "female-aodai-reference-v2",
+  "garmentKey": "ao_dai_nu_duong_dai",
+  "canvas": {
+    "width": 1024,
+    "height": 1536
+  },
+  "colorway": "ivory-white-trousers-pumps",
+  "swappableLayers": false,
+  "defaultPoseProposal": "relaxed_front",
+  "poses": [
+    {
+      "poseId": "relaxed_front",
+      "src": "aodai-female-ivory-relaxed-front-draft.png",
+      "layerMode": "complete_outfit_master",
+      "supportedBackgrounds": [
+        "campus",
+        "studio-tet",
+        "stage"
+      ],
+      "independentColorSwapReady": false
+    },
+    {
+      "poseId": "soft_three_quarter",
+      "src": "aodai-female-ivory-soft-three-quarter-draft.png",
+      "layerMode": "complete_outfit_master",
+      "supportedBackgrounds": [
+        "campus",
+        "studio-tet",
+        "stage"
+      ],
+      "independentColorSwapReady": false
+    },
+    {
+      "poseId": "gentle_step",
+      "src": "aodai-female-ivory-gentle-step-draft.png",
+      "layerMode": "complete_outfit_master",
+      "supportedBackgrounds": [
+        "campus",
+        "studio-tet",
+        "stage"
+      ],
+      "independentColorSwapReady": false
+    }
+  ],
+  "review": {
+    "html": "pose-review.html",
+    "aiComparison": "pose-comparison-ai-review.png"
+  },
+  "culturalLabel": "AI illustration of contemporary styling; not an authenticated artifact",
+  "integrationStatus": "not integrated or deployed"
+}
