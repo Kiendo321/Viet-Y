@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-10-08T03:41:53.378Z",
+  "url": "https://viet-y-171206540455.asia-southeast1.run.app",
+  "checks": [
+    {
+      "name": "public health",
+      "status": "pass",
+      "hasApiKey": true
+    },
+    {
+      "name": "homepage and SPA",
+      "status": "pass"
+    },
+    {
+      "name": "frontend bundles",
+      "status": "pass",
+      "count": 2
+    },
+    {
+      "name": "outfit assets",
+      "status": "pass",
+      "count": 18
+    },
+    {
+      "name": "API JSON routing",
+      "status": "pass"
+    }
+  ],
+  "liveGeminiCall": false
+}

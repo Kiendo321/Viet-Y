@@ -1,0 +1,13 @@
+.gcloudignore
+.git
+.gitignore
+node_modules/
+.runtime-smoke-*/
+dist/
+server.js
+.env
+.env.*
+!.env.example
+*.log
+*.zip
+bun.lock

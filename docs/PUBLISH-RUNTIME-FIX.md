@@ -50,3 +50,49 @@ Before republishing, apply these source changes in AI Studio (including scripts/
 then ensure the new deployment actually runs `node server.js` and produces a Ready
 revision. Verify the published URL's /api/health, homepage and assets again.
 Gemini access, model availability and quota require a separate live API check.
+
+## Verified deployment — 2026-10-08
+
+The production application is now deployed and verified:
+https://viet-y-171206540455.asia-southeast1.run.app
+
+- Cloud Run service: viet-y, project c3-app-162, region asia-southeast1.
+- Ready revision: viet-y-runtime-fix-20261008, receiving 100% traffic.
+- Image digest: sha256:5764bc0becd0b91f9103879ee454bc64ae433eaa17427890acce293701d54eb6.
+- Cloud Build: c2a2716f-1b81-4733-844d-15329accb354, SUCCESS.
+- Clean npm install on Linux, lint, 17/17 tests, build and production startup checks passed.
+- Public HTTP checks passed for health, homepage, SPA route, both frontend bundles,
+  JSON API routing and all 18 WebP assets (verified against their original SHA-256).
+- The existing GEMINI_API_KEY environment variable was preserved. Health reports that
+  a key is configured; this does not prove model/quota availability. No live Gemini
+  call was made during deployment verification.
+
+The later Linux checks supersede the local-only limitations described above.
+Evidence: DEPLOYMENT-REVISION.json and DEPLOYMENT-HTTP-CHECK.json.
+
+### Repeatable build and deploy
+
+Use package-lock.json and npm ci; bun.lock is retained from the original AI Studio
+snapshot but is not the lockfile used for this deployment. Do not mix lockfiles.
+The esbuild dependency was upgraded to ^0.28.0 to satisfy Vite 8's peer requirement.
+.gcloudignore and .dockerignore exclude local dependencies, secrets and generated
+output; the Dockerfile builds on Linux and installs only production dependencies
+into the runtime stage. The deployed runtime runs as the unprivileged node user.
+
+```powershell
+gcloud builds submit . --project=c3-app-162 --region=asia-southeast1 --tag=asia-southeast1-docker.pkg.dev/c3-app-162/viet-y/app:YOUR_TAG
+# Obtain the immutable image digest from the successful build, then:
+./scripts/deploy-cloud-run.ps1 -Image 'asia-southeast1-docker.pkg.dev/c3-app-162/viet-y/app@sha256:YOUR_DIGEST'
+node scripts/verify-deployment.mjs 'https://viet-y-171206540455.asia-southeast1.run.app'
+```
+
+The existing AI Studio deployment used prebuilt-source annotations and a matching
+runtimeClassName. Switching to a container image requires clearing those fields
+while preserving service configuration and env values. The helper uses the official
+Cloud Run v1 API and keeps credentials/env values in memory; it never saves or prints
+secrets. Deployment uses the current resourceVersion to avoid overwriting concurrent
+service edits.
+
+Deployment was performed directly on Cloud Run. AI Studio's publish panel can retain
+its old failure status; import/sync the fixed source before publishing from that
+panel again so it does not restore the old startup command.

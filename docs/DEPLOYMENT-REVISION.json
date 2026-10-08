@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "creationTimestamp": "2026-10-08T03:40:41.744114Z",
+    "name": "viet-y-runtime-fix-20261008"
+  },
+  "status": {
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-08T03:40:54.926525Z",
+        "message": "Deploying revision succeeded in 13.18s.",
+        "status": "True",
+        "type": "Ready"
+      },
+      {
+        "lastTransitionTime": "2026-10-08T03:40:55.046035Z",
+        "severity": "Info",
+        "status": "True",
+        "type": "Active"
+      },
+      {
+        "lastTransitionTime": "2026-10-08T03:40:54.855081Z",
+        "message": "Containers became healthy in 2.01s.",
+        "status": "True",
+        "type": "ContainerHealthy"
+      },
+      {
+        "lastTransitionTime": "2026-10-08T03:40:51.155139Z",
+        "message": "Container image import completed in 8.34s.",
+        "status": "True",
+        "type": "ContainerReady"
+      },
+      {
+        "lastTransitionTime": "2026-10-08T03:40:52.637781Z",
+        "message": "Provisioning imported containers completed in 1.48s. Checking container health. This will wait for up to 10s for the configured startup probe, including an initial delay of 0s.",
+        "status": "True",
+        "type": "ResourcesAvailable"
+      }
+    ]
+  }
+}
