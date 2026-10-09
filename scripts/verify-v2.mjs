@@ -7,6 +7,9 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const base=process.argv[2]?.replace(/\/$/,'');
 const staticOnly=process.argv.includes('--static-only');
+const artifactFlag=process.argv.indexOf('--artifact-dist');
+if(artifactFlag!==-1&&!process.argv[artifactFlag+1])throw Error('--artifact-dist requires the extracted build artifact directory');
+const expectedDist=artifactFlag===-1?path.join(root,'dist'):path.resolve(root,process.argv[artifactFlag+1]);
 if(!base||!/^https:\/\/(ux-preview---)?viet-y-ivo7erh2oq-as\.a\.run\.app$/.test(base))throw Error('Expected the known Viet Y Cloud Run service or its preview tag');
 const get=async url=>{const r=await fetch(base+url,{signal:AbortSignal.timeout(30000)});assert.equal(r.status,200,`HTTP ${r.status}: ${url}`);return r;};
 const hash=b=>createHash('sha256').update(b).digest('hex');
@@ -21,9 +24,9 @@ const bundles=[...html.matchAll(/(?:src|href)="(\/assets\/[^"\s]+\.(?:js|css))"/
 assert.ok(bundles.some(url=>url.endsWith('.js'))&&bundles.some(url=>url.endsWith('.css')),'Expected deployed JS and CSS bundles');
 for(const url of bundles){
  const remote=Buffer.from(await (await get(url)).arrayBuffer());
- assert.equal(hash(remote),hash(await readFile(path.join(root,'dist',url.slice(1)))),`Deployed bundle differs from local build: ${url}`);
+ assert.equal(hash(remote),hash(await readFile(path.join(expectedDist,url.slice(1)))),`Deployed bundle differs from build artifact: ${url}`);
 }
-console.log(`PASS: ${bundles.length} deployed frontend bundles match the local build`);
+console.log(`PASS: ${bundles.length} deployed frontend bundles match the ${artifactFlag===-1?'local build':'extracted container build artifact'}`);
 const assets=(await readdir(path.join(root,'public/assets/viet-y-v2'))).filter(n=>n.endsWith('.webp'));
 for(let i=0;i<assets.length;i+=4)await Promise.all(assets.slice(i,i+4).map(async name=>{
  const remote=Buffer.from(await (await get('/assets/viet-y-v2/'+name)).arrayBuffer());

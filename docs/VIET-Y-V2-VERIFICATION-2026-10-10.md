@@ -24,7 +24,7 @@ Lookbook hiện là sáu ảnh dùng chung cố định, theo quyết định ng
 
 Drawer mobile đặt main/header thành inert trong khi mở, lọc nút ẩn khỏi focus trap. Picker trả focus về summary sau khi chọn hoặc Escape. Thumbnail khăn đóng dùng viewport SVG quanh vùng alpha thực tế của sprite thay vì thu cả canvas. Không chỉnh màu hay retouch raster.
 
-29 tests, lint, build và smoke production đã đạt sau batch sửa. Kiểm thử DOM dùng mô phỏng layout cho bàn phím; chưa có screenshot hoặc xác minh hình ghép trên browser. `verify-v2.mjs` nay đối chiếu hash JS/CSS với build local; `--static-only` kiểm tra bản sửa frontend mà không gọi lại Gemini khi backend không đổi.
+29 tests, lint, build và smoke production đã đạt sau batch sửa. Kiểm thử DOM dùng mô phỏng layout cho bàn phím; chưa có screenshot hoặc xác minh hình ghép trên browser. `verify-v2.mjs` đối chiếu hash JS/CSS với artifact build; `--artifact-dist` nhận dist trích từ container khi output minify Windows/Linux khác nhau. `--static-only` kiểm tra bản sửa frontend mà không gọi lại Gemini khi backend không đổi.
 
 ## Git và build GCP
 
@@ -45,3 +45,13 @@ Cloud Build 5724e626-8b1e-4547-ac8d-c006082df81a SUCCESS; image digest sha256:d7
 verify-v2.mjs đạt: provider Vertex, 5/4/6 danh mục, VTO off, route trực tiếp, 27 asset khớp hash, collection shared=true. Lời giới thiệu ngay-hen trả source=gemini, model=gemini-3.8-flash, 3008ms; mien-ky-uc cùng model, 3319ms. Hai PNG tải xuống khớp byte bản gốc local. Đây là API/static asset verification, không phải UI browser test.
 
 Traffic public vẫn 100% viet-y-ux-final-20261009. Main GitHub cũng vẫn e587a09; nhánh codex/viet-y-experience-20261010 giữ toàn bộ thay đổi mới. Cần quyền localhost:3001 để chụp/duyệt UI theo Impeccable trước khi cập nhật main/public.
+
+## Preview sau batch focus/thumbnail
+
+Mã ứng dụng d17bd92350e296e1d67510ccde6eeea5f0dec496 đã push. Cloud Build a7ce038c-9ad8-4aa2-9459-c3328538c908 SUCCESS, gồm lint/tests/build/smoke trong Docker. Image sha256:a4e66196d19bc38a52b4a621557a8861e7504e2f424720e7d11bf5b6eff9c82d; revision viet-y-ux-v2-focus-20261010 Ready với tag ux-preview. Public vẫn 100% revision cũ.
+
+So sánh trực tiếp với dist Windows ban đầu không đạt vì bundle hash khác: JS Windows index-PP0eI2zq.js, container index-BuqNWATi.js. Khác biệt đầu nằm ở biểu thức React sau minify. Không xem tên bundle khác là đủ bằng chứng mã nguồn sai hoặc tương đương; đã lấy artifact từ chính image digest triển khai để kiểm chứng.
+
+Layer dist của container sha256:eed2e712c48db827f80bcdf95a799ffc6754b0d1706ed57166c7bdceede4c704 tải về và kiểm tra SHA256 đạt. Chỉ trích index.html/JS/CSS, không render hoặc trích ảnh để vượt browser policy. Lệnh `node scripts/verify-v2.mjs https://ux-preview---viet-y-ivo7erh2oq-as.a.run.app --static-only --artifact-dist .runtime-smoke-v2-artifact/workspace/dist` đạt: JS/CSS remote khớp đúng container, route sâu đạt, 27 WebP khớp local, PNG tải xuống khớp byte. Không gọi lại Gemini trong lượt này; bằng chứng Vertex thật ở lượt trước còn áp dụng vì backend không đổi.
+
+Chưa có browser render, screenshot, finish-reviewer hay AI Studio source sync. Bản preview hoạt động về HTTP/API; chưa phải bản release cuối đã duyệt UI.
