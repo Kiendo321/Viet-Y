@@ -1,5 +1,11 @@
 # Việt Phục Remix — Gợi Ý Trang Phục Học Đường
 
+## Trạng thái bản hiện tại (2026-10-09)
+
+Luồng chính hiện là **Xưởng phối → Lookbook**. Người dùng tự chọn màu và phụ kiện bằng asset mẫu, lưu/sửa cấu hình và xuất thẻ PNG. Gợi ý Gemini và tạo minh họa Gemini là công cụ tùy chọn ngay trong xưởng phối. Các mô tả sáu bước bên dưới ghi lại phiên bản trước; xem [báo cáo UX hiện tại](docs/UX-IMPROVEMENTS-2026-10-09.md) cho bản đã triển khai.
+
+Preview AI Studio đã được kiểm tra với env Gemini Developer API: gợi ý thật thành công qua `gemini-3.7-flash`; tạo ảnh trả `429 QUOTA_EXCEEDED`. Website Cloud Run dùng Vertex AI và có kết quả kiểm chứng riêng, không suy diễn quota hoặc khả năng của preview từ production. Xem [cấu hình env và kiểm chứng AI Studio](docs/AI-STUDIO-ENV-VERIFICATION-2026-10-09.md) để thiết lập đúng môi trường và đọc các giới hạn còn lại.
+
 Ứng dụng web định hướng thẩm mỹ và cố vấn trang phục truyền thống Việt Nam dành cho học sinh, sinh viên tham gia sự kiện **Ngày hội Việt phục ở trường**, bám sát tư liệu hiện vật bảo tàng và ứng dụng AI Studio làm công cụ hỗ trợ sáng tạo có kiểm duyệt.
 
 ---
