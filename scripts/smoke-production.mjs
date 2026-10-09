@@ -26,7 +26,7 @@ try {
   await new Promise((resolve, reject) => reservation.close(err => err ? reject(err) : resolve()));
   child = spawn(process.execPath, ['server.js'], {
     cwd: stage,
-    env: { ...process.env, PORT: String(port), NODE_ENV: 'development', GEMINI_API_KEY: '' },
+    env: { ...process.env, PORT: String(port), NODE_ENV: 'development', GEMINI_API_KEY: '', GOOGLE_GENAI_USE_VERTEXAI: 'false' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   childDone = once(child, 'exit');
@@ -48,7 +48,7 @@ try {
   assert.equal(health.hasApiKey, false);
   summary.push('PASS: compiled server starts without TypeScript source and honors PORT');
   const html = await readFile(path.join(stage, 'dist', 'index.html'), 'utf8');
-  for (const route of ['/', '/lookbook']) {
+  for (const route of ['/', '/xuong-phoi', '/lookbook', '/lookbook/ngay-hen', '/tu-lieu', '/tu-lieu/trang-phuc/nhat-binh', '/tu-lieu/su-kien/an-hoi']) {
     const response = await fetch(`${base}${route}`);
     assert.equal(response.status, 200);
     assert.match(response.headers.get('content-type'), /text\/html/);
@@ -76,15 +76,34 @@ try {
   const missingApi = await fetch(`${base}/api/not-a-real-route`);
   assert.equal(missingApi.status, 404);
   assert.equal((await missingApi.json()).error, 'API_ENDPOINT_NOT_FOUND');
-  const fallback = await fetch(`${base}/api/stylist/suggest`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
-  });
-  assert.equal(fallback.status, 200);
-  const result = await fallback.json();
-  assert.equal(result.error, 'API_KEY_MISSING');
-  assert.equal(result.source, 'curated_fallback');
-  assert.equal(result.suggestions.length, 2);
-  summary.push('PASS: API routing and missing-key fallback work without Gemini calls');
+  const v2Directory = path.join(stage, 'public', 'assets', 'viet-y-v2');
+  const v2 = (await readdir(v2Directory)).filter(name => name.endsWith('.webp'));
+  assert.equal(v2.length, 27);
+  for (const name of v2) {
+    const response = await fetch(`${base}/assets/viet-y-v2/${name}`);
+    assert.equal(response.status, 200);
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()), await readFile(path.join(v2Directory, name)));
+  }
+  const collection = await (await fetch(`${base}/api/lookbook`)).json();
+  assert.equal(collection.shared, true);
+  assert.equal(collection.looks.length, 6);
+  for (const look of collection.looks) {
+    const story = await (await fetch(`${base}/api/lookbook/${look.id}/story`)).json();
+    assert.equal(story.source, 'editorial');
+    assert.equal(story.text, look.intro);
+    const download = await fetch(`${base}/api/lookbook/${look.id}/download`);
+    assert.equal(download.status, 200);
+    assert.match(download.headers.get('content-disposition'), /attachment/);
+    assert.deepEqual(Buffer.from(await download.arrayBuffer()), await readFile(path.join(stage, 'public', look.image.slice(1).replace(/\.webp$/, '.png'))));
+  }
+  for (const route of ['/api/stylist/suggest', '/api/image/generate', '/api/image/recolor']) {
+    assert.equal((await fetch(`${base}${route}`, {method:'POST'})).status, 410);
+  }
+  assert.equal((await fetch(`${base}/api/lookbook/unknown/story`)).status, 404);
+  const fonts = await fetch(`${base}/fonts/fonts.css`);
+  assert.equal(fonts.status, 200);
+  assert.match(await fonts.text(), /Be Vietnam Pro/);
+  summary.push('PASS: 27 new assets, six shared looks, intact PNG downloads, self-hosted fonts and truthful story fallback');
   console.log(summary.join('\n'));
 } finally {
   if (child && child.exitCode === null) child.kill();

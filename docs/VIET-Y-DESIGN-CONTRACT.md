@@ -8,7 +8,7 @@ Trang giấy trắng, đỏ son dùng có chủ đích, vàng đồng làm nét 
 FIRST VIEWPORT: chữ “Mặc một nét Việt. Kể câu chuyện của bạn.” lớn ở trái, ảnh Nhật Bình trong bối cảnh ăn hỏi ở phải, Việt Y và sidebar nhỏ. Một nút bắt đầu xưởng, một liên kết tìm hiểu dẫn đến tư liệu. Bên dưới là câu chuyện nhu cầu chọn áo đúng dịp, ảnh bốn bối cảnh và lợi ích cụ thể, preview lookbook đi đến bộ sưu tập, góc nhìn người dùng có nhãn minh họa demo.
 
 ## Xưởng — Operate
-FIRST VIEWPORT: tiêu đề gọn, khu lựa chọn 330–400px cạnh khung xem cao theo viewport; khung không chuyển khi lựa chọn cuộn. Bối cảnh đổi cùng sự kiện; người mẫu và từng phụ kiện được nhìn thấy ngay. Các lựa chọn mở trong picker anchored, chọn xong thu lại, không modal cho việc chọn thông thường. Mobile dùng preview trên và nhóm lựa chọn dưới, cả hai nằm trong viewport; sidebar thành drawer điều hướng có focus/escape đúng.
+FIRST VIEWPORT: tiêu đề gọn, khu lựa chọn 265–330px (245–290px trên màn hình hẹp) cạnh khung xem cao theo viewport; khung không chuyển khi lựa chọn cuộn. Bối cảnh đổi cùng sự kiện; người mẫu và từng phụ kiện được nhìn thấy ngay. Các lựa chọn mở trong picker anchored, chọn xong thu lại, không modal cho việc chọn thông thường. Mobile dùng preview trên và nhóm lựa chọn dưới, cả hai nằm trong viewport; sidebar thành drawer điều hướng có focus/escape đúng.
 
 ## Lookbook — Experience
 FIRST VIEWPORT: tiêu đề, lọc theo concept, lưới ảnh có khoảng cách như reference; desktop 3–4 cột, mobile 2. Ảnh có URL riêng, mở trang chi tiết với ảnh lớn và lời giới thiệu theo context; tải chính ảnh đó. Một khung thêm trống dẫn về xưởng, không giả VTO đã hoạt động.
