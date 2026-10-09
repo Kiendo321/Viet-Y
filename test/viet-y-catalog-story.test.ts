@@ -2,7 +2,13 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {GARMENTS,OCCASIONS,LOOKS,ACCESSORIES} from '../src/data/vietYCatalog';
-import {cleanLookStory,lookStoryPrompt,produceLookStory} from '../src/services/lookStory';
+import {cleanLookStory,completeStoryText,lookStoryPrompt,produceLookStory} from '../src/services/lookStory';
+
+test('A truncated model paragraph is rejected even when its text passes the length check',()=>{
+ assert.throws(()=>completeStoryText({text:LOOKS[0].intro,candidates:[{finishReason:'MAX_TOKENS'}]}),/INCOMPLETE_STORY/);
+ assert.throws(()=>completeStoryText({text:LOOKS[0].intro,candidates:[{finishReason:'SAFETY'}]}),/INCOMPLETE_STORY/);
+ assert.equal(completeStoryText({text:LOOKS[0].intro,candidates:[{finishReason:'STOP'}]}),LOOKS[0].intro);
+});
 test('Every exposed variant, event, accessory and look has a real local asset',()=>{
  const urls=[...GARMENTS.flatMap(g=>Object.values(g.variants).flatMap(v=>Object.values(v!))),...OCCASIONS.map(e=>e.image),...LOOKS.map(l=>l.image),...Object.values(ACCESSORIES).flatMap(a=>a.image?[a.image]:[])];
  for(const url of urls)if(url!=='legacy')assert.ok(existsSync('public'+url),url);

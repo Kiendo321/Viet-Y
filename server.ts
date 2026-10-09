@@ -5,7 +5,7 @@ import {fileURLToPath} from 'url';
 import {ThinkingLevel} from '@google/genai';
 import {createGenaiClient,genaiSettings} from './src/services/genaiConfig.js';
 import {LOOKS,GARMENTS,OCCASIONS,lookById} from './src/data/vietYCatalog.js';
-import {produceLookStory,LookStory} from './src/services/lookStory.js';
+import {produceLookStory,completeStoryText,LookStory} from './src/services/lookStory.js';
 
 dotenv.config();
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
@@ -27,12 +27,17 @@ async function storyFor(id:string):Promise<LookStory>{
   try{
    console.log(JSON.stringify({event:'lookbook_story_request',lookId:id,model}));
    const request=client.models.generateContent({model,contents:prompt,config:{
-    temperature:.7,maxOutputTokens:700,thinkingConfig:{thinkingLevel:ThinkingLevel.LOW},abortSignal:controller.signal
+    temperature:.7,maxOutputTokens:2048,thinkingConfig:{thinkingLevel:ThinkingLevel.LOW},abortSignal:controller.signal
    }});
    const response=await Promise.race([request,new Promise<never>((_,reject)=>{
     timeout=setTimeout(()=>{controller.abort();reject(new Error('Story timeout'));},9000);
    })]);
-   return response.text||'';
+   console.log(JSON.stringify({event:'lookbook_model_response',lookId:id,model,finishReason:response.candidates?.[0]?.finishReason,thoughtTokens:response.usageMetadata?.thoughtsTokenCount,outputTokens:response.usageMetadata?.candidatesTokenCount}));
+   return completeStoryText(response);
+  }catch(error){
+   const failure=error as {status?:number;message?:string};
+   console.warn(JSON.stringify({event:'lookbook_model_failure',lookId:id,model,status:typeof failure.status==='number'?failure.status:null,kind:controller.signal.aborted?'TIMEOUT':failure.message==='INCOMPLETE_STORY'?'INCOMPLETE_STORY':'PROVIDER_ERROR'}));
+   throw error;
   }finally{clearTimeout(timeout!);}
  });
  pendingStories.set(id,work);

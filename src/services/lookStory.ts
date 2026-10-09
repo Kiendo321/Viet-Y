@@ -1,5 +1,10 @@
 import {Look,garmentById,eventById,COLORS,ACCESSORIES} from '../data/vietYCatalog.js';
 export interface LookStory {text:string;source:'gemini'|'editorial';model:string|null;reason?:string;}
+export function completeStoryText(response:{text?:string;candidates?:Array<{finishReason?:string}>}):string{
+ // A long but truncated paragraph must not be presented as a successful story.
+ if(response.candidates?.[0]?.finishReason!=='STOP')throw new Error('INCOMPLETE_STORY');
+ return response.text||'';
+}
 export function lookStoryPrompt(look:Look){
  const garment=garmentById(look.selection.garment)!,occasion=eventById(look.selection.event)!;
  return [
