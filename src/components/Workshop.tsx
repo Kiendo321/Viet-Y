@@ -4,9 +4,10 @@ import {GARMENTS,OCCASIONS,COLORS,ACCESSORIES,ComposerSelection,GarmentId,EventI
 import {OutfitScene} from './OutfitScene';
 function Picker({label,value,children}:{label:string;value:string;children:React.ReactNode}){
  const details=React.useRef<HTMLDetailsElement>(null);
- return <details ref={details} className="choice-picker" onBlur={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node))e.currentTarget.open=false;}}>
+ const close=()=>{if(!details.current)return;details.current.open=false;details.current.querySelector<HTMLElement>('summary')?.focus({preventScroll:true});};
+ return <details ref={details} className="choice-picker" onBlur={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node))e.currentTarget.open=false;}} onKeyDown={e=>{if(e.key==='Escape'&&e.currentTarget.open){e.preventDefault();e.stopPropagation();close();}}}>
   <summary><span>{label}</span><strong>{value}</strong><ChevronDown size={18}/></summary>
-  <div className="picker-options" onClick={e=>{if((e.target as HTMLElement).closest('button'))details.current!.open=false;}}>{children}</div>
+  <div className="picker-options" onClick={e=>{if((e.target as HTMLElement).closest('button'))close();}}>{children}</div>
  </details>;
 }
 export function Workshop({selection,onChange}:{selection:ComposerSelection;onChange:(s:ComposerSelection)=>void}){
@@ -30,7 +31,7 @@ export function Workshop({selection,onChange}:{selection:ComposerSelection;onCha
     </div>
     <div className="choice-group"><h2>Thêm điểm nhấn</h2>
      <div className="accessory-options" aria-label="Phụ kiện">{accessoriesFor(selection.garment,selection.person).map(id=><button key={id} className={'accessory-choice '+(id===selection.accessory?'selected':'')} aria-pressed={id===selection.accessory} onClick={()=>update({accessory:id})}>
-      <div>{ACCESSORIES[id].image?<img src={ACCESSORIES[id].image} alt="" loading="lazy"/>:<span className="no-accessory-line"/>}</div><span>{ACCESSORIES[id].name}</span>{id===selection.accessory&&<Check className="accessory-check" size={14}/>}</button>)}</div>
+      <div>{id==='turban'?<svg viewBox="410 20 200 140" aria-hidden="true"><image href={ACCESSORIES[id].image} width="1024" height="1536"/></svg>:ACCESSORIES[id].image?<img src={ACCESSORIES[id].image} alt="" loading="lazy"/>:<span className="no-accessory-line"/>}</div><span>{ACCESSORIES[id].name}</span>{id===selection.accessory&&<Check className="accessory-check" size={14}/>}</button>)}</div>
     </div>
     <p className="selection-feedback" role="status" aria-live="polite">{feedback}</p>
    </div>

@@ -19,7 +19,8 @@ export function AppShell({path,children,workbench}:{path:string;children:React.R
   const key=(e:KeyboardEvent)=>{
    if(e.key==='Escape'){e.preventDefault();setMobileOpen(false);}
    if(e.key==='Tab'){
-    const nodes=Array.from(panel.current?.querySelectorAll<HTMLElement>('a[href],button:not([disabled])')||[]);
+    const nodes=Array.from(panel.current?.querySelectorAll<HTMLElement>('a[href],button:not([disabled])')||[])
+     .filter(node=>node.getClientRects().length>0&&!node.closest('[inert]'));
     const first=nodes[0],last=nodes[nodes.length-1];
     if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}
     else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}
@@ -30,8 +31,8 @@ export function AppShell({path,children,workbench}:{path:string;children:React.R
  },[mobileOpen,isMobile]);
  return <div className={'app-shell '+(collapsed?'nav-collapsed ':'')+(workbench?'is-workbench':'')}>
   <a className="skip-link" href="#main-content">Đến nội dung</a>
-  <div className="mobile-bar"><Link to="/" aria-label="Việt Y · Trang chủ"><Brand/></Link><button ref={menu} className="icon-button" aria-label="Mở điều hướng" aria-expanded={mobileOpen} onClick={()=>setMobileOpen(true)}><Menu size={22}/></button></div>
-  {mobileOpen&&<button className="nav-backdrop" aria-label="Đóng điều hướng" onClick={()=>setMobileOpen(false)}/>}
+  <div className="mobile-bar" inert={isMobile&&mobileOpen} aria-hidden={isMobile&&mobileOpen?true:undefined}><Link to="/" aria-label="Việt Y · Trang chủ"><Brand/></Link><button ref={menu} className="icon-button" aria-label="Mở điều hướng" aria-expanded={mobileOpen} onClick={()=>setMobileOpen(true)}><Menu size={22}/></button></div>
+  {mobileOpen&&<button className="nav-backdrop" tabIndex={-1} aria-hidden="true" onClick={()=>setMobileOpen(false)}/>}
   <aside ref={panel} className={'sidebar '+(mobileOpen?'mobile-open':'')} inert={isMobile&&!mobileOpen} aria-hidden={isMobile&&!mobileOpen?true:undefined} role={isMobile&&mobileOpen?'dialog':undefined} aria-modal={isMobile&&mobileOpen?true:undefined} aria-label="Điều hướng Việt Y">
    <div className="sidebar-brand"><Link to="/" aria-label="Việt Y · Trang chủ" onNavigate={()=>setMobileOpen(false)}><Brand compact={collapsed&&!isMobile}/></Link><button className="icon-button mobile-close" aria-label="Đóng điều hướng" onClick={()=>setMobileOpen(false)}><X size={20}/></button></div>
    <nav aria-label="Các trang">{items.map(({to,label,Icon})=>{
@@ -40,6 +41,6 @@ export function AppShell({path,children,workbench}:{path:string;children:React.R
    })}</nav>
    <div className="sidebar-bottom"><p>Một nét Việt.<br/>Một cách riêng.</p><button className="nav-toggle" onClick={()=>setCollapsed(!collapsed)} aria-label={collapsed?'Mở rộng điều hướng':'Thu gọn điều hướng'} aria-expanded={!collapsed}>{collapsed?<PanelLeftOpen size={19}/>:<PanelLeftClose size={19}/>}<span>Thu gọn</span></button></div>
   </aside>
-  <main id="main-content" className="main-content" tabIndex={-1}>{children}</main>
+  <main id="main-content" className="main-content" tabIndex={-1} inert={isMobile&&mobileOpen} aria-hidden={isMobile&&mobileOpen?true:undefined}>{children}</main>
  </div>;
 }

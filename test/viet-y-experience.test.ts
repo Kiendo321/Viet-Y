@@ -6,14 +6,14 @@ import App from '../src/App';
 import {navigate} from '../src/services/navigation';
 import {GARMENTS,OCCASIONS,LOOKS,normalizeSelection,composerUrl,accessoriesFor} from '../src/data/vietYCatalog';
 import {genaiSettings} from '../src/services/genaiConfig';
-const originalFetch=globalThis.fetch,originalImage=window.Image;
+const originalFetch=globalThis.fetch,originalImage=window.Image,originalWidth=window.innerWidth,originalRects=window.HTMLElement.prototype.getClientRects;
 beforeEach(()=>{
  window.history.replaceState({},'','/');
  window.scrollTo=()=>{};
  globalThis.fetch=async()=>({ok:true,status:200,json:async()=>({text:LOOKS[0].intro,source:'gemini'})}) as Response;
  window.Image=class{onload:(()=>void)|null=null;set src(_:string){queueMicrotask(()=>this.onload?.());}} as any;
 });
-afterEach(()=>{cleanup();globalThis.fetch=originalFetch;window.Image=originalImage;});
+afterEach(()=>{cleanup();globalThis.fetch=originalFetch;window.Image=originalImage;Object.defineProperty(window,'innerWidth',{configurable:true,value:originalWidth});window.HTMLElement.prototype.getClientRects=originalRects;});
 function openWorkshop(){render(React.createElement(App));fireEvent.click(screen.getByRole('link',{name:/^Bắt đầu phối/}));}
 test('Workshop uses prepared assets, updates event and color, and contains no generation/save controls',async()=>{
  const calls:string[]=[];globalThis.fetch=async(input)=>{calls.push(String(input));return {ok:true,json:async()=>({})} as Response;};
@@ -96,6 +96,42 @@ test('Sidebar collapse has explicit state and does not alter the active route',(
  assert.ok(document.querySelector('.app-shell.nav-collapsed'));
  assert.equal(window.location.pathname,'/');
  assert.equal(screen.getByRole('button',{name:'Mở rộng điều hướng'}).getAttribute('aria-expanded'),'false');
+});
+test('Mobile drawer isolates the page, wraps focus past a hidden desktop control, and restores its trigger on Escape',()=>{
+ Object.defineProperty(window,'innerWidth',{configurable:true,value:390});
+ // JSDOM has no layout. Model the mobile breakpoint hiding the desktop collapse button.
+ window.HTMLElement.prototype.getClientRects=function(){return (this.classList.contains('nav-toggle')?[]:[{width:44,height:44}]) as any;};
+ render(React.createElement(App));
+ const trigger=screen.getByRole('button',{name:'Mở điều hướng'});trigger.focus();fireEvent.click(trigger);
+ assert.ok(screen.getByRole('dialog',{name:'Điều hướng Việt Y'}));
+ assert.ok(document.querySelector('main[inert][aria-hidden="true"]'));
+ assert.ok(document.querySelector('.mobile-bar[inert]'));
+ assert.ok(!screen.queryByRole('heading',{name:/Mặc một nét Việt/}));
+ const last=screen.getByRole('link',{name:'Tư liệu'}),first=screen.getByRole('link',{name:'Việt Y · Trang chủ'});
+ last.focus();fireEvent.keyDown(last,{key:'Tab'});assert.ok(document.activeElement===first);
+ fireEvent.keyDown(first,{key:'Tab',shiftKey:true});assert.ok(document.activeElement===last);
+ fireEvent.keyDown(last,{key:'Escape'});assert.ok(document.activeElement===trigger);
+ assert.ok(!document.querySelector('main[inert]'));
+ assert.ok(!screen.queryByRole('dialog'));
+});
+test('Selecting an occasion or dismissing its picker with Escape returns focus to the visible summary',()=>{
+ openWorkshop();const picker=document.querySelector<HTMLDetailsElement>('.choice-picker')!,summary=picker.querySelector('summary')!;
+ picker.open=true;const choice=screen.getByRole('button',{name:'Lễ ăn hỏi'});choice.focus();fireEvent.click(choice);
+ assert.equal(picker.open,false);assert.ok(document.activeElement===summary);
+ assert.ok(summary.textContent?.includes('Lễ ăn hỏi'));
+ picker.open=true;const other=screen.getByRole('button',{name:'Lễ hội dân gian'});other.focus();fireEvent.keyDown(other,{key:'Escape'});
+ assert.equal(picker.open,false);assert.ok(document.activeElement===summary);
+ assert.ok(window.location.search.includes('an-hoi'));
+});
+test('A failed outfit image has a working retry without losing the chosen configuration',async()=>{
+ let failed=true;
+ window.Image=class{onload:(()=>void)|null=null;onerror:(()=>void)|null=null;set src(_:string){queueMicrotask(()=>failed?this.onerror?.():this.onload?.());}} as any;
+ openWorkshop();fireEvent.click(screen.getByRole('button',{name:'Đỏ son'}));const selected=window.location.search;
+ assert.ok(await screen.findByRole('alert'));
+ failed=false;fireEvent.click(screen.getByRole('button',{name:'Thử lại'}));
+ await waitFor(()=>assert.equal(document.querySelector('.outfit-scene')?.getAttribute('aria-busy'),'false'));
+ assert.equal(window.location.search,selected);assert.ok(!screen.queryByRole('alert'));
+ assert.equal(screen.getByRole('button',{name:'Đỏ son'}).getAttribute('aria-pressed'),'true');
 });
 test('Catalog has five distinct garments, four scenes and compatible options for every supported model',()=>{
  assert.equal(GARMENTS.length,5);assert.equal(OCCASIONS.length,4);

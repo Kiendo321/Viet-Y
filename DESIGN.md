@@ -246,7 +246,7 @@ Primary actions are solid red with white text and a dark red hover state; their 
 
 ### Navigation
 
-Navigation rows use sans-serif labels, line icons, 48px minimum height, warm neutral resting text, a pale warm hover background, and a solid red current-page state. The collapsed desktop state removes visible labels while retaining accessible names and titles. The mobile drawer is coded to trap Tab focus, close with Escape and route changes, restore prior focus, and mark the hidden panel inert. These behaviors are code observations and have not been exercised in the browser in this extraction.
+Navigation rows use sans-serif labels, line icons, 48px minimum height, warm neutral resting text, a pale warm hover background, and a solid red current-page state. The collapsed desktop state removes visible labels while retaining accessible names and titles. The mobile drawer is coded to trap Tab focus among visible links and enabled buttons, filtering candidates by `getClientRects()` and excluding nodes inside inert ancestors. It closes with Escape and route changes and restores prior focus. While the modal drawer is open, the main content and mobile header are inert and hidden from assistive technology; the clickable backdrop has `tabIndex=-1` and `aria-hidden=true`. The hidden drawer itself remains inert and hidden from assistive technology. These behaviors are code observations and have not been exercised in the browser in this extraction.
 
 ### Concept filters
 
@@ -254,9 +254,9 @@ Lookbook concept filters are softly rounded, minimally filled buttons with a 44p
 
 ### Compact pickers and selections
 
-Ordinary choices use native details/summary pickers with a label, selected value, rotating chevron, and a bordered rounded frame. Options are thumbnail rows with a pale hover fill, muted rose selected fill, and a check icon; choosing an option or moving focus outside closes the picker. This is an inline expanding picker, not a positioned popover. The sidecar's picker sample demonstrates the closed summary and native disclosure; live option data and thumbnails are provided by the application.
+Ordinary choices use native details/summary pickers with a label, selected value, rotating chevron, and a bordered rounded frame. Options are thumbnail rows with a pale hover fill, muted rose selected fill, and a check icon. Choosing an option closes the picker and returns focus to its summary with `preventScroll`; Escape does the same when the picker is open, preventing the default action and stopping propagation. Moving focus outside closes the picker without returning focus. This is an inline expanding picker, not a positioned popover. The sidecar's picker sample demonstrates the closed summary and native disclosure; live option data, thumbnails, selection handlers, and focus-return behavior are provided by the application.
 
-Person controls use a segmented group with 38px minimum-height options; unavailable options are disabled. Color swatches combine a circular color, selected outline, check, accessible color name, and `aria-pressed`. Accessories are compact three-column image choices with warm borders, red selection borders, pale selected fill, and checkmarks. The documented no-accessory sample corresponds to the existing diagonal-line option. No standalone text input or text-field system appears in the inspected surfaces, so none is invented here.
+Person controls use a segmented group with 38px minimum-height options; unavailable options are disabled. Color swatches combine a circular color, selected outline, check, accessible color name, and `aria-pressed`. Accessories are compact three-column image choices with warm borders, red selection borders, pale selected fill, and checkmarks. The photographic turban thumbnail crops the source sprite with SVG `viewBox="410 20 200 140"`, placing the 1024 × 1536 source image inside a 66px × 55px thumbnail; other accessory images keep their 52px × 52px contained-image treatment. The documented no-accessory sample corresponds to the existing diagonal-line option. No standalone text input or text-field system appears in the inspected surfaces, so none is invented here.
 
 ### Photography and cultural records
 
@@ -268,7 +268,7 @@ The outfit scene uses a fixed SVG composition plane (1086 × 1448) to place phot
 
 Motion is functional and restrained: navigation width/drawer transitions, picker-chevron rotation, primary hover background, small photo zooms, and a loading spinner. Exact durations are recorded in the sidecar. Reduced motion switches smooth scrolling to automatic and reduces animation/transition duration to 0.01ms.
 
-Implementation scope: `index.html` declares Vietnamese, the theme color agrees with the primary token, and font faces are local. Actual viewport fit, font appearance, image loading, hover/focus rendering, drawer interaction, and clipping still need visual/runtime review. This document makes no ship verdict.
+Implementation scope: `index.html` declares Vietnamese, the theme color agrees with the primary token, and font faces are local. `test/viet-y-experience.test.ts` contains focused checks for drawer isolation, focus wrapping and Escape restoration, and picker focus return after selection or Escape. Its drawer test models visibility through mocked `getClientRects()` because JSDOM has no layout. These tests do not establish rendered viewport fit, font appearance, image loading, hover/focus rendering, real-browser drawer interaction, or clipping. Browser rendered verification remains pending after localhost access was denied; this document makes no ship verdict.
 
 ## Do's and Don'ts
 

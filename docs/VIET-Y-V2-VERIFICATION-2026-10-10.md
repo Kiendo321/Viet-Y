@@ -4,7 +4,7 @@
 
 - TypeScript: `npm run lint` đạt.
 - Build frontend/backend: `npm run build` đạt.
-- 26 kiểm thử đạt: điều hướng Back/Forward, deep link, đổi asset/mẫu/phụ kiện, các đích landing khác nhau, trang ảnh lookbook, race của lời giới thiệu, fallback/retry, danh mục 5 trang phục/4 sự kiện và cấu hình Vertex.
+- 29 kiểm thử đạt: điều hướng Back/Forward, deep link, đổi asset/mẫu/phụ kiện, các đích landing khác nhau, trang ảnh lookbook, race của lời giới thiệu, fallback/retry, danh mục 5 trang phục/4 sự kiện và cấu hình Vertex. Ba kiểm thử bổ sung xác minh drawer mobile cô lập bàn phím, picker trả focus khi chọn/Escape và retry ảnh giữ nguyên lựa chọn.
 - Smoke production đạt: backend compiled chạy chỉ với artifact deploy, PORT, bảy route SPA, bundle JS/CSS khớp build, 18 asset cũ, 27 WebP mới, sáu PNG tải xuống nguyên vẹn, collection shared=true, fallback không giả Gemini thành công.
 - PNG có prompt trong metadata ảnh; WebP có sidecar prompt/origin đi kèm. Scan 72 raster báo 0 thiếu. Alpha của cutout được giữ trong WebP.
 - Detector đã chạy một lần; trả danh sách rỗng. Đây không thay thế kiểm tra trực quan.
@@ -19,6 +19,12 @@
 Trình duyệt từ chối truy cập `http://localhost:3001` với lý do quyền đã bị người dùng từ chối. Đã hỏi người dùng cấp lại quyền; không dùng browser/CDP/port khác để vượt chặn. Các kiểm chứng ở trên là code/API, không khẳng định responsive đã được nhìn trên thiết bị.
 
 Lookbook hiện là sáu ảnh dùng chung cố định, theo quyết định người dùng. Thêm ảnh bằng VTO chưa triển khai. Không có đăng nhập hoặc database người dùng trong scope này.
+
+## Batch sửa bàn phím và thumbnail
+
+Drawer mobile đặt main/header thành inert trong khi mở, lọc nút ẩn khỏi focus trap. Picker trả focus về summary sau khi chọn hoặc Escape. Thumbnail khăn đóng dùng viewport SVG quanh vùng alpha thực tế của sprite thay vì thu cả canvas. Không chỉnh màu hay retouch raster.
+
+29 tests, lint, build và smoke production đã đạt sau batch sửa. Kiểm thử DOM dùng mô phỏng layout cho bàn phím; chưa có screenshot hoặc xác minh hình ghép trên browser. `verify-v2.mjs` nay đối chiếu hash JS/CSS với build local; `--static-only` kiểm tra bản sửa frontend mà không gọi lại Gemini khi backend không đổi.
 
 ## Git và build GCP
 

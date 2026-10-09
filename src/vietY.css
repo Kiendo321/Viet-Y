@@ -148,7 +148,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible { outline:2px solid v
 .accessory-choice.selected { border-color:var(--vy-red); background:#FBF3EE; }
 .accessory-choice>div { width:100%; height:55px; display:grid; place-items:center; }
 .accessory-choice img { width:52px; height:52px; object-fit:contain; }
-.accessory-choice img[src*="hat-black"] { width:66px; height:55px; object-fit:cover; object-position:50% 18%; }
+.accessory-choice>div>svg { width:66px; height:55px; }
 .accessory-choice>span { font-size:10px; white-space:nowrap; }
 .accessory-check { position:absolute; top:6px; right:6px; color:var(--vy-red); }
 .no-accessory-line { display:block; width:28px; height:1px; background:#BDB0A5; transform:rotate(-32deg); }
