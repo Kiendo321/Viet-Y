@@ -13,7 +13,7 @@
 
 - Kiểm tra hình ảnh thực tế desktop/mobile, vị trí phụ kiện, scroll độc lập, drawer và target chạm trên browser.
 - Finish reviewer của Impeccable cần screenshot hợp lệ.
-- Lượt gọi Gemini thật cho endpoint lời giới thiệu mới trên Vertex.
+- Không còn chờ kiểm chứng API Gemini: xem kết quả thành công phía dưới.
 - Deploy production và xác minh GitHub/AI Studio/public cùng bản.
 
 Trình duyệt từ chối truy cập `http://localhost:3001` với lý do quyền đã bị người dùng từ chối. Đã hỏi người dùng cấp lại quyền; không dùng browser/CDP/port khác để vượt chặn. Các kiểm chứng ở trên là code/API, không khẳng định responsive đã được nhìn trên thiết bị.
@@ -30,4 +30,12 @@ DESIGN.md và .impeccable/design.json đã được documenter trích xuất t�
 
 Revision viet-y-ux-v2-20261010 sẵn sàng với tag ux-preview; traffic public vẫn 100% viet-y-ux-final-20261009. Provider vertex_ai và danh mục 5/4/6 được xác minh; 27 asset WebP deploy khớp hash local.
 
-Lượt story đầu chưa đạt: maxOutputTokens=700 khiến Gemini 3.8 và 3.7 trả MAX_TOKENS, phần suy luận dùng khoảng 670 token. Đã tăng 2048 và kiểm tra finishReason=STOP trước khi nhận lời giới thiệu. 26 tests/lint/build/smoke đạt sau bản sửa; cần build/deploy preview lại và kiểm chứng lời giới thiệu thật.
+Lượt story đầu chưa đạt: maxOutputTokens=700 khiến Gemini 3.8 và 3.7 trả MAX_TOKENS, phần suy luận dùng khoảng 670 token. Đã tăng 2048 và kiểm tra finishReason=STOP trước khi nhận lời giới thiệu. 26 tests/lint/build/smoke đạt sau bản sửa; preview sửa đã triển khai và kiểm chứng thành công.
+
+## Kết quả preview sau sửa
+
+Cloud Build 5724e626-8b1e-4547-ac8d-c006082df81a SUCCESS; image digest sha256:d71b9b6c4ac4b289f65eb30b1b1f6be26392a292a015eccc6d7521301ace3393. Revision viet-y-ux-v2-story-20261010 Ready, tag ux-preview, không nhận traffic public mặc định.
+
+verify-v2.mjs đạt: provider Vertex, 5/4/6 danh mục, VTO off, route trực tiếp, 27 asset khớp hash, collection shared=true. Lời giới thiệu ngay-hen trả source=gemini, model=gemini-3.8-flash, 3008ms; mien-ky-uc cùng model, 3319ms. Hai PNG tải xuống khớp byte bản gốc local. Đây là API/static asset verification, không phải UI browser test.
+
+Traffic public vẫn 100% viet-y-ux-final-20261009. Main GitHub cũng vẫn e587a09; nhánh codex/viet-y-experience-20261010 giữ toàn bộ thay đổi mới. Cần quyền localhost:3001 để chụp/duyệt UI theo Impeccable trước khi cập nhật main/public.
