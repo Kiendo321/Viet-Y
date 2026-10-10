@@ -5,7 +5,7 @@ import {apiRequest,apiUrl,jsonPost} from '../services/apiClient';
 import {imageFileData} from '../services/outfitReference';
 import {OutfitReference,TRYON_ERRORS,SavedLook} from '../services/tryOnContract';
 import {VittyTurn,VittyAvatar} from '../services/vittyContract';
-import {COLORS,OCCASIONS,garmentById,eventById} from '../data/vietYCatalog';
+import {COLORS,garmentById,eventById} from '../data/vietYCatalog';
 const message=(e:unknown)=>TRYON_ERRORS[(e as Error).message]||TRYON_ERRORS.NETWORK;
 export function TryOnReference({reference,author,avatar,onTurn}:{reference:OutfitReference;author:string;avatar:VittyAvatar;onTurn:(turn:VittyTurn)=>void}){
  const [photo,setPhoto]=useState<File|null>(null),[preview,setPreview]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState('');
@@ -32,16 +32,15 @@ export function TryOnReference({reference,author,avatar,onTurn}:{reference:Outfi
  </div>;
 }
 export function TryOnResultCard({turn,author}:{turn:VittyTurn;author:string}){
- const [open,setOpen]=useState(false),[name,setName]=useState(()=>garmentById(turn.context!.garment)!.shortName+' · '+COLORS[turn.context!.color].name),[category,setCategory]=useState(()=>eventById(turn.context!.event)!.name),[custom,setCustom]=useState('');
+ const [open,setOpen]=useState(false),[name,setName]=useState(()=>garmentById(turn.context!.garment)!.shortName+' · '+COLORS[turn.context!.color].name);
  const [names,setNames]=useState<string[]>([]),[naming,setNaming]=useState(false),[saving,setSaving]=useState(false),[saved,setSaved]=useState<string|null>(null),[error,setError]=useState('');
  useEffect(()=>{let live=true;void apiRequest<{look:SavedLook}>('/api/lookbook/'+turn.id).then(r=>{if(live)setSaved(r.look.id);}).catch(()=>{});return()=>{live=false;};},[turn.id]);
  async function suggest(){setNaming(true);setError('');try{const result=await apiRequest<{names:string[]}>('/api/vitty/try-on/'+turn.id+'/names',jsonPost({authorId:author}),24000);setNames(result.names);}catch(e){setError(message(e));}finally{setNaming(false);}}
- async function save(){if(saving)return;setSaving(true);setError('');try{const {look}=await apiRequest<{look:SavedLook}>('/api/vitty/try-on/'+turn.id+'/save',jsonPost({authorId:author,title:name,concept:category==='custom'?custom:category}));setSaved(look.id);setOpen(false);}catch(e){setError(message(e));}finally{setSaving(false);}}
+ async function save(){if(saving)return;setSaving(true);setError('');try{const {look}=await apiRequest<{look:SavedLook}>('/api/vitty/try-on/'+turn.id+'/save',jsonPost({authorId:author,title:name,concept:eventById(turn.context!.event)!.name}));setSaved(look.id);setOpen(false);}catch(e){setError(message(e));}finally{setSaving(false);}}
  return <div className="vitty-result"><h2>Bộ phối của bạn đã sẵn sàng</h2><img className="vitty-result-image" src={apiUrl(turn.tryOn!.image!)} alt={'Ảnh thử '+garmentById(turn.context!.garment)!.name}/>
   <div className="vitty-result-actions"><a className="text-button" href={apiUrl('/api/vitty/media/results/'+turn.id+'.png?download=1')} download={'viet-y-'+turn.id+'.png'}><Download size={17}/>Tải ảnh</a>{saved?<Link className="secondary-link" to={'/lookbook/'+saved}><Check size={17}/>Đã lưu · Xem ảnh</Link>:turn.authorId===author&&<button className="primary-link" aria-expanded={open} onClick={()=>setOpen(!open)}><Bookmark size={17}/>Lưu vào Lookbook</button>}</div>
   {open&&!saved&&<form className="vitty-save-form" onSubmit={e=>{e.preventDefault();void save();}}><div className="vitty-name-heading"><label htmlFor={'name-'+turn.id}>Tên ảnh</label><button type="button" className="text-button" disabled={naming} onClick={suggest}>{naming?<span className="spinner"/>:<Sparkles size={15}/>}Gợi ý tên</button></div><input id={'name-'+turn.id} maxLength={100} required value={name} onChange={e=>setName(e.target.value)}/>{names.length>0&&<div className="vitty-name-options">{names.map(n=><button key={n} type="button" aria-pressed={name===n} onClick={()=>setName(n)}>{n}</button>)}</div>}
-   <label htmlFor={'category-'+turn.id}>Chủ đề</label><select id={'category-'+turn.id} value={category} onChange={e=>setCategory(e.target.value)}>{OCCASIONS.map(o=><option key={o.id} value={o.name}>{o.name}</option>)}<option value="custom">Chủ đề mới…</option></select>{category==='custom'&&<input aria-label="Tên chủ đề mới" placeholder="Đặt tên chủ đề" maxLength={60} required value={custom} onChange={e=>setCustom(e.target.value)}/>}
-   <button className="primary-link" disabled={saving||!name.trim()||(category==='custom'&&!custom.trim())} type="submit">{saving?<span className="spinner"/>:<Check size={17}/>} {saving?'Đang lưu':'Lưu bộ ảnh'}</button>
+   <button className="primary-link" disabled={saving||!name.trim()} type="submit">{saving?<span className="spinner"/>:<Check size={17}/>} {saving?'Đang lưu':'Lưu bộ ảnh'}</button>
   </form>}{error&&<p className="vitty-upload-error" role="alert">{error}</p>}
  </div>;
 }

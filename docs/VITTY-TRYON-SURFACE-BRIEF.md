@@ -2,9 +2,9 @@
 
 Mode: Operate. Ordinary extension of the approved Việt Y interface; preserve DESIGN.md and its sidecar. No redesign or new visual comp is needed for the explicitly specified workflow.
 
-Success: choose an outfit in Workshop, hand off its actual composed PNG, upload a face, receive an edited image inside chat, name and classify it, save to the shared Lookbook and download it. Without a PNG context, a try-on request gives a real Workshop link. Returning or refreshing keeps reference and completed results.
+Success: choose an outfit in Workshop, hand off its actual composed PNG, upload a face, receive an edited image inside chat, name it, save to the shared Lookbook and download it. Without a PNG context, a try-on request gives a real Workshop link. Returning or refreshing keeps reference and completed results.
 
-First viewport: existing compact sidebar/header and pinned composer remain. The transcript contains a small reference portrait with outfit/event labels and an upload action. Result imagery belongs in the transcript, bounded in height; name/category editing appears inline below the result. No face-only avatar changes, generated banners, oversized panels or explanatory chrome.
+First viewport: existing compact sidebar/header and pinned composer remain. The transcript contains a small reference portrait with outfit/event labels and an upload action. Result imagery belongs in the transcript, bounded in height; name editing appears inline below the result. No face-only avatar changes, generated banners, oversized panels or explanatory chrome.
 
 States: exporting PNG, loading context, image upload validation/preview, explicit generation, pending, failure/retry, completed result, naming suggestions, saving, already saved, reload recovery. Controls expose real disabled/loading/error states. Mobile preserves a visible composer and scrollable transcript. All face inputs are transient; the shared result is disclosed before generation.
 
