@@ -68,4 +68,14 @@ Browser Back/Forward từ Lookbook đến trang ảnh và quay lại đúng rout
 
 29 tests đạt sau cập nhật fixture tên hero và thẻ ảnh. Lint, build và smoke production đạt. LOCAL_LISTEN_HOST tùy chọn phục vụ kiểm tra local dual-stack; Cloud Run mặc định vẫn 0.0.0.0. Local không cấu hình Vertex nên lời giới thiệu dùng fallback biên tập; bằng chứng Gemini thật vẫn là preview Vertex đã ghi ở trên.
 
-Main/public và AI Studio vẫn cần đồng bộ release mới; không coi screenshot local là bằng chứng đã publish.
+Tại thời điểm browser local, main/public và AI Studio còn cần đồng bộ. Release thực tế được xác nhận bên dưới.
+
+## Release public đã xác minh
+
+Cloud Build 20104677-7732-434a-86b6-85efe928f5b9 SUCCESS cho mã ứng dụng f5488a2. Image digest sha256:93e27450997f67f7305d8f7a8a90846840509a02e200d484fdde473684310f00, revision viet-y-ux-v2-hero-20261010 Ready, nhận 100% traffic. GitHub main và nhánh codex cùng 3e34753 sau commit tài liệu thiết kế; không có khác biệt code ứng dụng so với image f5488a2.
+
+Artifact dist layer sha256:a86638c1adc807f67a8f77561d3db1371bf7e8548881f84d7b9e1409db257d8c tải về và kiểm tra hash đạt. Chỉ trích index.html/JS/CSS. verify-v2 trên preview và production đạt: CSS index-D7U7zomf.css và JS index-DDHUUgBh.js khớp byte container; 27 WebP khớp local, route sâu và PNG download đạt. Chạy Gemini thật trên production: ngay-hen dùng gemini-3.8-flash 3570ms; mien-ky-uc dùng backup gemini-3.7-flash 11519ms. Cả hai source=gemini; không ghi nhận backup thành model 3.8.
+
+Browser tại https://viet-y.ai.studio hiển thị hero/ngà mới, background rgb(247,240,228), heroComplete=true và đúng tên hai bundle container. Screenshot home-public.jpg lưu trong packet review. Website đã cập nhật, không chỉ local.
+
+Fresh review có no material render finding; verdict pass ship xác nhận fix tài liệu resolved (xem VIET-Y-V2-FINISH-REVIEW-2026-10-10.md). AI Studio source sync vẫn chưa xác nhận: app / My apps / reload đều lỗi 520 hoặc Error loading apps. Không dùng nút publish AI Studio để ghi đè Cloud Run đang hoạt động.
