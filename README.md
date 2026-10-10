@@ -56,6 +56,10 @@ Các API stylist/tạo ảnh/đổi màu cũ trả `410 FEATURE_RETIRED`. Chưa 
 
 Font Be Vietnam Pro và Noto Serif Display tự host ở `public/fonts`, kèm giấy phép OFL; không phụ thuộc tải Google Fonts khi xem trang.
 
+Landing tiếp tục dùng ảnh hero di sản `public/assets/style-a-hero.png` và nền giấy ngà của bản cũ theo quyết định người dùng. Không thay ảnh phủ toàn vùng này bằng khung ảnh riêng.
+
+Khi kiểm tra local trên Windows, có thể đặt `LOCAL_LISTEN_HOST=::` để server lắng nghe cả IPv6/IPv4. Giá trị mặc định vẫn là `0.0.0.0` cho Cloud Run; biến này không liên quan tới quyền trình duyệt.
+
 ## Kế hoạch và triển khai
 
 - `PRODUCT.md`: phạm vi và quyết định sản phẩm đã chốt.

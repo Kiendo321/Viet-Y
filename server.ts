@@ -89,6 +89,6 @@ async function startServer(){
   app.get('*',(_req,res)=>res.sendFile(path.resolve(__dirname,'dist','index.html')));
  }
  const port=Number(process.env.PORT)||3000;
- app.listen(port,'0.0.0.0',()=>console.log('Việt Y server running on port '+port));
+ app.listen(port,process.env.LOCAL_LISTEN_HOST||'0.0.0.0',()=>console.log('Việt Y server running on port '+port));
 }
 startServer().catch(error=>{console.error('Server startup failed',error?.message);process.exit(1);});

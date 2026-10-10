@@ -24,7 +24,7 @@ test('Routes retain browser history; Back and Forward return to the correspondin
  window.history.back();
  await waitFor(()=>assert.ok(screen.getByRole('heading',{level:1,name:'Xưởng phối'})));
  window.history.back();
- await waitFor(()=>assert.ok(screen.getByRole('heading',{level:1,name:/Mặc một nét Việt/})));
+ await waitFor(()=>assert.ok(screen.getByRole('heading',{level:1,name:'Việt Y'})));
  window.history.forward();
  await waitFor(()=>assert.ok(screen.getByRole('heading',{level:1,name:'Xưởng phối'})));
 });

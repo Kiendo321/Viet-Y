@@ -54,4 +54,18 @@ So sánh trực tiếp với dist Windows ban đầu không đạt vì bundle ha
 
 Layer dist của container sha256:eed2e712c48db827f80bcdf95a799ffc6754b0d1706ed57166c7bdceede4c704 tải về và kiểm tra SHA256 đạt. Chỉ trích index.html/JS/CSS, không render hoặc trích ảnh để vượt browser policy. Lệnh `node scripts/verify-v2.mjs https://ux-preview---viet-y-ivo7erh2oq-as.a.run.app --static-only --artifact-dist .runtime-smoke-v2-artifact/workspace/dist` đạt: JS/CSS remote khớp đúng container, route sâu đạt, 27 WebP khớp local, PNG tải xuống khớp byte. Không gọi lại Gemini trong lượt này; bằng chứng Vertex thật ở lượt trước còn áp dụng vì backend không đổi.
 
-Chưa có browser render, screenshot, finish-reviewer hay AI Studio source sync. Bản preview hoạt động về HTTP/API; chưa phải bản release cuối đã duyệt UI.
+Tại thời điểm preview focus, chưa có browser render hay AI Studio source sync. Bằng chứng browser bổ sung bên dưới thay thế trạng thái chờ render này.
+
+## Browser và khôi phục hero — 10/10/2026
+
+Quyền localhost đã hoạt động. Tab cũ lưu trang lỗi kết nối; sau khi máy chủ được xác nhận hoạt động và tạo tab mới trong cùng trình duyệt ở đúng localhost:3001, ứng dụng truy cập được. Không đổi port, browser, proxy hay dùng CDP để vượt quyền.
+
+Người dùng xác nhận giữ hero và nền cũ. Home đã dùng lại ảnh hiên gỗ/ngũ thân đỏ/lụa đỏ phủ toàn vùng, flourish và paper wave; nền root #F7F0E4, lớp giấy #F7EEDD. Ảnh hero được ghi metadata nguồn sẵn có, không bịa prompt gốc. Nút đóng drawer chỉ hiện trên mobile, sửa specificity bị class icon-button ghi đè.
+
+17 screenshot desktop 1440×900, mobile 390×844 và viewport người dùng được lưu tại D:/AI Arena/output/ux-v2-review-2026-10-10. Fresh finish reviewer xác nhận tất cả capture hợp lệ, không có material render finding; yêu cầu duy nhất là đồng bộ tài liệu thiết kế.
+
+Browser Back/Forward từ Lookbook đến trang ảnh và quay lại đúng route. Bấm tải ảnh thực tế tạo C:/Users/DELL/Downloads/viet-y-ngay-hen.png; SHA256 429f114b5034c80111517d54470ae75a885bb151aa3ad54bb2719d72a18604d4 khớp PNG gốc. Mobile workshop có preview top108/bottom442; cuộn controls253px vẫn pageY0 và preview top108. Drawer mở làm main inert; Escape đóng và trả focus về trigger. Hero không tràn ngang ở mobile. Đã xem thư viện hai cột, chi tiết trang phục/sự kiện, phụ kiện nam và nữ trên ảnh.
+
+29 tests đạt sau cập nhật fixture tên hero và thẻ ảnh. Lint, build và smoke production đạt. LOCAL_LISTEN_HOST tùy chọn phục vụ kiểm tra local dual-stack; Cloud Run mặc định vẫn 0.0.0.0. Local không cấu hình Vertex nên lời giới thiệu dùng fallback biên tập; bằng chứng Gemini thật vẫn là preview Vertex đã ghi ở trên.
+
+Main/public và AI Studio vẫn cần đồng bộ release mới; không coi screenshot local là bằng chứng đã publish.

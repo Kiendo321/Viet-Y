@@ -48,7 +48,7 @@ test('A direct workshop link restores its configured garment, event, person, col
 test('Landing links have distinct relevant destinations and do not all funnel into the workshop',()=>{
  render(React.createElement(App));
  const paths=new Set(Array.from(document.querySelectorAll('a[href]')).map(a=>a.getAttribute('href')));
- assert.ok(paths.has('/lookbook/ngay-hen'));
+ assert.ok(paths.has('/lookbook/sac-hoi'));
  assert.ok(paths.has('/tu-lieu/su-kien/le-hoi'));
  assert.ok(paths.has('/tu-lieu'));assert.ok(paths.has('/lookbook'));
 });

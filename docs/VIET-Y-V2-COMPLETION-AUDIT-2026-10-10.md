@@ -25,8 +25,16 @@ Phạm vi gốc: `goal-objective.md` người dùng cung cấp; các quyết đ�
 | Kế hoạch và tài liệu triển khai | PRODUCT, kế hoạch, design contract, README, DESIGN.md và token sidecar hiện có | Finish review cần screenshot hợp lệ; tài liệu chưa phải visual approval |
 | Commit, GitHub và website đồng bộ bản cuối | Nhánh `codex/viet-y-experience-20261010` đã push; preview Cloud Run riêng đã kiểm chứng API/static asset | Main/public vẫn phiên bản cũ; chưa chứng minh AI Studio sync bản mới; cập nhật sau review |
 
-## Chặn hiện tại
+## Trạng thái lịch sử trước khi cấp lại quyền
 
 Browser đã từ chối `http://localhost:3001` vì quyền truy cập bị từ chối. Đã hỏi người dùng cho phép lại địa chỉ; chưa có câu trả lời mới. Không mở bằng port, CDP, browser khác hay nhúng app vào trang khác để vượt chặn.
 
 Các kiểm tra HTTP/backend ở preview chỉ chứng minh triển khai/API, không thay thế browser render. Goal chưa hoàn thành; bước còn thiếu là screenshot/finish review và đồng bộ release cuối.
+
+## Cập nhật sau khi truy cập browser thành công — 10/10/2026
+
+Trạng thái chặn phía trên đã được giải quyết. Đã kiểm tra bản local trên desktop/mobile, có 17 screenshot hợp lệ và fresh finish reviewer. Không có material render finding; phần còn phải sửa trong review là đồng bộ tài liệu từ nền trắng/hero boxed sang hero cũ phủ toàn vùng và nền ngà mà người dùng yêu cầu giữ.
+
+Đã chứng minh scroll controls độc lập/preview cố định, Back/Forward, route gallery→ảnh, tải PNG khớp hash, drawer Escape/inert/focus, library hai cột và detail ảnh. Bộ ảnh review gồm phụ kiện nam khăn đóng và nữ kiềng bạc; chưa phải xác nhận chuyên gia hiện vật cho mọi tổ hợp asset. Chi tiết số đo và hash trong VIET-Y-V2-VERIFICATION-2026-10-10.md.
+
+Phạm vi triển khai hiện có 5 áo/4 sự kiện/8 tổ hợp áo-mẫu/6 ảnh lookbook chung, VTO off, không lưu trong xưởng. 29 tests, lint, build và smoke đạt. Bước release main/public và đồng bộ AI Studio vẫn chưa hoàn tất ở thời điểm ghi cập nhật này.
