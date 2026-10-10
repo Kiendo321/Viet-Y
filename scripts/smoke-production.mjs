@@ -48,7 +48,7 @@ try {
   assert.equal(health.hasApiKey, false);
   summary.push('PASS: compiled server starts without TypeScript source and honors PORT');
   const html = await readFile(path.join(stage, 'dist', 'index.html'), 'utf8');
-  for (const route of ['/', '/xuong-phoi', '/lookbook', '/lookbook/ngay-hen', '/tu-lieu', '/tu-lieu/trang-phuc/nhat-binh', '/tu-lieu/su-kien/an-hoi']) {
+  for (const route of ['/', '/xuong-phoi', '/lookbook', '/lookbook/ngay-hen', '/tu-lieu', '/tu-lieu/trang-phuc/nhat-binh', '/tu-lieu/su-kien/an-hoi', '/vitty']) {
     const response = await fetch(`${base}${route}`);
     assert.equal(response.status, 200);
     assert.match(response.headers.get('content-type'), /text\/html/);

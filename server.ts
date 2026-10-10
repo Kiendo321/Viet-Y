@@ -6,6 +6,9 @@ import {ThinkingLevel} from '@google/genai';
 import {createGenaiClient,genaiSettings} from './src/services/genaiConfig.js';
 import {LOOKS,GARMENTS,OCCASIONS,lookById} from './src/data/vietYCatalog.js';
 import {produceLookStory,completeStoryText,LookStory} from './src/services/lookStory.js';
+import {configuredVittyStore,validId,vittyPage,VittyStore} from './src/services/vittyStore.js';
+import {completeVittyTurn,generateVitty,VittyFailure} from './src/services/vittyAgent.js';
+import {validSelection} from './src/services/vittyContract.js';
 
 dotenv.config();
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
@@ -53,6 +56,40 @@ async function startServer(){
  const app=express();
  app.disable('x-powered-by');
  app.use(express.json({limit:'1mb'}));
+ let vittyStore:VittyStore|null=null;
+ const store=()=>vittyStore||(vittyStore=configuredVittyStore());
+ const activeVitty=new Set<string>();
+ const vittyOrigins=new Set((process.env.VITTY_ALLOWED_ORIGINS||'').split(',').map(s=>s.trim()).filter(Boolean));
+ app.use('/api/vitty',(req,res,next)=>{
+  const origin=req.get('Origin');
+  if(origin){
+   let sameHost=false;try{sameHost=new URL(origin).host===req.get('Host');}catch{}
+   if(!sameHost&&!vittyOrigins.has(origin)){res.status(403).json({error:'ORIGIN_NOT_ALLOWED'});return;}
+   res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');
+   res.setHeader('Access-Control-Allow-Methods','GET,POST,OPTIONS');res.setHeader('Access-Control-Allow-Headers','Content-Type');
+  }
+  if(req.method==='OPTIONS'){res.sendStatus(204);return;}next();
+ });
+ const vittyError=(res:express.Response,e:unknown)=>{
+  const failure=e instanceof VittyFailure?e:new VittyFailure((e as Error).message==='DURABLE_STORAGE_UNCONFIGURED'?'DURABLE_STORAGE_UNCONFIGURED':'STORAGE_UNAVAILABLE');
+  res.status(failure.status).json({error:failure.code});
+ };
+ app.get('/api/vitty',async(req,res)=>{
+  res.setHeader('Cache-Control','no-store');
+  if(req.query.before&&!validId(req.query.before)){res.status(400).json({error:'INVALID_CURSOR'});return;}
+  try{res.json(await vittyPage(store(),req.query.before as string|undefined));}catch(e){vittyError(res,e);}
+ });
+ app.post('/api/vitty/turns',async(req,res)=>{
+  res.setHeader('Cache-Control','no-store');
+  const {id,authorId,avatar,text,context}=req.body||{};
+  if(!validId(id)||!validId(authorId)||(avatar!=='male'&&avatar!=='female')||typeof text!=='string'||!text.trim()||text.length>4000){res.status(400).json({error:'INVALID_MESSAGE'});return;}
+  const selection=context===undefined?undefined:validSelection(context);
+  if(selection===null){res.status(400).json({error:'INVALID_CONTEXT'});return;}
+  if(activeVitty.size>=3&&!activeVitty.has(id)){res.status(429).json({error:'BUSY'});return;}
+  const ownsSlot=!activeVitty.has(id);if(ownsSlot)activeVitty.add(id);
+  try{res.json({turn:await completeVittyTurn(store(),{id,authorId,avatar,text:text.trim(),...(selection?{context:selection}:{})},(turn,history)=>generateVitty(turn,history,[PRIMARY_TEXT_MODEL,BACKUP_TEXT_MODEL]))});}
+  catch(e){vittyError(res,e);}finally{if(ownsSlot)activeVitty.delete(id);}
+ });
  app.get('/api/health',(_req,res)=>res.json({
   status:'ok',brand:'Việt Y',version:'experience-v2',hasApiKey:Boolean(process.env.GEMINI_API_KEY&&process.env.GEMINI_API_KEY!=='MY_GEMINI_API_KEY'),
   provider:genaiSettings().provider,configured:genaiSettings().configured,textModel:PRIMARY_TEXT_MODEL,backupTextModel:BACKUP_TEXT_MODEL,

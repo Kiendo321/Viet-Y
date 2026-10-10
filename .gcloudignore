@@ -3,6 +3,7 @@
 .gitignore
 node_modules/
 .runtime-smoke-*/
+.vitty-data/
 dist/
 server.js
 .env

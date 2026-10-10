@@ -10,6 +10,7 @@ coverage/
 # Generated production backend
 /server.js
 /.runtime-smoke-*/
+/.vitty-data/
 
 # Local UI review captures; durable review reports live in docs.
 /.impeccable/review/

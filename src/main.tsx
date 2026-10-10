@@ -4,5 +4,6 @@ import './index.css';
 import './vietY.css';
 import './editorialDetails.css';
 import './homeStudio.css';
+import './vitty.css';
 
 createRoot(document.getElementById('root')!).render(<App />);

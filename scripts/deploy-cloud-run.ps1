@@ -2,7 +2,8 @@ param(
   [Parameter(Mandatory=$true)][string]$Image,
   [string]$RevisionName = ('viet-y-runtime-' + (Get-Date).ToUniversalTime().ToString('yyyyMMddHHmmss')),
   [switch]$Preview,
-  [switch]$UseVertexAI
+  [switch]$UseVertexAI,
+  [string]$VittyStorageBucket
 )
 $ErrorActionPreference = 'Stop'
 if ($Image -notmatch '^asia-southeast1-docker\.pkg\.dev/c3-app-162/viet-y/app(?:@sha256:[a-f0-9]{64}|:[a-zA-Z0-9._-]+)$') {
@@ -31,6 +32,13 @@ try {
     }
     $runtimeContainer.env = @($runtimeContainer.env | Where-Object { -not $vertexSettings.ContainsKey($_.name) }) + @(
       $vertexSettings.GetEnumerator() | ForEach-Object { [PSCustomObject]@{ name = $_.Key; value = $_.Value } }
+    )
+  }
+  if ($VittyStorageBucket) {
+    if ($VittyStorageBucket -ne 'c3-app-162-vitty-history') { throw 'Unexpected Vitty storage bucket.' }
+    $runtimeContainer.env = @($runtimeContainer.env | Where-Object { $_.name -notin @('VITTY_STORAGE_BUCKET','VITTY_ALLOWED_ORIGINS') }) + @(
+      [PSCustomObject]@{ name = 'VITTY_STORAGE_BUCKET'; value = $VittyStorageBucket },
+      [PSCustomObject]@{ name = 'VITTY_ALLOWED_ORIGINS'; value = 'https://ais-dev-o3rrywly7slgnm7urzsfge-823055115091.asia-southeast1.run.app,https://viet-y.ai.studio' }
     )
   }
   # Replace AI Studio prebuilt-source config with the verified production image.
