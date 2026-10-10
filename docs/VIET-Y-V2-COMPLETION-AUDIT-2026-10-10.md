@@ -1,5 +1,7 @@
 # Việt Y v2 — đối chiếu phạm vi và bằng chứng
 
+**Cập nhật sau retry:** AI Studio/My apps mở được, pull và Save mã từ GitHub đã hoàn tất; preview hiển thị Việt Y/hero/ngà/sidebar mới. Tuy nhiên ảnh /assets ở runtime preview còn trả trang SPA; xưởng báo ảnh chưa tải được. Chưa xác nhận hoàn chỉnh preview/download/API. Public production vẫn là bản đã kiểm chứng. Xem phần mới nhất của VIET-Y-AI-STUDIO-HANDOFF.md; các lỗi /520 phía dưới là lịch sử.
+
 **Trạng thái mới nhất:** bản public và GitHub main đã cập nhật ngày 10/10; hero cũ và nền ngà được giữ theo yêu cầu. Browser render/review và kiểm chứng production đã đạt. AI Studio mở được ở tab người dùng và đã đăng nhập GitHub, nhưng pull dừng ở Failed to create user snapshot; reload sau đó báo /520 và My apps báo Error loading apps. Source sync vẫn chưa hoàn tất. Bảng dưới là audit lịch sử trước khi có bằng chứng browser; các cập nhật ở cuối và VIET-Y-V2-VERIFICATION-2026-10-10.md là trạng thái hiện hành.
 
 Phạm vi gốc: `goal-objective.md` người dùng cung cấp; các quyết định sau đó chốt bỏ nút lưu trong xưởng, lookbook tạm dùng chung, chưa triển khai VTO/đăng nhập. Bảng này không xem code hoặc kiểm thử DOM là bằng chứng đã duyệt giao diện.

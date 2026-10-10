@@ -1,5 +1,7 @@
 # Việt Y — đồng bộ AI Studio và bàn giao
 
+**Cập nhật hiện hành:** người dùng tải lại My apps thành công. Pull đã hoàn tất sau retry và giữ bản GitHub của ba tài liệu xung đột. Editor vẫn còn App cũ, nên đã nhập code/checks từ main db75236 và Save, phục hồi package-lock.json. Sau retry Save, checkpoint 267 files được ghi và runtime preview hiển thị Việt Y, hero ngà, sidebar cùng route mới. Gói ảnh gốc đã nhập và Save lại; kiểm tra trực tiếp vẫn thấy đường festival.webp trả trang SPA thay vì ảnh, xưởng báo Ảnh chưa tải được. Preview asset serving và API/flow còn cần kiểm chứng trước khi gọi đồng bộ hoàn chỉnh. Không publish hoặc push thay đổi AI Studio lên main. Các lỗi phía dưới là lịch sử, không có nghĩa trang hiện không mở được.
+
 ## Trạng thái kiểm chứng khi tiếp tục goal
 
 - Repo: https://github.com/Kiendo321/Viet-Y, nhánh main. Mốc kiểm tra 80e51f3, working tree sạch; các commit sau mốc này chỉ bổ sung tài liệu nếu không ghi khác.
@@ -51,3 +53,13 @@ UI xác nhận Repository Kiendo321/Viet-Y, main; Last synced Oct 9, 11:46 AM; C
 Đã bấm Pull changes to Google AI Studio. Sau lỗi Network error và một retry do UI cung cấp, tiến trình Fetching remote files dừng ở Failed to create user snapshot. Đã cancel thao tác lỗi, kiểm tra editor vẫn giao diện cũ Việt phục Remix/luồng 6 bước. Reload phiên đã đăng nhập dẫn /520; mở My apps dẫn Error loading apps, console có RpcError: Network error, try again. Không có thông báo pull thành công hoặc diff xung đột để xử lý.
 
 Không disconnect repository, tạo app mới, sửa secret hoặc publish đè bản public. Chưa có bằng chứng quy lỗi này cho credential GitHub, quota ảnh, kích thước repo hay billing; không yêu cầu thêm token/API key. Bằng chứng màn hình: D:/AI Arena/output/ux-v2-review-2026-10-10/ai-studio-sync-error-20261010.jpg. Cần mở lại editor khi tải app/snapshot hoạt động, rồi tiếp tục pull và xác minh nguồn/preview theo checklist phía trên.
+
+## Tiếp tục sau khi người dùng xác nhận tải lại bình thường
+
+My apps và editor mở được. GitHub sync retry thành công; pull phát hiện ba conflict chỉ ở tài liệu báo cáo, giữ GitHub cho cả ba, Finish, Last synced Oct 10 9:56 AM. UI còn package-lock.json Deleted; không push thao tác xóa này. Home.tsx mới hiển thị đúng Việt Y/hero, nhưng App.tsx mở lại vẫn dùng EditorialLanding, xác nhận thông báo pull chưa đủ chứng minh toàn bộ nguồn.
+
+Đã nhập gói code/checks bằng git archive main db75236, gồm src/scripts/test/server/config/package-lock. Dùng nút Save, gặp lỗi mạng lần đầu rồi retry; Unsaved changes biến mất và checkpoint 267 files được ghi. Preview mới có title Việt Y — Nếp xưa. Cách mặc hôm nay., heading Việt Y, nền rgb(247,240,228), sidebar và /xuong-phoi, /lookbook, /tu-lieu. Không dùng báo cáo 17/17 tests của Gemini về luồng cũ làm bằng chứng v2: tác vụ đó đã sửa package.json, nhưng code/package/checks sau đó được nhập lại từ repo để loại thay đổi tự phát.
+
+Nhập và Save gói ảnh/fonts từ repo, retry sau lỗi lưu đầu tiên. Save hoàn tất nhưng ảnh runtime preview chưa hoạt động: mở /assets/viet-y-v2/festival.webp trong cùng trình duyệt trả trang Trang chưa có ở đây., không phải ảnh. Xưởng báo Ảnh chưa tải được. Chưa khẳng định nguyên nhân hoặc thiếu binary từ repo. Browser mở /api/health bị ERR_BLOCKED_BY_CLIENT; không đi đường khác để vượt chặn. Lần HTTP trước đó không xác minh API thật vì trả text/html.
+
+Artifact ở D:/AI Arena/output: viet-y-code-and-checks-db75236.zip, viet-y-runtime-assets-db75236.zip. Screenshot ở packet review: ai-studio-home-synced-20261010.jpg, ai-studio-runtime-home-20261010.jpg và lỗi lưu lịch sử ai-studio-save-error-20261010.jpg. Còn phải xác minh preview static serving/backend, flow/download. Không cần thêm credential chỉ để xử lý ảnh tĩnh; public Vertex đã kiểm chứng và không đổi trong lượt này.

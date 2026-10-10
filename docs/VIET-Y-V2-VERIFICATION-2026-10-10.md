@@ -1,5 +1,7 @@
 # Việt Y v2 — kiểm chứng 10/10/2026
 
+**Cập nhật mới nhất:** My apps/editor đã mở lại, pull thành công sau retry. Đã nhập code/checks từ main db75236 bằng ZIP và Save sau lỗi mạng; checkpoint 267 files. Preview thực tế có Việt Y, hero cũ và nền ngà, sidebar/router mới. Gói ảnh đã được nhập và Save nhưng đường ảnh festival.webp trả trang SPA trong browser; xưởng báo ảnh chưa tải được. Preview static/backend/flow chưa xác minh hoàn chỉnh. Chi tiết thao tác và bằng chứng trong VIET-Y-AI-STUDIO-HANDOFF.md. Không dùng báo cáo Gemini về bộ kiểm thử luồng cũ làm bằng chứng v2; package và checks đã phục hồi từ GitHub. Public không đổi.
+
 ## Đã kiểm chứng
 
 - TypeScript: `npm run lint` đạt.
