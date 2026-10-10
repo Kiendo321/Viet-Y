@@ -66,5 +66,6 @@ Khi kiểm tra local trên Windows, có thể đặt `LOCAL_LISTEN_HOST=::` đ�
 - `docs/VIET-Y-REDESIGN-PLAN-2026-10-10.md`: lộ trình và điều kiện hoàn thành.
 - `docs/VIET-Y-DESIGN-CONTRACT.md`: thiết kế của từng trang.
 - `docs/VIET-Y-V2-VERIFICATION-2026-10-10.md`: kiểm chứng và phần còn chờ.
+- `docs/VIET-Y-AI-STUDIO-HANDOFF.md`: trạng thái bàn giao, cách kéo GitHub về AI Studio và bằng chứng cần để xác nhận source sync.
 
 Đích production hiện hữu: `https://viet-y.ai.studio`, GCP project `c3-app-162`, Cloud Run service `viet-y`, region `asia-southeast1`. Branch mới chưa đồng nghĩa bản public đã cập nhật; chỉ ghi nhận deploy hoàn thành khi revision, traffic và luồng trên website được xác minh. Các tài liệu ngày trước trong `docs/` là lịch sử phiên bản, không phải mô tả API hiện hành.
