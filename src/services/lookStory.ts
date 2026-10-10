@@ -11,7 +11,7 @@ export function lookStoryPrompt(look:Look){
  'Bạn viết lời giới thiệu tiếng Việt cho một ảnh thời trang trong lookbook Việt Y.',
  'Viết một đoạn 70–110 từ, giàu hình ảnh nhưng cụ thể, tự nhiên, không markdown, không tiêu đề, không nhãn công nghệ và không quảng cáo quá mức.',
  'Chỉ dùng ngữ cảnh dưới đây. Không bịa danh tính, địa điểm chính xác, chất liệu cụ thể không có trong dữ liệu, phẩm cấp, năm khai sinh hay quy tắc nghi lễ.',
- 'Không suy ra đây là ảnh của người dùng thật. Đây là ảnh concept, chưa có thử đồ trên người dùng.',
+ 'Không suy ra danh tính hoặc thông tin cá nhân của nhân vật. Chỉ mô tả bộ phối dựa trên dữ liệu; không hứa hẹn độ vừa vặn thực tế.',
  'Kết nối dáng áo, màu áo, bối cảnh và tư thế; nêu một lý do chúng hài hòa. Đừng chỉ liệt kê.',
  JSON.stringify({title:look.title,concept:look.concept,character:look.character,
  garment:{name:garment.name,features:garment.anatomy,era:garment.era},

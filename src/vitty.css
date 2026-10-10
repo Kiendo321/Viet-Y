@@ -104,3 +104,51 @@
  .vitty-outfit{grid-template-columns:78px minmax(0,1fr);gap:10px;}.vitty-outfit .outfit-scene{height:140px;}.vitty-outfit>div:last-child{padding:10px 10px 10px 0;}.vitty-outfit h3{font-size:13px;}.vitty-design{padding:14px;}
 }
 @media(prefers-reduced-motion:reduce){.vitty-page *{animation:none!important;transition:none!important;}.vitty-dots i{opacity:.7;}}
+
+.vitty-reference-message {width:100%;}
+.vitty-reference {display:grid;grid-template-columns:116px minmax(0,1fr);gap:20px;align-items:start;}
+.vitty-reference-image {width:116px;aspect-ratio:3/4;object-fit:cover;border-radius:8px;background:var(--vy-soft);}
+.vitty-reference h2,.vitty-result h2 {font:650 17px/1.5 var(--vy-sans);color:var(--vy-red-dark);margin:0 0 8px;}
+.vitty-reference-copy>p {font-size:13px;line-height:1.7;color:#67575C;}
+.vitty-tryon-controls {display:flex;align-items:center;gap:12px;margin-top:14px;}
+.vitty-page .secondary-link {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:8px 14px;border:1px solid var(--vy-line);border-radius:8px;background:var(--vy-soft);color:var(--vy-red-dark);font:600 12px/1.5 var(--vy-sans);}
+.vitty-page .secondary-link:hover {background:#EEDDD3;}
+.vitty-page .primary-link {min-height:44px;padding:10px 16px;gap:8px;border-radius:8px;font-size:12px;}
+.vitty-page button:disabled,.workshop-vitty:disabled {opacity:.6;cursor:wait;transform:none;}
+.vitty-face-upload {width:44px;height:48px;object-fit:cover;border-radius:6px;}
+.vitty-reference-copy .vitty-upload-note {font-size:11px;line-height:1.65;margin:12px 0;color:#67575C;max-width:52ch;}
+.vitty-upload-error {font-size:12px;line-height:1.7;color:var(--vy-red-dark);margin-top:12px;}
+.vitty-result-image {display:block;width:auto;max-width:100%;max-height:460px;aspect-ratio:3/4;object-fit:contain;border-radius:8px;margin-top:14px;background:var(--vy-soft);}
+.vitty-result-actions {display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin-top:14px;}
+.vitty-result-actions .text-button {display:inline-flex;align-items:center;gap:8px;min-height:44px;}
+.vitty-save-form {display:grid;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid var(--vy-line);}
+.vitty-save-form label {font-size:12px;font-weight:600;}
+.vitty-name-heading {display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.vitty-name-heading button {display:inline-flex;align-items:center;gap:7px;}
+.vitty-save-form input,.vitty-save-form select {min-width:0;width:100%;height:44px;padding:10px 12px;font:13px var(--vy-sans);color:var(--vy-ink);border:1px solid #BFA997;border-radius:8px;background:#FFFCF7;caret-color:var(--vy-red);}
+.vitty-save-form input::placeholder {color:#67575C;}
+.vitty-save-form .primary-link {justify-self:start;margin-top:6px;}
+.vitty-name-options {display:flex;flex-wrap:wrap;gap:6px;}
+.vitty-name-options button {padding:8px 12px;border:1px solid var(--vy-line);border-radius:8px;background:var(--vy-soft);color:var(--vy-red-dark);font-size:12px;}
+.vitty-name-options button[aria-pressed=true] {border-color:var(--vy-red);background:#EEDDD3;}
+.vitty-missing-outfit {margin-top:16px;}
+.vitty-missing-outfit p {font-size:13px;margin-bottom:12px;}
+.workshop-preview {grid-template-rows:minmax(0,1fr) 76px;}
+.workshop-vitty {flex:0 1 auto;min-height:44px;padding:10px 14px;gap:7px;font-size:12px;line-height:1.5;}
+.workshop-handoff-error {font-size:12px;color:var(--vy-red-dark);padding:6px 16px;background:white;}
+.workshop-preview:has(.workshop-handoff-error) {grid-template-rows:minmax(0,1fr) 76px auto;}
+@media(max-width:759px){
+ .vitty-reference {grid-template-columns:70px minmax(0,1fr);gap:12px;}
+ .vitty-reference-image {width:70px;}
+ .vitty-reference h2,.vitty-result h2 {font-size:15px;}
+ .vitty-reference-copy>p {font-size:12px;}
+ .vitty-reference .secondary-link {font-size:11px;padding:8px 10px;}
+ .vitty-tryon-controls {flex-wrap:wrap;gap:8px;}
+ .vitty-upload-note {grid-column:1/-1;}
+ .vitty-result-image {max-height:380px;}
+ .vitty-name-heading {flex-wrap:wrap;gap:0;}
+ .workshop-preview {grid-template-rows:minmax(0,1fr) 64px;}
+ .workshop-preview:has(.workshop-handoff-error) {grid-template-rows:minmax(0,1fr) 64px auto;}
+ .workshop-vitty {font-size:11px;padding:8px 10px;gap:4px;max-width:148px;}
+ .preview-caption>div {min-width:0;}
+}

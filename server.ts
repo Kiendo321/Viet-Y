@@ -4,11 +4,15 @@ import path from 'path';
 import {fileURLToPath} from 'url';
 import {ThinkingLevel} from '@google/genai';
 import {createGenaiClient,genaiSettings} from './src/services/genaiConfig.js';
-import {LOOKS,GARMENTS,OCCASIONS,lookById} from './src/data/vietYCatalog.js';
+import {LOOKS,GARMENTS,OCCASIONS,lookById,Look} from './src/data/vietYCatalog.js';
 import {produceLookStory,completeStoryText,LookStory} from './src/services/lookStory.js';
 import {configuredVittyStore,validId,vittyPage,VittyStore} from './src/services/vittyStore.js';
 import {completeVittyTurn,generateVitty,VittyFailure} from './src/services/vittyAgent.js';
 import {validSelection} from './src/services/vittyContract.js';
+import {configuredMediaStore,MediaStore} from './src/services/mediaStore.js';
+import {tryOnRouter} from './src/services/tryOnRoutes.js';
+import {IMAGE_MODEL} from './src/services/tryOnAgent.js';
+import {OutfitReference,SavedLook} from './src/services/tryOnContract.js';
 
 dotenv.config();
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
@@ -16,8 +20,8 @@ export const PRIMARY_TEXT_MODEL=process.env.GEMINI_TEXT_MODEL||'gemini-3.8-flash
 export const BACKUP_TEXT_MODEL=process.env.GEMINI_BACKUP_TEXT_MODEL||'gemini-3.7-flash';
 const storyCache=new Map<string,{value:LookStory;expires:number}>();
 const pendingStories=new Map<string,Promise<LookStory>>();
-async function storyFor(id:string):Promise<LookStory>{
- const look=lookById(id)!;
+async function storyFor(look:Look):Promise<LookStory>{
+ const id=look.id;
  const cached=storyCache.get(id);
  if(cached&&cached.expires>Date.now())return cached.value;
  const pending=pendingStories.get(id);if(pending)return pending;
@@ -46,7 +50,7 @@ async function storyFor(id:string):Promise<LookStory>{
  pendingStories.set(id,work);
  try{
   const result=await work;
-  // Only six curated entries: cache is naturally bounded; duplicate requests share a model call.
+  if(storyCache.size>=200)storyCache.delete(storyCache.keys().next().value!);
   storyCache.set(id,{value:result,expires:Date.now()+(result.source==='gemini'?12*60*60*1000:30000)});
   console.log(JSON.stringify({event:'lookbook_story_result',lookId:id,source:result.source,model:result.model}));
   return result;
@@ -55,12 +59,16 @@ async function storyFor(id:string):Promise<LookStory>{
 async function startServer(){
  const app=express();
  app.disable('x-powered-by');
+ app.use(['/api/vitty/references','/api/vitty/try-on'],express.json({limit:'13mb'}));
  app.use(express.json({limit:'1mb'}));
  let vittyStore:VittyStore|null=null;
  const store=()=>vittyStore||(vittyStore=configuredVittyStore());
+ let mediaStore:MediaStore|null=null;
+ const media=()=>mediaStore||(mediaStore=configuredMediaStore());
+ const findLook=async(id:string)=>lookById(id)||(validId(id)?await media().read<SavedLook>('looks',id):null);
  const activeVitty=new Set<string>();
  const vittyOrigins=new Set((process.env.VITTY_ALLOWED_ORIGINS||'').split(',').map(s=>s.trim()).filter(Boolean));
- app.use('/api/vitty',(req,res,next)=>{
+ app.use(['/api/vitty','/api/lookbook'],(req,res,next)=>{
   const origin=req.get('Origin');
   if(origin){
    let sameHost=false;try{sameHost=new URL(origin).host===req.get('Host');}catch{}
@@ -70,6 +78,7 @@ async function startServer(){
   }
   if(req.method==='OPTIONS'){res.sendStatus(204);return;}next();
  });
+ app.use('/api/vitty',tryOnRouter(store,media,PRIMARY_TEXT_MODEL));
  const vittyError=(res:express.Response,e:unknown)=>{
   const failure=e instanceof VittyFailure?e:new VittyFailure((e as Error).message==='DURABLE_STORAGE_UNCONFIGURED'?'DURABLE_STORAGE_UNCONFIGURED':'STORAGE_UNAVAILABLE');
   res.status(failure.status).json({error:failure.code});
@@ -77,35 +86,44 @@ async function startServer(){
  app.get('/api/vitty',async(req,res)=>{
   res.setHeader('Cache-Control','no-store');
   if(req.query.before&&!validId(req.query.before)){res.status(400).json({error:'INVALID_CURSOR'});return;}
-  try{res.json(await vittyPage(store(),req.query.before as string|undefined));}catch(e){vittyError(res,e);}
+  try{const page=await vittyPage(store(),req.query.before as string|undefined);
+   for(let i=0;i<page.turns.length;i++){const t=page.turns[i];if(t.tryOn&&t.status==='pending'&&t.leaseUntil<Date.now()){const current=await store().read(t.id);if(current?.turn.status==='pending'&&current.turn.leaseUntil<Date.now()){const expired={...current.turn,status:'failed' as const,leaseUntil:0,error:'IMAGE_TIMEOUT'};if(await store().write(expired,current.version))page.turns[i]=expired;}}}
+   res.json(page);
+  }catch(e){vittyError(res,e);}
  });
  app.post('/api/vitty/turns',async(req,res)=>{
   res.setHeader('Cache-Control','no-store');
-  const {id,authorId,avatar,text,context}=req.body||{};
+  const {id,authorId,avatar,text,context,referenceId}=req.body||{};
   if(!validId(id)||!validId(authorId)||(avatar!=='male'&&avatar!=='female')||typeof text!=='string'||!text.trim()||text.length>4000){res.status(400).json({error:'INVALID_MESSAGE'});return;}
   const selection=context===undefined?undefined:validSelection(context);
   if(selection===null){res.status(400).json({error:'INVALID_CONTEXT'});return;}
   if(activeVitty.size>=3&&!activeVitty.has(id)){res.status(429).json({error:'BUSY'});return;}
   const ownsSlot=!activeVitty.has(id);if(ownsSlot)activeVitty.add(id);
-  try{res.json({turn:await completeVittyTurn(store(),{id,authorId,avatar,text:text.trim(),...(selection?{context:selection}:{})},(turn,history)=>generateVitty(turn,history,[PRIMARY_TEXT_MODEL,BACKUP_TEXT_MODEL]))});}
+  try{
+   let reference:OutfitReference|null=null,referencePng:Buffer|undefined;
+   if(referenceId!==undefined){if(!validId(referenceId))throw new VittyFailure('INVALID_CONTEXT',400);reference=await media().read<OutfitReference>('references',referenceId);if(!reference||reference.authorId!==authorId)throw new VittyFailure('INVALID_CONTEXT',400);referencePng=await media().image('references',referenceId)||undefined;if(!referencePng)throw new VittyFailure('INVALID_CONTEXT',400);}
+   res.json({turn:await completeVittyTurn(store(),{id,authorId,avatar,text:text.trim(),...(reference?{context:reference.selection,referenceId:reference.id}:selection?{context:selection}:{})},(turn,history)=>generateVitty(turn,history,[PRIMARY_TEXT_MODEL,BACKUP_TEXT_MODEL],referencePng))});
+  }
   catch(e){vittyError(res,e);}finally{if(ownsSlot)activeVitty.delete(id);}
  });
  app.get('/api/health',(_req,res)=>res.json({
   status:'ok',brand:'Việt Y',version:'experience-v2',hasApiKey:Boolean(process.env.GEMINI_API_KEY&&process.env.GEMINI_API_KEY!=='MY_GEMINI_API_KEY'),
   provider:genaiSettings().provider,configured:genaiSettings().configured,textModel:PRIMARY_TEXT_MODEL,backupTextModel:BACKUP_TEXT_MODEL,
-  catalog:{garments:GARMENTS.length,events:OCCASIONS.length,looks:LOOKS.length},vto:false
+  catalog:{garments:GARMENTS.length,events:OCCASIONS.length,looks:LOOKS.length},vto:true,imageModel:IMAGE_MODEL
  }));
- app.get('/api/lookbook',(req,res)=>res.json({looks:LOOKS,shared:true}));
+ app.get('/api/lookbook',async(_req,res)=>{res.setHeader('Cache-Control','no-store');try{const saved=await media().list<SavedLook>('looks');res.json({looks:[...saved.sort((a,b)=>b.createdAt.localeCompare(a.createdAt)),...LOOKS],shared:true});}catch(e){vittyError(res,e);}});
+ app.get('/api/lookbook/:id',async(req,res)=>{try{const look=await findLook(req.params.id);if(!look){res.status(404).json({error:'LOOK_NOT_FOUND'});return;}res.json({look});}catch(e){vittyError(res,e);}});
  app.get('/api/lookbook/:id/story',async(req,res)=>{
-  const look=lookById(req.params.id);
+  let look:Look|null|undefined;try{look=await findLook(req.params.id);}catch(e){vittyError(res,e);return;}
   if(!look){res.status(404).json({error:'LOOK_NOT_FOUND'});return;}
   res.setHeader('Cache-Control','no-store');
-  try{res.json(await storyFor(look.id));}
+  try{res.json(await storyFor(look));}
   catch{res.json({text:look.intro,source:'editorial',model:null,reason:'STORY_UNAVAILABLE'});}
  });
- app.get('/api/lookbook/:id/download',(req,res)=>{
-  const look=lookById(req.params.id);
+ app.get('/api/lookbook/:id/download',async(req,res)=>{
+  let look:Look|null|undefined;try{look=await findLook(req.params.id);}catch(e){vittyError(res,e);return;}
   if(!look){res.status(404).json({error:'LOOK_NOT_FOUND'});return;}
+  if(validId(look.id)){try{const image=await media().image('results',look.id);if(!image){res.status(404).json({error:'IMAGE_NOT_FOUND'});return;}res.setHeader('Content-Disposition','attachment; filename="viet-y-'+look.id+'.png"');res.type('png').send(image);}catch(e){vittyError(res,e);}return;}
   // Resolve only known catalog IDs, never a request-supplied filesystem path.
   const file=path.resolve(__dirname,'public',look.image.slice(1).replace(/\.webp$/,'.png'));
   res.download(file,'viet-y-'+look.id+'.png',error=>{
@@ -116,6 +134,7 @@ async function startServer(){
   res.status(410).json({error:'FEATURE_RETIRED',message:'Tính năng không còn thuộc xưởng phối hiện tại.'});
  });
  app.all('/api/*',(_req,res)=>res.status(404).json({error:'API_ENDPOINT_NOT_FOUND'}));
+ app.use((error:unknown,_req:express.Request,res:express.Response,next:express.NextFunction)=>{if(error){res.status((error as {status?:number}).status===413?413:400).json({error:'INVALID_IMAGE'});return;}next();});
  app.use('/assets',express.static(path.resolve(__dirname,'public','assets'),{maxAge:'1h'}));
  app.use(express.static(path.resolve(__dirname,'public')));
  if(process.env.NODE_ENV!=='production'){

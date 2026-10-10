@@ -1,6 +1,9 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {ArrowUp,ArrowDown,ArrowUpRight,BookOpen,Check,ChevronDown,RotateCw,X} from 'lucide-react';
-import {Link} from '../services/navigation';
+import {Link,navigate} from '../services/navigation';
+import {API_BASE,browserAuthor,apiRequest} from '../services/apiClient';
+import {OutfitReference} from '../services/tryOnContract';
+import {TryOnReference,TryOnResultCard,MissingOutfit,FailedTryOn} from './VittyTryOn';
 import {ComposerSelection,GARMENTS,OCCASIONS,COLORS,ACCESSORIES,composerUrl,garmentById,eventById,selectionFromSearch} from '../data/vietYCatalog';
 import {browserAsset} from '../assets/browserAssets';
 import {VittyAnswer,VittyAvatar,VittyPage,VittyTurn,VITTY_STARTERS,validateVittyAnswer} from '../services/vittyContract';
@@ -10,9 +13,7 @@ const VITTY_IMAGE=new URL('../assets/vitty/vitty-a-cultural-guide.png',import.me
 const AVATARS={male:browserAsset('/assets/outfit-photo-v1/avatar.webp'),female:browserAsset('/assets/viet-y-v2/nguthan-female-ivory.webp')};
 // Studio's preview serves frontend modules but its API paths currently return startup HTML.
 // The stable preview tag runs this same backend with Vertex; public routes stay same-origin.
-const API_BASE=import.meta.env?.VITE_VITTY_API_BASE||(window.location.hostname.startsWith('ais-dev-')&&window.location.hostname.endsWith('.run.app')?'https://ux-preview---viet-y-ivo7erh2oq-as.a.run.app':'');
 const local={read:(key:string)=>{try{return localStorage.getItem('vitty:'+key);}catch{return null;}},write:(key:string,value:string)=>{try{localStorage.setItem('vitty:'+key,value);}catch{}},remove:(key:string)=>{try{localStorage.removeItem('vitty:'+key);}catch{}}};
-function ownId(){const saved=local.read('author');if(saved)return saved;const id=crypto.randomUUID();local.write('author',id);return id;}
 const errorText:Record<string,string>={PROVIDER_UNCONFIGURED:'Vitty chưa kết nối được dịch vụ trả lời.',ANSWER_UNAVAILABLE:'Vitty chưa trả lời được lúc này. Bạn có thể thử lại.',STORAGE_UNAVAILABLE:'Chưa kết nối được lịch sử trò chuyện. Thử tải lại.',DURABLE_STORAGE_UNCONFIGURED:'Lịch sử trò chuyện chưa sẵn sàng. Thử lại sau.',BUSY:'Vitty đang trả lời một vài câu hỏi. Bạn thử lại sau một chút nhé.',INVALID_MESSAGE:'Câu hỏi cần từ 1 đến 4.000 ký tự.',TURN_CONFLICT:'Lượt này đã được gửi với nội dung khác. Hãy tải lại hội thoại.',NETWORK:'Chưa nhận được phản hồi. Câu hỏi được giữ lại để bạn thử lại.'};
 async function request<T>(url:string,options?:RequestInit):Promise<T>{
  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),options?.method==='POST'?85000:12000);
@@ -40,15 +41,18 @@ function restoredOutbox():VittyTurn|null{try{const saved=JSON.parse(local.read('
 function mergeTurns(before:VittyTurn[],after:VittyTurn[]){const merged=new Map(before.map(t=>[t.id,t]));after.forEach(t=>merged.set(t.id,t));return [...merged.values()].sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));}
 function fitComposer(el:HTMLTextAreaElement){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
 export function Vitty({search=''}:{search?:string}){
- const [author]=useState(ownId),[avatar,setAvatar]=useState<VittyAvatar>(()=>local.read('avatar')==='female'?'female':'male');
+ const [author]=useState(browserAuthor),[avatar,setAvatar]=useState<VittyAvatar>(()=>local.read('avatar')==='female'?'female':'male');
  const [draft,setDraft]=useState(()=>local.read('draft')||''),[turns,setTurns]=useState<VittyTurn[]>([]),[outbox,setOutbox]=useState<VittyTurn|null>(restoredOutbox);
  const [loading,setLoading]=useState(true),[sending,setSending]=useState(false),[error,setError]=useState(''),[syncError,setSyncError]=useState('');
  const [before,setBefore]=useState<string|null>(null),[loadingOlder,setLoadingOlder]=useState(false),[fan,setFan]=useState(false),[avatarOpen,setAvatarOpen]=useState(false),[newMessages,setNewMessages]=useState(false);
  const [context,setContext]=useState<ComposerSelection|null>(()=>new URLSearchParams(search).has('ao')?selectionFromSearch(search):null);
+ const [reference,setReference]=useState<OutfitReference|null>(null),[referenceLoading,setReferenceLoading]=useState(false);
  const transcript=useRef<HTMLDivElement>(null),input=useRef<HTMLTextAreaElement>(null),suggestions=useRef<HTMLDivElement>(null),avatarPicker=useRef<HTMLDivElement>(null);
  const nearBottom=useRef(true),boot=useRef(true),turnsRef=useRef(turns),outboxRef=useRef(outbox),fanButton=useRef<HTMLButtonElement>(null),avatarButton=useRef<HTMLButtonElement>(null);
  turnsRef.current=turns;outboxRef.current=outbox;
  const scrollBottom=()=>{const el=transcript.current;if(el)el.scrollTop=el.scrollHeight;nearBottom.current=true;setNewMessages(false);};
+ useEffect(()=>{const id=new URLSearchParams(search).get('bo-phoi')||local.read('reference');if(!id)return;let live=true;setReferenceLoading(true);setReference(null);void apiRequest<{reference:OutfitReference}>('/api/vitty/references/'+encodeURIComponent(id)).then(({reference:r})=>{if(!live)return;if(r.authorId!==author)throw Error('INVALID_CONTEXT');setReference(r);setContext(r.selection);local.write('reference',r.id);nearBottom.current=true;requestAnimationFrame(scrollBottom);}).catch(()=>{if(live){local.remove('reference');setError('Chưa tải được bộ phối. Hãy gửi lại từ Xưởng phối.');}}).finally(()=>{if(live)setReferenceLoading(false);});return()=>{live=false;};},[search,author]);
+ const acceptTryOn=(turn:VittyTurn)=>{nearBottom.current=true;setTurns(previous=>mergeTurns(previous,[turn]));requestAnimationFrame(scrollBottom);};
  useEffect(()=>{if(nearBottom.current)scrollBottom();},[turns,outbox]);
  useEffect(()=>{local.write('draft',draft);if(input.current)fitComposer(input.current);},[draft]);
  useEffect(()=>{const el=input.current;if(!el||typeof ResizeObserver==='undefined')return;let width=el.getBoundingClientRect().width;const observer=new ResizeObserver(()=>{const next=el.getBoundingClientRect().width;if(Math.abs(next-width)>1){width=next;fitComposer(el);}});observer.observe(el);return()=>observer.disconnect();},[]);
@@ -78,11 +82,11 @@ export function Vitty({search=''}:{search?:string}){
  },[fan,avatarOpen]);
  async function send(text:string,retry?:VittyTurn){
   if(sending||!text.trim()||text.length>4000)return;
-  const turn:VittyTurn=retry||{id:crypto.randomUUID(),authorId:author,avatar,text:text.trim(),createdAt:new Date().toISOString(),status:'pending',leaseUntil:Date.now()+100000,attempt:0,...(context?{context}:{})};
+  const turn:VittyTurn=retry||{id:crypto.randomUUID(),authorId:author,avatar,text:text.trim(),createdAt:new Date().toISOString(),status:'pending',leaseUntil:Date.now()+100000,attempt:0,...(context?{context}:{}),...(reference?{referenceId:reference.id}:{})};
   setSending(true);setError('');setFan(false);setOutbox(turn);local.write('outbox',JSON.stringify(turn));
   if(!retry){setDraft('');local.write('draft','');}
   nearBottom.current=true;requestAnimationFrame(scrollBottom);
-  try{const {turn:received}=await request<{turn:VittyTurn}>('/api/vitty/turns',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:turn.id,authorId:turn.authorId,avatar:turn.avatar,text:turn.text,...(turn.context?{context:turn.context}:{})})});
+  try{const {turn:received}=await request<{turn:VittyTurn}>('/api/vitty/turns',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:turn.id,authorId:turn.authorId,avatar:turn.avatar,text:turn.text,...(turn.context?{context:turn.context}:{}),...(turn.referenceId?{referenceId:turn.referenceId}:{})})});
    setTurns(previous=>mergeTurns(previous,[received]));setOutbox(null);local.remove('outbox');setSyncError('');requestAnimationFrame(scrollBottom);
   }catch(e){setError(errorText[(e as Error).message]||errorText.NETWORK);}
   finally{setSending(false);input.current?.focus({preventScroll:true});}
@@ -99,13 +103,15 @@ export function Vitty({search=''}:{search?:string}){
     <article className="vitty-message assistant"><Face who="vitty"/><div className="vitty-message-content"><span className="vitty-speaker">Vitty</span><div className="vitty-bubble"><Answer answer={welcome}/></div></div></article>
     {loading&&<p className="vitty-sync" role="status">Đang kết nối hội thoại…</p>}
     {displayed.map(turn=><React.Fragment key={turn.id}><article className="vitty-message user"><Face who={turn.avatar}/><div className="vitty-message-content"><span className="vitty-speaker">{turn.authorId===author?'Bạn':'Khách'}</span><div className="vitty-bubble"><p>{turn.text}</p>{turn.context&&<span className="vitty-turn-context">{garmentById(turn.context.garment)!.shortName} · {eventById(turn.context.event)!.shortName}</span>}</div></div></article>
-     <article className="vitty-message assistant"><Face who="vitty"/><div className="vitty-message-content"><span className="vitty-speaker">Vitty</span><div className="vitty-bubble">{turn.status==='complete'&&turn.answer?<Answer answer={validateVittyAnswer(turn.answer)}/>:turn.status==='failed'?<div className="vitty-failure"><p>{errorText[turn.error||'']||errorText.ANSWER_UNAVAILABLE}</p>{turn.authorId===author&&<button onClick={()=>send(turn.text,turn)} disabled={sending}><RotateCw size={15}/>Thử lại</button>}</div>:<div className="vitty-waiting"><span className="vitty-dots" aria-hidden="true"><i/><i/><i/></span><span>{turn.attempt===0?'Đang gửi câu hỏi…':'Vitty đang suy nghĩ…'}</span>{turn.leaseUntil<Date.now()&&turn.authorId===author&&<button disabled={sending} onClick={()=>send(turn.text,turn)}>Thử lại</button>}</div>}</div></div></article>
+     <article className="vitty-message assistant"><Face who="vitty"/><div className="vitty-message-content"><span className="vitty-speaker">Vitty</span><div className="vitty-bubble">{turn.tryOn?(turn.status==='complete'&&turn.tryOn.image?<TryOnResultCard turn={turn} author={author}/>:turn.status==='failed'?<FailedTryOn turn={turn}/>:<div className="vitty-waiting"><span className="spinner"/><span>{turn.leaseUntil>Date.now()?'Vitty đang tạo ảnh thử đồ…':'Lượt tạo bị gián đoạn. Chọn lại ảnh mặt để thử lại.'}</span></div>):turn.status==='complete'&&turn.answer?<><Answer answer={validateVittyAnswer(turn.answer)}/>{turn.text.toLowerCase().includes('thử đồ')&&!turn.referenceId&&<MissingOutfit/>}</>:turn.status==='failed'?<div className="vitty-failure"><p>{errorText[turn.error||'']||errorText.ANSWER_UNAVAILABLE}</p>{turn.authorId===author&&<button onClick={()=>send(turn.text,turn)} disabled={sending}><RotateCw size={15}/>Thử lại</button>}</div>:<div className="vitty-waiting"><span className="vitty-dots" aria-hidden="true"><i/><i/><i/></span><span>{turn.attempt===0?'Đang gửi câu hỏi…':'Vitty đang suy nghĩ…'}</span>{turn.leaseUntil<Date.now()&&turn.authorId===author&&<button disabled={sending} onClick={()=>send(turn.text,turn)}>Thử lại</button>}</div>}</div></div></article>
     </React.Fragment>)}
+    {referenceLoading&&<p className="vitty-sync" role="status">Đang nhận bộ phối…</p>}
+    {reference&&<article className="vitty-message assistant"><Face who="vitty"/><div className="vitty-message-content vitty-reference-message"><span className="vitty-speaker">Vitty</span><div className="vitty-bubble"><TryOnReference reference={reference} author={author} avatar={avatar} onTurn={acceptTryOn}/></div></div></article>}
    </div>
   </div>
   <footer className="vitty-composer-zone"><div className="vitty-composer-inner">
    <div className="vitty-tools">{newMessages&&<button className="vitty-new" onClick={scrollBottom}><ArrowDown size={15}/>Tin nhắn mới</button>}<div className="vitty-fan-control"><button ref={fanButton} className={'vitty-fan-button '+(fan?'open':'')} aria-label="Gợi ý câu hỏi" aria-expanded={fan} aria-controls="vitty-starters" onClick={()=>{setFan(!fan);setAvatarOpen(false);}}><Fan/></button>{fan&&<div ref={suggestions} id="vitty-starters" className="vitty-starters">{VITTY_STARTERS.map(s=><button key={s} disabled={sending} onClick={()=>send(s)}>{s}<ArrowUpRight size={17}/></button>)}</div>}</div></div>
-   {context&&<div className="vitty-context"><span>Đang trao đổi: {garmentById(context.garment)!.shortName} · {COLORS[context.color].name} · {eventById(context.event)!.shortName}</span><button aria-label="Bỏ ngữ cảnh bộ phối" onClick={()=>setContext(null)}><X size={16}/></button></div>}
+   {context&&<div className="vitty-context"><span>Đang trao đổi: {garmentById(context.garment)!.shortName} · {COLORS[context.color].name} · {eventById(context.event)!.shortName}</span><button aria-label="Bỏ ngữ cảnh bộ phối" onClick={()=>{setContext(null);setReference(null);local.remove('reference');navigate('/vitty',true);}}><X size={16}/></button></div>}
    {(error||syncError)&&<div className="vitty-error" role="alert"><p>{error||syncError}</p>{outbox&&!sending&&<button onClick={()=>send(outbox.text,outbox)}><RotateCw size={15}/>Thử lại</button>}</div>}
    <form className="vitty-composer" onSubmit={e=>{e.preventDefault();void send(draft);}}><label className="sr-only" htmlFor="vitty-question">Câu hỏi cho Vitty</label><textarea ref={input} id="vitty-question" rows={1} placeholder="Hỏi Vitty…" maxLength={4000} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();void send(draft);}}}/><button aria-label={sending?'Đang gửi':'Gửi câu hỏi'} disabled={sending||!draft.trim()} type="submit">{sending?<span className="vitty-send-wait"/>:<ArrowUp size={22}/>}</button></form>
    <span className="sr-only" role="status" aria-live="polite">{sending?'Đang gửi câu hỏi':turns.at(-1)?.status==='complete'?'Vitty đã trả lời':''}</span>

@@ -10,7 +10,7 @@ const originalFetch=globalThis.fetch,originalImage=window.Image;
 beforeEach(()=>{
  window.history.replaceState({},'','/');
  window.scrollTo=()=>{};
- globalThis.fetch=async()=>({ok:true,status:200,json:async()=>({text:LOOKS[0].intro,source:'gemini'})}) as Response;
+ globalThis.fetch=async(url)=>({ok:true,status:200,json:async()=>String(url).endsWith('/api/lookbook')?{looks:LOOKS,shared:true}:String(url).endsWith('/story')?{text:LOOKS[0].intro,source:'gemini'}:{look:LOOKS.find(l=>String(url).endsWith('/'+l.id))}}) as Response;
  window.Image=class{onload:(()=>void)|null=null;set src(_:string){queueMicrotask(()=>this.onload?.());}} as any;
 });
 afterEach(()=>{cleanup();globalThis.fetch=originalFetch;window.Image=originalImage;});

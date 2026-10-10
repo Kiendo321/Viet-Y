@@ -17,7 +17,7 @@ test('Every exposed variant, event, accessory and look has a real local asset',(
 test('Lookbook prompt contains validated cultural context and the exact selected occasion/person',()=>{
  const p=lookStoryPrompt(LOOKS[1]);
  assert.ok(p.includes('Áo Nhật Bình'));assert.ok(p.includes('Lễ ăn hỏi'));assert.ok(p.includes(LOOKS[1].character));
- assert.ok(p.includes('Không bịa'));assert.ok(p.includes('chưa có thử đồ'));
+ assert.ok(p.includes('Không bịa'));assert.ok(p.includes('Không suy ra danh tính'));assert.ok(p.includes('không hứa hẹn độ vừa vặn thực tế'));
 });
 test('Malformed, empty, HTML or oversized story outputs are rejected',()=>{
  for(const text of ['',null,'short','<script>'+LOOKS[0].intro+'</script>','x'.repeat(1601)])assert.equal(cleanLookStory(text),null);

@@ -1,4 +1,5 @@
 import {ComposerSelection,GARMENTS,OCCASIONS,normalizeSelection,garmentById,eventById} from '../data/vietYCatalog';
+import type {TryOnResult} from './tryOnContract';
 
 export type VittyAvatar = 'male'|'female';
 export interface VittySection {title:string;body:string;items:string[];}
@@ -9,7 +10,7 @@ export interface VittyAnswer {title:string;intro:string;sections:VittySection[];
 export interface VittyTurn {
  id:string;authorId:string;avatar:VittyAvatar;text:string;createdAt:string;
  status:'pending'|'complete'|'failed';leaseUntil:number;attempt:number;
- context?:ComposerSelection;answer?:VittyAnswer;model?:string;error?:string;
+ context?:ComposerSelection;referenceId?:string;tryOn?:TryOnResult;answer?:VittyAnswer;model?:string;error?:string;
 }
 export interface VittyPage {turns:VittyTurn[];before:string|null;shared:true;storage:'filesystem'|'cloud-storage';}
 export const VITTY_STARTERS=['Có những trang phục và sự kiện nào?','Tôi nên mặc gì?','Tôi muốn thử đồ.'] as const;

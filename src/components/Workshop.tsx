@@ -1,5 +1,9 @@
 import React from 'react';
-import {Check,ChevronDown,RotateCcw} from 'lucide-react';
+import {Check,ChevronDown,RotateCcw,ArrowUpRight} from 'lucide-react';
+import {navigate} from '../services/navigation';
+import {exportOutfitPng} from '../services/outfitReference';
+import {apiRequest,browserAuthor,jsonPost} from '../services/apiClient';
+import {OutfitReference} from '../services/tryOnContract';
 import {GARMENTS,OCCASIONS,COLORS,ACCESSORIES,ComposerSelection,GarmentId,EventId,Person,ColorId,AccessoryId,normalizeSelection,accessoriesFor,garmentById,eventById} from '../data/vietYCatalog';
 import {OutfitPreview} from './OutfitDetails';
 function Picker({label,value,children}:{label:string;value:string;children:React.ReactNode}){
@@ -13,6 +17,8 @@ function Picker({label,value,children}:{label:string;value:string;children:React
 export function Workshop({selection,onChange}:{selection:ComposerSelection;onChange:(s:ComposerSelection)=>void}){
  const garment=garmentById(selection.garment)!;const occasion=eventById(selection.event)!;
  const [feedback,setFeedback]=React.useState(''),[ready,setReady]=React.useState(false);
+ const [handoff,setHandoff]=React.useState(false),[handoffError,setHandoffError]=React.useState('');
+ async function tryWithVitty(){if(handoff||!ready)return;setHandoff(true);setHandoffError('');const chosen={...selection};try{const image=await exportOutfitPng(chosen);const {reference}=await apiRequest<{reference:OutfitReference}>('/api/vitty/references',jsonPost({authorId:browserAuthor(),selection:chosen,image}),30000);navigate('/vitty?bo-phoi='+reference.id);}catch{setHandoffError('Chưa gửi được bộ phối. Bạn thử lại nhé.');}finally{setHandoff(false);}}
  const update=(patch:Partial<ComposerSelection>)=>{const next=normalizeSelection({...selection,...patch});onChange(next);setFeedback(patch.garment&&next.person!==selection.person?'Đã chuyển sang mẫu nữ': 'Đã cập nhật bộ phối');};
  const colors=Object.keys(garment.variants[selection.person]!) as ColorId[];
  return <section className="workshop" aria-label="Xưởng phối">
@@ -35,7 +41,7 @@ export function Workshop({selection,onChange}:{selection:ComposerSelection;onCha
     </div>
     <p className="selection-feedback" role="status" aria-live="polite">{feedback}</p>
    </div>
-   <div className="workshop-preview"><OutfitPreview selection={selection} onReady={setReady}/><div className="preview-caption"><div><h2>{garment.shortName} · {COLORS[selection.color].name}</h2><p>{occasion.name}</p></div><span className={'preview-state '+(ready?'ready':'')}><span/>{ready?'Đang xem':'Đang tải'}</span></div></div>
+   <div className="workshop-preview"><OutfitPreview selection={selection} onReady={setReady}/><div className="preview-caption"><div><h2>{garment.shortName} · {COLORS[selection.color].name}</h2><p>{occasion.name}</p></div><button className="primary-link workshop-vitty" disabled={!ready||handoff} onClick={tryWithVitty}>{handoff?<span className="spinner"/>:<ArrowUpRight size={17}/>} {handoff?'Đang gửi bộ phối':'Thử đồ với Vitty'}</button></div>{handoffError&&<p className="workshop-handoff-error" role="alert">{handoffError}</p>}</div>
   </div>
  </section>;
 }
