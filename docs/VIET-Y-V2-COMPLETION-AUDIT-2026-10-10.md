@@ -1,8 +1,8 @@
 # Việt Y v2 — đối chiếu phạm vi và bằng chứng
 
-**Cập nhật sau retry:** AI Studio/My apps mở được, pull và Save mã từ GitHub đã hoàn tất; preview hiển thị Việt Y/hero/ngà/sidebar mới. Tuy nhiên ảnh /assets ở runtime preview còn trả trang SPA; xưởng báo ảnh chưa tải được. Chưa xác nhận hoàn chỉnh preview/download/API. Public production vẫn là bản đã kiểm chứng. Xem phần mới nhất của VIET-Y-AI-STUDIO-HANDOFF.md; các lỗi /520 phía dưới là lịch sử.
+**Cập nhật hiện hành — lỗi ảnh đã hoàn tất:** ảnh được đóng gói qua Vite thay vì phụ thuộc mapping public-files trong preview AI Studio. Đã kiểm chứng trực tiếp mẫu nam/nữ, đổi asset màu và phụ kiện, phông ăn hỏi, sáu ảnh lookbook và chín ảnh tư liệu; mobile không tràn ngang. Public chạy cùng ứng dụng d5dacfd ở revision viet-y-browser-assets-20261010, giữ Vertex. Static images/UI preview đã đạt; Gemini preview còn fallback và không được đánh dấu đã tích hợp thành công. Các bảng/trạng thái bên dưới là lịch sử, theo mốc ghi ở từng phần.
 
-**Trạng thái mới nhất:** bản public và GitHub main đã cập nhật ngày 10/10; hero cũ và nền ngà được giữ theo yêu cầu. Browser render/review và kiểm chứng production đã đạt. AI Studio mở được ở tab người dùng và đã đăng nhập GitHub, nhưng pull dừng ở Failed to create user snapshot; reload sau đó báo /520 và My apps báo Error loading apps. Source sync vẫn chưa hoàn tất. Bảng dưới là audit lịch sử trước khi có bằng chứng browser; các cập nhật ở cuối và VIET-Y-V2-VERIFICATION-2026-10-10.md là trạng thái hiện hành.
+**Trạng thái lịch sử trước khi sửa ảnh:** bản public và GitHub main đã cập nhật ngày 10/10; hero cũ và nền ngà được giữ theo yêu cầu. Browser render/review và kiểm chứng production đã đạt. AI Studio mở được ở tab người dùng và đã đăng nhập GitHub, nhưng pull dừng ở Failed to create user snapshot; reload sau đó báo /520 và My apps báo Error loading apps. Source sync vẫn chưa hoàn tất. Bảng dưới là audit lịch sử trước khi có bằng chứng browser; các cập nhật ở cuối và VIET-Y-V2-VERIFICATION-2026-10-10.md là trạng thái hiện hành.
 
 Phạm vi gốc: `goal-objective.md` người dùng cung cấp; các quyết định sau đó chốt bỏ nút lưu trong xưởng, lookbook tạm dùng chung, chưa triển khai VTO/đăng nhập. Bảng này không xem code hoặc kiểm thử DOM là bằng chứng đã duyệt giao diện.
 
@@ -50,3 +50,17 @@ Main/branch đã fast-forward cùng 3e34753 (sau đó chỉ có commit tài li�
 ## Sau đăng nhập GitHub và thử pull
 
 Đã thao tác trên đúng tab AI Studio người dùng đang mở, xác minh liên kết main và thực hiện pull mốc 1afd324. UI bắt đầu Fetching remote files nhưng báo Failed to create user snapshot; chưa vào diff và chưa xác nhận hoàn thành. Editor được nhìn thấy vẫn là bản cũ. Sau reload, lỗi /520 và Error loading apps xuất hiện cả trong tab này. Xem VIET-Y-AI-STUDIO-HANDOFF.md để có bằng chứng và bước tiếp tục. Không đánh dấu toàn bộ mục đồng bộ hoàn thành, không publish lại hoặc thay cấu hình Vertex production.
+
+
+## Sửa tải ảnh AI Studio — release browser assets
+
+- Source ứng dụng: d5dacfd; ZIP viet-y-browser-assets-fix.zip, 6,248,711 bytes, 53 file, đã Save vào app gốc. Không có credential hoặc .env trong ZIP.
+- Kiểm tra trước sửa: hero và performance.webp tải được nhưng festival/engagement/heritage và nhiều ảnh lookbook trả SPA thay vì ảnh. Không kết luận tất cả public assets đều hỏng.
+- public/assets tiếp tục là nguồn gốc cho backend/PNG. src/assets/runtime chứa bản WebP giống byte để browser bundler đưa vào graph; scripts/sync-browser-assets.mjs đồng bộ/kiểm chứng, npm run build kiểm tra drift trước khi build. Không sửa bố cục, màu nền, pose hoặc hình ảnh.
+- Cơ chế static new URL(..., import.meta.url) theo tài liệu Vite: https://vite.dev/guide/assets.html#new-url-url-import-meta-url . Trong editor dùng URL src/assets/runtime; production dùng filename có hash. Registry chỉ được import phía client, catalog/server giữ đường dẫn gốc.
+- Browser preview: aria-busy=false ở nam/ngũ thân/chàm; nữ/Nhật Bình/ngà/kiềng bạc/phông ăn hỏi. 6/6 ảnh lookbook, 9/9 ảnh thư viện naturalWidth=1086. Mobile 390×844: clientWidth=scrollWidth=390 và ảnh đã tải. Trang ảnh chi tiết mở đúng ảnh; lời giới thiệu kết thúc ở fallback có nút làm mới. Không claim Vertex/Gemini hoặc PNG download đã được kiểm chứng trong preview AI Studio.
+- Evidence: ai-studio-workshop-assets-fixed.jpg, ai-studio-workshop-female-fixed.jpg, ai-studio-lookbook-fixed.jpg, ai-studio-look-detail-fixed.jpg, ai-studio-workshop-mobile-fixed.jpg, ai-studio-editor-workshop-fixed.jpg, public-workshop-assets-fixed.jpg trong output/ux-v2-review-2026-10-10 ngoài repo.
+- Lint đạt, 29/29 tests đạt, build đạt. Smoke mới: 45 ảnh có hash được phục vụ đúng image/webp và đúng byte; 45 ảnh đường gốc, PNG download và fallback vẫn đạt.
+- Cloud Build eab39e92-2924-4deb-831c-ed2f2f51df14 SUCCESS. Image sha256:26c6fe57bf7268b1f2859efaaa85ef67f836dd3999de43e3c8bfa011e66e202f. Revision viet-y-browser-assets-20261010 Ready và nhận 100% traffic.
+- Verify-browser-assets chạy trên tag ux-preview và URL public Cloud Run: cả hai đạt 45 ảnh có hash khớp canonical WebP; bundle public index-BiIMSGbt.js. Health preview: experience-v2, vertex_ai, configured=true, 5/4/6, VTO=false. Backend không thay đổi so với bằng chứng Gemini thật đã ghi ở release trước.
+- Browser tại https://viet-y.ai.studio/xuong-phoi xác nhận bundle index-BiIMSGbt.js, background festival-DkTCblc0.webp và scene aria-busy=false. Không bấm Publish AI Studio để thay image Cloud Run đã kiểm chứng.
