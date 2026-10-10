@@ -14,17 +14,17 @@ beforeEach(()=>{
  window.Image=class{onload:(()=>void)|null=null;set src(_:string){queueMicrotask(()=>this.onload?.());}} as any;
 });
 afterEach(()=>{cleanup();globalThis.fetch=originalFetch;window.Image=originalImage;});
-function openWorkshop(){render(React.createElement(App));fireEvent.click(screen.getByRole('link',{name:/^Bắt đầu phối/}));}
+function openWorkshop(){render(React.createElement(App));fireEvent.click(screen.getByRole('link',{name:/^Vào xưởng phối/}));}
 test('Routes retain browser history; Back and Forward return to the corresponding page',async()=>{
  render(React.createElement(App));
- fireEvent.click(screen.getByRole('link',{name:/^Bắt đầu phối/}));
+ fireEvent.click(screen.getByRole('link',{name:/^Vào xưởng phối/}));
  assert.equal(window.location.pathname,'/xuong-phoi');
  fireEvent.click(screen.getByRole('link',{name:'Lookbook'}));
  assert.equal(window.location.pathname,'/lookbook');
  window.history.back();
  await waitFor(()=>assert.ok(screen.getByRole('heading',{level:1,name:'Xưởng phối'})));
  window.history.back();
- await waitFor(()=>assert.ok(screen.getByRole('heading',{level:1,name:'Việt Y'})));
+ await waitFor(()=>assert.ok(screen.getByRole('heading',{level:1,name:/Mặc nét Việt\.\s*Phối chất riêng\./})));
  window.history.forward();
  await waitFor(()=>assert.ok(screen.getByRole('heading',{level:1,name:'Xưởng phối'})));
 });

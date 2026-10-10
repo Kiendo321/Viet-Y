@@ -14,7 +14,7 @@ beforeEach(()=>{
  window.Image=class{onload:(()=>void)|null=null;set src(_:string){queueMicrotask(()=>this.onload?.());}} as any;
 });
 afterEach(()=>{cleanup();globalThis.fetch=originalFetch;window.Image=originalImage;Object.defineProperty(window,'innerWidth',{configurable:true,value:originalWidth});window.HTMLElement.prototype.getClientRects=originalRects;});
-function openWorkshop(){render(React.createElement(App));fireEvent.click(screen.getByRole('link',{name:/^Bắt đầu phối/}));}
+function openWorkshop(){render(React.createElement(App));fireEvent.click(screen.getByRole('link',{name:/^Vào xưởng phối/}));}
 test('Static detail disclosure has three crops, preserves selection, and never calls AI',async()=>{
  const calls:string[]=[];globalThis.fetch=async(input)=>{calls.push(String(input));return {ok:true,json:async()=>({})} as Response;};
  openWorkshop();const before=window.location.href;
@@ -72,9 +72,18 @@ test('A direct workshop link restores its configured garment, event, person, col
 test('Landing links have distinct relevant destinations and do not all funnel into the workshop',()=>{
  render(React.createElement(App));
  const paths=new Set(Array.from(document.querySelectorAll('a[href]')).map(a=>a.getAttribute('href')));
- assert.ok(paths.has('/lookbook/sac-hoi'));
- assert.ok(paths.has('/tu-lieu/su-kien/le-hoi'));
+ assert.ok(paths.has('/tu-lieu/trang-phuc/nhat-binh'));
+ assert.ok([...paths].some(path=>path?.startsWith('/xuong-phoi?')&&path.includes('su-kien=an-hoi')));
  assert.ok(paths.has('/tu-lieu'));assert.ok(paths.has('/lookbook'));
+});
+test('Landing collection introduction has no starter photos and occasion links restore the chosen context',()=>{
+ render(React.createElement(App));
+ assert.equal(document.querySelectorAll('.studio-collection img').length,0);
+ assert.ok(!document.querySelector('a[href^="/lookbook/"]'));
+ fireEvent.click(screen.getByRole('link',{name:'Phối đồ cho Lễ ăn hỏi'}));
+ assert.equal(window.location.pathname,'/xuong-phoi');
+ assert.equal(new URLSearchParams(window.location.search).get('su-kien'),'an-hoi');
+ assert.ok(document.querySelector('image[data-layer="background"][href$="engagement.webp"]'));
 });
 test('Lookbook tile opens an image detail, receives a context story and offers the actual image download',async()=>{
  window.history.replaceState({},'','/lookbook');render(React.createElement(App));

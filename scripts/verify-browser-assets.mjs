@@ -14,9 +14,10 @@ assert.ok(entry,'Frontend entry missing');
 const js=await (await get(entry)).text();
 // Read emitted URLs from the deployed client rather than assuming Windows/Linux build hashes agree.
 const urls=[...new Set([...js.matchAll(/\/assets\/([^\/"\s]+\.webp)/g)].map(m=>'/assets/'+m[1]))];
-assert.equal(urls.length,45,'The deployed client must reference every bundled image');
 const files=[];
 for(const folder of ['viet-y-v2','outfit-photo-v1'])for(const name of (await readdir(path.join(root,'public/assets',folder))).filter(n=>n.endsWith('.webp')))files.push({folder,name});
+files.push({name:'studio-hero.webp',source:path.join(root,'src/assets/landing/studio-hero.webp')});
+assert.equal(urls.length,files.length,'The deployed client must reference every bundled image');
 const seen=new Set();
 for(let i=0;i<urls.length;i+=4)await Promise.all(urls.slice(i,i+4).map(async url=>{
  const emitted=path.posix.basename(url);
@@ -24,6 +25,6 @@ for(let i=0;i<urls.length;i+=4)await Promise.all(urls.slice(i,i+4).map(async url
  assert.ok(original,`Unknown bundled image: ${emitted}`);
  assert.ok(!seen.has(original.name),`Duplicate image: ${emitted}`);seen.add(original.name);
  const response=await get(url);assert.match(response.headers.get('content-type')??'',/image\/webp/);
- assert.equal(hash(Buffer.from(await response.arrayBuffer())),hash(await readFile(path.join(root,'public/assets',original.folder,original.name))),`Photo differs: ${emitted}`);
+ assert.equal(hash(Buffer.from(await response.arrayBuffer())),hash(await readFile(original.source??path.join(root,'public/assets',original.folder,original.name))),`Photo differs: ${emitted}`);
 }));
-console.log(`PASS: ${entry}; all 45 deployed browser photos match canonical image hashes`);
+console.log(`PASS: ${entry}; all ${files.length} deployed browser photos match canonical image hashes`);
