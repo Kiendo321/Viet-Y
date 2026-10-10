@@ -6,6 +6,7 @@ import App from '../src/App';
 import {VittyTurn,validateVittyAnswer} from '../src/services/vittyContract';
 const originalFetch=globalThis.fetch;let saved:VittyTurn[]=[];let calls=0;
 beforeEach(()=>{
+ Object.defineProperty(document,'hidden',{value:false,configurable:true});
  localStorage.clear();saved=[];calls=0;window.history.replaceState({},'','/');window.scrollTo=()=>{};
  globalThis.fetch=async(url,options)=>{
   if(options?.method==='POST'){calls++;const input=JSON.parse(String(options.body));saved=[{...input,status:'complete',createdAt:new Date().toISOString(),leaseUntil:0,attempt:1,answer:validateVittyAnswer({title:'Bạn định đi dịp nào?',intro:'Cho mình biết dịp và phong cách bạn thích nhé.',sections:[],outfits:[],articles:[]})}];return {ok:true,json:async()=>({turn:saved[0]})} as Response;}
