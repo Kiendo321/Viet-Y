@@ -17,6 +17,7 @@ const urls=[...new Set([...js.matchAll(/\/assets\/([^\/"\s]+\.webp)/g)].map(m=>'
 const files=[];
 for(const folder of ['viet-y-v2','outfit-photo-v1'])for(const name of (await readdir(path.join(root,'public/assets',folder))).filter(n=>n.endsWith('.webp')))files.push({folder,name});
 files.push({name:'studio-hero.webp',source:path.join(root,'src/assets/landing/studio-hero.webp')});
+files.push({name:'vitty-atelier.webp',source:path.join(root,'src/assets/vitty/vitty-atelier.webp')});
 assert.equal(urls.length,files.length,'The deployed client must reference every bundled image');
 const seen=new Set();
 for(let i=0;i<urls.length;i+=4)await Promise.all(urls.slice(i,i+4).map(async url=>{

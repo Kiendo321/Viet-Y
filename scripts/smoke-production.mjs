@@ -65,8 +65,8 @@ try {
   summary.push(`PASS: ${references.length} frontend JS/CSS bundles match build output`);
   const bundledPhotos=(await readdir(path.join(stage,'dist','assets'))).filter(name=>name.endsWith('.webp'));
   const canonicalPhotos=(await Promise.all(['viet-y-v2','outfit-photo-v1'].map(folder=>readdir(path.join(stage,'public','assets',folder))))).flat().filter(name=>name.endsWith('.webp'));
-  const landingPhotos=(await readdir(path.join(root,'src','assets','landing'))).filter(name=>name.endsWith('.webp'));
-  assert.equal(bundledPhotos.length,canonicalPhotos.length+landingPhotos.length,'Every browser photo must be emitted by Vite');
+  const authoredPhotos=(await Promise.all(['landing','vitty'].map(folder=>readdir(path.join(root,'src','assets',folder))))).flat().filter(name=>name.endsWith('.webp'));
+  assert.equal(bundledPhotos.length,canonicalPhotos.length+authoredPhotos.length,'Every browser photo must be emitted by Vite');
   for(const name of bundledPhotos){
     const response=await fetch(`${base}/assets/${name}`);
     assert.equal(response.status,200);
