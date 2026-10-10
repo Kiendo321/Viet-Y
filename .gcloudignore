@@ -4,6 +4,7 @@
 node_modules/
 .runtime-smoke-*/
 .vitty-data/
+.vitty-media/
 dist/
 server.js
 .env

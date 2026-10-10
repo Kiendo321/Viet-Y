@@ -32,7 +32,7 @@ export function LookDetail({id}:{id:string}){
    .finally(()=>clearTimeout(timeout));
   return()=>{active=false;controller.abort();clearTimeout(timeout);};
  },[look?.id,retry]);
- if(!look){if(status==='missing')return <NotFound/>;return <section className="page"><Link to="/lookbook" className="back-link"><ArrowLeft size={16}/>Lookbook</Link><p role={status==='error'?'alert':'status'}>{status==='error'?'Chưa tải được ảnh.':'Đang tải ảnh…'}</p>{status==='error'&&<button className="text-button" onClick={()=>setRetry(x=>x+1)}>Thử lại</button>}</section>;}
+ if(!look){if(status==='missing'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))return <NotFound/>;return <section className="page"><Link to="/lookbook" className="back-link"><ArrowLeft size={16}/>Lookbook</Link><p role={status==='error'?'alert':'status'}>{status==='error'?'Chưa tải được ảnh.':'Đang tải ảnh…'}</p>{status==='error'&&<button className="text-button" onClick={()=>setRetry(x=>x+1)}>Thử lại</button>}</section>;}
  const garment=garmentById(look.selection.garment)!,occasion=eventById(look.selection.event)!;
  const current=story?.id===id?story:null;
  return <article className="look-detail page"><Link to="/lookbook" className="back-link"><ArrowLeft size={16}/>Lookbook</Link><div className="look-detail-grid">

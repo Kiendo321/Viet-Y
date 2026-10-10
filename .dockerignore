@@ -1,6 +1,7 @@
 .git
 node_modules
 .vitty-data
+.vitty-media
 .runtime-smoke-*
 dist
 server.js
