@@ -140,7 +140,7 @@ test('Mobile drawer isolates the page, wraps focus past a hidden desktop control
  assert.ok(document.querySelector('main[inert][aria-hidden="true"]'));
  assert.ok(document.querySelector('.mobile-bar[inert]'));
  assert.ok(!screen.queryByRole('heading',{name:/Mặc một nét Việt/}));
- const last=screen.getByRole('link',{name:'Tư liệu'}),first=screen.getByRole('link',{name:'Việt Y · Trang chủ'});
+ const last=screen.getByRole('link',{name:'Vitty'}),first=screen.getByRole('link',{name:'Việt Y · Trang chủ'});
  last.focus();fireEvent.keyDown(last,{key:'Tab'});assert.ok(document.activeElement===first);
  fireEvent.keyDown(first,{key:'Tab',shiftKey:true});assert.ok(document.activeElement===last);
  fireEvent.keyDown(last,{key:'Escape'});assert.ok(document.activeElement===trigger);

@@ -48,6 +48,7 @@ export function Vitty({search=''}:{search?:string}){
  const nearBottom=useRef(true),boot=useRef(true),turnsRef=useRef(turns),outboxRef=useRef(outbox),fanButton=useRef<HTMLButtonElement>(null),avatarButton=useRef<HTMLButtonElement>(null);
  turnsRef.current=turns;outboxRef.current=outbox;
  const scrollBottom=()=>{const el=transcript.current;if(el)el.scrollTop=el.scrollHeight;nearBottom.current=true;setNewMessages(false);};
+ useEffect(()=>{if(nearBottom.current)scrollBottom();},[turns,outbox]);
  useEffect(()=>{local.write('draft',draft);if(input.current){input.current.style.height='auto';input.current.style.height=Math.min(input.current.scrollHeight,120)+'px';}},[draft]);
  useEffect(()=>{
   let active=true,timer:ReturnType<typeof setTimeout>;let busy=false;
