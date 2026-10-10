@@ -7,7 +7,7 @@
 - Cloud Run: c3-app-162 / asia-southeast1 / viet-y. Revision viet-y-ux-v2-hero-20261010 nhận 100% traffic khi kiểm tra lại.
 - Mã ứng dụng triển khai: f5488a2. Image sha256:93e27450997f67f7305d8f7a8a90846840509a02e200d484fdde473684310f00. Các commit sau đó chỉ tài liệu.
 - UI đã review: D:/AI Arena/output/ux-v2-review-2026-10-10; hero cũ và nền giấy ngà là hướng giữ lại.
-- AI Studio: app fc70a7ef-527d-45b5-8323-721aab0ff6e5 vẫn chuyển /520 trong phiên trình duyệt Codex. Không kết luận tài khoản mất quyền hay dịch vụ lỗi với mọi người chỉ từ bằng chứng này. Editor source chưa được xác minh đồng bộ.
+- AI Studio: tab người dùng fc70a7ef-527d-45b5-8323-721aab0ff6e5 đã mở được, liên kết đúng Kiendo321/Viet-Y main và đăng nhập GitHub thành công. Pull lần đầu báo Network error; retry đi tới Fetching remote files rồi báo Failed to create user snapshot. Reload sau đăng nhập chuyển /520; My apps báo Error loading apps. Editor source chưa được xác minh đồng bộ. Lỗi ở tab tạo trước đó không đủ để kết luận tab người dùng không mở được; kết quả pull thực tế mới là bằng chứng chặn hiện hành.
 
 ## Luồng đồng bộ đã đối chiếu tài liệu Google
 
@@ -43,3 +43,11 @@ Không cần tạo repository hoặc app mới chỉ vì một lần /520. Nếu
 | Commit/GitHub/public | Main và branch trùng mốc kiểm tra, image/traffic/bundle được xác minh | AI Studio editor vẫn chờ sync, không gộp thành tuyên bố đồng bộ toàn bộ |
 
 Kiểm chứng kỹ thuật và review chi tiết: VIET-Y-V2-VERIFICATION-2026-10-10.md và VIET-Y-V2-FINISH-REVIEW-2026-10-10.md. Lượt tiếp tục không sửa UI hay mở rộng tính năng; việc còn phải đóng là source sync AI Studio có bằng chứng.
+
+## Lượt pull sau khi người dùng đăng nhập GitHub — 10/10/2026
+
+UI xác nhận Repository Kiendo321/Viet-Y, main; Last synced Oct 9, 11:46 AM; Changes in GitHub are ready to be pulled. Mã main được yêu cầu kéo: 1afd3246e847da0e122e6cd01891c84d51e92b1d (các commit sau f5488a2 chỉ tài liệu).
+
+Đã bấm Pull changes to Google AI Studio. Sau lỗi Network error và một retry do UI cung cấp, tiến trình Fetching remote files dừng ở Failed to create user snapshot. Đã cancel thao tác lỗi, kiểm tra editor vẫn giao diện cũ Việt phục Remix/luồng 6 bước. Reload phiên đã đăng nhập dẫn /520; mở My apps dẫn Error loading apps, console có RpcError: Network error, try again. Không có thông báo pull thành công hoặc diff xung đột để xử lý.
+
+Không disconnect repository, tạo app mới, sửa secret hoặc publish đè bản public. Chưa có bằng chứng quy lỗi này cho credential GitHub, quota ảnh, kích thước repo hay billing; không yêu cầu thêm token/API key. Bằng chứng màn hình: D:/AI Arena/output/ux-v2-review-2026-10-10/ai-studio-sync-error-20261010.jpg. Cần mở lại editor khi tải app/snapshot hoạt động, rồi tiếp tục pull và xác minh nguồn/preview theo checklist phía trên.

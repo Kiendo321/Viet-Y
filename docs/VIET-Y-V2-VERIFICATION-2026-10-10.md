@@ -79,3 +79,9 @@ Artifact dist layer sha256:a86638c1adc807f67a8f77561d3db1371bf7e8548881f84d7b9e1
 Browser tại https://viet-y.ai.studio hiển thị hero/ngà mới, background rgb(247,240,228), heroComplete=true và đúng tên hai bundle container. Screenshot home-public.jpg lưu trong packet review. Website đã cập nhật, không chỉ local.
 
 Fresh review có no material render finding; verdict pass ship xác nhận fix tài liệu resolved (xem VIET-Y-V2-FINISH-REVIEW-2026-10-10.md). AI Studio source sync vẫn chưa xác nhận: app / My apps / reload đều lỗi 520 hoặc Error loading apps. Không dùng nút publish AI Studio để ghi đè Cloud Run đang hoạt động.
+
+## Thử source sync trong tab người dùng sau đăng nhập GitHub
+
+Tab app fc70a7ef-527d-45b5-8323-721aab0ff6e5 người dùng cung cấp mở editor được; tab lỗi tạo trước không phản ánh được trạng thái này. Settings → GitHub xác nhận Kiendo321/Viet-Y main và Changes in GitHub are ready to be pulled sau khi người dùng hoàn tất đăng nhập. Main tại thời điểm pull: 1afd3246e847da0e122e6cd01891c84d51e92b1d.
+
+Pull lần đầu báo Network error, try again. Retry qua nút UI đi tới Fetching remote files, sau đó báo Failed to create user snapshot. Đã cancel, quan sát preview vẫn là Việt phục Remix/luồng cũ; không có bằng chứng file mới hoặc sync thành công. Reload để làm mới phiên đăng nhập báo /520; My apps báo Error loading apps với console RpcError. Screenshot ai-studio-sync-error-20261010.jpg lưu trong packet review. Không thay code ứng dụng, credential, repo link hoặc bản Cloud Run đã kiểm chứng. Phần source sync AI Studio còn chờ; đây là lỗi pull/snapshot quan sát trực tiếp, không phải kết luận mất quyền GitHub.

@@ -1,6 +1,6 @@
 # Việt Y v2 — đối chiếu phạm vi và bằng chứng
 
-**Trạng thái mới nhất:** bản public và GitHub main đã cập nhật ngày 10/10; hero cũ và nền ngà được giữ theo yêu cầu. Browser render/review và kiểm chứng production đã đạt. AI Studio source sync còn chờ do dịch vụ báo lỗi 520. Bảng dưới là audit lịch sử trước khi có bằng chứng browser; các cập nhật ở cuối và VIET-Y-V2-VERIFICATION-2026-10-10.md là trạng thái hiện hành.
+**Trạng thái mới nhất:** bản public và GitHub main đã cập nhật ngày 10/10; hero cũ và nền ngà được giữ theo yêu cầu. Browser render/review và kiểm chứng production đã đạt. AI Studio mở được ở tab người dùng và đã đăng nhập GitHub, nhưng pull dừng ở Failed to create user snapshot; reload sau đó báo /520 và My apps báo Error loading apps. Source sync vẫn chưa hoàn tất. Bảng dưới là audit lịch sử trước khi có bằng chứng browser; các cập nhật ở cuối và VIET-Y-V2-VERIFICATION-2026-10-10.md là trạng thái hiện hành.
 
 Phạm vi gốc: `goal-objective.md` người dùng cung cấp; các quyết định sau đó chốt bỏ nút lưu trong xưởng, lookbook tạm dùng chung, chưa triển khai VTO/đăng nhập. Bảng này không xem code hoặc kiểm thử DOM là bằng chứng đã duyệt giao diện.
 
@@ -44,3 +44,7 @@ Phạm vi triển khai hiện có 5 áo/4 sự kiện/8 tổ hợp áo-mẫu/6 �
 ## Sau release
 
 Main/branch đã fast-forward cùng 3e34753 (sau đó chỉ có commit tài liệu bằng chứng), public 100% viet-y-ux-v2-hero-20261010. Source ứng dụng image f5488a2; các commit tiếp theo chỉ docs. Bundle container/ảnh/deep-route/PNG và hai lời giới thiệu Gemini production được xác minh; public browser có screenshot hero mới. Persistence fix được reviewer chấm resolved/ship. Phần còn chờ duy nhất trong đồng bộ công cụ là AI Studio editor vì /520, không ảnh hưởng website Cloud Run hiện hoạt động.
+
+## Sau đăng nhập GitHub và thử pull
+
+Đã thao tác trên đúng tab AI Studio người dùng đang mở, xác minh liên kết main và thực hiện pull mốc 1afd324. UI bắt đầu Fetching remote files nhưng báo Failed to create user snapshot; chưa vào diff và chưa xác nhận hoàn thành. Editor được nhìn thấy vẫn là bản cũ. Sau reload, lỗi /520 và Error loading apps xuất hiện cả trong tab này. Xem VIET-Y-AI-STUDIO-HANDOFF.md để có bằng chứng và bước tiếp tục. Không đánh dấu toàn bộ mục đồng bộ hoàn thành, không publish lại hoặc thay cấu hình Vertex production.
