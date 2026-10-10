@@ -1,5 +1,7 @@
 # Việt Y — đồng bộ AI Studio và bàn giao
 
+**Cập nhật mới nhất — Tư liệu B và Chi tiết:** mã ứng dụng `0e21a49` đã push main và nhánh làm việc; public chạy revision `viet-y-library-details-20261010` với 100% traffic, bundle `index-BphrhCf4.js`. AI Studio đã nhập/lưu ZIP đúng 21 file thay đổi, checkpoint vẫn còn sau reload; Chi tiết và bài Nhật Bình mới đã mở trực tiếp trong preview. Đây là đồng bộ mã bằng ZIP, không phải bằng chứng auto-sync GitHub hoạt động. Console dev có lỗi websocket/HMR; bản public đã kiểm chứng cảnh ready và 45 ảnh hash khớp. Chi tiết nguồn, test, review, deployment và evidence: `LIBRARY-DETAILS-VERIFICATION.md`. Các mốc phía dưới là lịch sử.
+
 **Cập nhật hiện hành — đã sửa ảnh:** commit ứng dụng d5dacfd dùng registry URL ảnh đóng gói qua Vite cho 45 WebP. Đã nhập ZIP 53 file vào đúng app fc70a7ef, Save thành công và kiểm tra trực tiếp preview: ảnh nam, nữ, màu ngà/đỏ, kiềng bạc, phông ăn hỏi; 6 ảnh lookbook và 9 ảnh tư liệu tải đủ. Mobile 390×844 không tràn ngang, scene aria-busy=false. Hero và nền ngà giữ nguyên. Public đã triển khai cùng mã d5dacfd ở revision viet-y-browser-assets-20261010, 100% traffic; xem bằng chứng ở cuối. Gemini trong preview AI Studio còn dùng lời giới thiệu dự phòng; không xem static-image fix là bằng chứng API preview chạy Gemini. Các lỗi tải ảnh/pull/520 bên dưới là lịch sử.
 
 ## Trạng thái kiểm chứng khi tiếp tục goal
