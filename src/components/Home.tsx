@@ -6,6 +6,10 @@ import {ACCESSORIES,COLORS,GARMENTS,OCCASIONS,composerUrl} from '../data/vietYCa
 import {Brand} from './AppShell';
 import {BraidedFlowerLogo} from './HeritageOrnaments';
 const studioHero=new URL('../assets/landing/studio-hero.webp',import.meta.url).href;
+const vittyAtelier=new URL('../assets/vitty/vitty-atelier.webp',import.meta.url).href;
+const knowledgeAoTac=browserAsset(GARMENTS.find(garment=>garment.id==='ao-tac')!.cover);
+const knowledgeNhatBinh=browserAsset(GARMENTS.find(garment=>garment.id==='nhat-binh')!.cover);
+const knowledgeHeritage=browserAsset(OCCASIONS.find(event=>event.id==='di-tich')!.image);
 export function Home(){
  return <div className="home home-studio">
   <section className="studio-hero" aria-labelledby="studio-title">
@@ -34,7 +38,45 @@ export function Home(){
    <div className="studio-collection-copy"><h2 id="collection-title">Một bộ sưu tập.<br/>Một dấu ấn riêng.</h2><p>Dành một không gian cho gu của bạn. Những bộ phối cùng chủ đề, sắc màu và cảm hứng có thể kể nên một câu chuyện mang dấu ấn riêng.</p><Link to="/lookbook" className="studio-text-link">Đến Lookbook <ArrowRight size={18}/></Link></div>
    <div className="studio-collection-themes" aria-hidden="true"><span>Sắc màu</span><span>Chủ đề</span><span>Câu chuyện</span></div>
   </section>
-  <section className="studio-knowledge"><BookOpen size={23} aria-hidden="true"/><div><h2>Phối theo gu, hiểu điều đang mặc.</h2><p>Từ cổ áo, hàng khuy đến bối cảnh sử dụng — tìm hiểu những chi tiết làm nên nét riêng của Việt phục.</p></div><Link to="/tu-lieu" className="studio-text-link">Đọc tư liệu <ArrowRight size={18}/></Link></section>
+  <section className="studio-knowledge" aria-labelledby="knowledge-title">
+   <div className="studio-knowledge-copy">
+    <BookOpen size={25} aria-hidden="true"/>
+    <h2 id="knowledge-title">Phối theo gu,<br/>hiểu điều đang mặc.</h2>
+    <p>Nhìn từ chi tiết áo đến hoàn cảnh mặc.</p>
+    <Link to="/tu-lieu" className="studio-text-link">Khám phá tư liệu <ArrowRight size={18}/></Link>
+    <div className="studio-knowledge-rule" aria-hidden="true"><BraidedFlowerLogo/><span/></div>
+   </div>
+   <div className="studio-knowledge-spread">
+    <Link to="/tu-lieu/trang-phuc/ao-tac" className="studio-knowledge-portrait" aria-label="Khám phá kết cấu áo tấc">
+     <svg viewBox="320 240 450 650" role="img" aria-label="Cổ đứng, đường khuy lệch phải và chất liệu áo tấc chàm"><image href={knowledgeAoTac} width="1086" height="1448"/></svg>
+    </Link>
+    <div className="studio-knowledge-studies">
+     <Link to="/tu-lieu/trang-phuc/ao-tac" className="studio-knowledge-study">
+      <svg viewBox="345 225 300 180" role="img" aria-label="Cận cảnh cổ đứng và khuy buộc của áo tấc"><image href={knowledgeAoTac} width="1086" height="1448"/></svg>
+      <span>Cổ áo &amp; hàng khuy</span>
+     </Link>
+     <Link to="/tu-lieu/trang-phuc/nhat-binh" className="studio-knowledge-study">
+      <svg viewBox="345 260 390 220" role="img" aria-label="Khung cổ chữ nhật và hoa văn áo Nhật Bình đỏ"><image href={knowledgeNhatBinh} width="1086" height="1448"/></svg>
+      <span>Sắc áo &amp; họa tiết</span>
+     </Link>
+    </div>
+    <Link to="/tu-lieu/su-kien/di-tich" className="studio-knowledge-setting">
+     <img src={knowledgeHeritage} alt="Sân di tích với mái ngói, cửa gỗ và sắc tường vàng" width="1086" height="1448" loading="lazy"/>
+     <span>Bối cảnh sử dụng</span>
+    </Link>
+    <span className="studio-knowledge-thread" aria-hidden="true"/>
+   </div>
+  </section>
+  <section className="studio-vitty" aria-labelledby="home-vitty-title">
+   <img className="studio-vitty-art" src={vittyAtelier} alt="Vitty mặc áo ngũ thân đỏ, đội khăn đóng, ngồi cùng sổ thiết kế và mẫu vải tại bàn sáng tạo" width="2048" height="768" loading="lazy"/>
+   <div className="studio-vitty-copy">
+    <h2 id="home-vitty-title">Ghé bàn Vitty,<br/>mở chuyện Việt phục.</h2>
+    <p>Từ nét riêng của dáng áo đến ý tưởng cho bộ phối, Vitty cùng bạn tìm hiểu và thử điều mới.</p>
+    <Link to="/vitty" className="studio-vitty-action">Trò chuyện với Vitty <ArrowRight size={19}/></Link>
+    <div className="studio-vitty-benefit-rule" aria-hidden="true"><span/><BraidedFlowerLogo/><span/></div>
+    <ul className="studio-vitty-benefits" aria-label="Vitty đồng hành cùng bạn"><li>Hiểu nét văn hóa</li><li>Phối theo dịp</li><li>Thử bộ phối</li></ul>
+   </div>
+  </section>
   <footer className="home-footer studio-footer"><Brand/><p>Nếp xưa. Cách mặc hôm nay.</p><div><Link to="/xuong-phoi">Xưởng phối</Link><Link to="/lookbook">Lookbook</Link><Link to="/tu-lieu">Tư liệu</Link></div></footer>
  </div>;
 }

@@ -1,0 +1,16 @@
+{
+  "prompt": "Use case: compositing / website illustration asset.\nImage1 is approved Việt Y homepage concept B. Image2 is the strict identity source of Vitty, the male white duck mascot. Produce ONLY the bottom atelier artwork from image1 as a clean production web background image, no screenshot, no UI, no navigation, no footer, no letters, no captions or buttons anywhere, even book spines must be unlabelled. Landscape 2048x768 or similar very wide 2.67:1 framing.\nPreserve the exact visual feel of the bottom region of image1: friendly Vitty sitting at a beautiful walnut cultural designer's desk in a warm ivory traditional Vietnamese atelier. Black khăn đóng, textured red brocade ngũ thân, white feathers, orange beak, same eyes and recognizable face as image2. Waist-up mascot on LEFT roughly x15–40%, face entirely visible with generous top margin, holding a fine pencil, other wing resting at a notebook open to Vietnamese garment sketches. Photoreal textured room with character rendered as high-quality softly lit 3D illustration; premium coherent photographic composition. Ceramic brush cup, a few cloth-bound books, folded crimson/indigo fabric swatches, understated carved wood furniture, subtle flowering branch at farleft. Desk foreground across bottom16%, not a second large empty floor. Head and turban no nearer than8% top edge, subject not clipped at sides.\nRight 52% of image MUST be QUIET warmly lit ivory plaster/paper wall with very faint soft warm plant shadows near the far right ONLY, no objects crossing future web copy area x56–94%, y14–79%. Wall color #FCF8F2 / #F7F0E4, gentle natural depth, don't add dark ornate panels behind copy. Detail remains left, right reserved for actual HTML. Same lighting and natural material language as approved concept. No fake branded logos, no foreign costume, no human subject. Upper two thirds of right side calm and almost solid ivory. The browser will place real text here later; leave it completely empty. Every detail must be refined, elegant cultural fashion atelier rather than cartoon game room. Output artwork only; never rasterize interface.",
+  "generator": "built-in image_gen",
+  "createdAt": "2026-10-10",
+  "references": [
+    "D:/AI Arena/output/vitty-home-concepts-2026-10-10/v2/b-ban-sang-tao-v2.png",
+    "src/assets/vitty/vitty-a-cultural-guide.png"
+  ],
+  "approvedConcept": "B — Bàn sáng tạo",
+  "sourceDimensions": [
+    2048,
+    768
+  ],
+  "conversion": "PNG to WebP via Sharp, quality 88; no compositing, text or identity edits",
+  "purpose": "Home introduction, all UI text rendered in React"
+}

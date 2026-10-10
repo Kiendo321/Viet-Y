@@ -1,10 +1,3 @@
----
-version: 1
-slug: "src-components-home-tsx"
-primary_target: "src/components/Home.tsx"
-related_targets: ["src/homeStudio.css"]
----
-
 # Home — Tư liệu và bàn sáng tạo Vitty
 
 Mode: Persuade. Local extension of the existing Home, approved by the user with “CHọn B và thực hiện” on 10 October 2026. Preserve the hero, workflow, garment discovery, collection introduction, app shell and existing routes. No new visual identity or whole-surface tournament.
