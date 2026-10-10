@@ -10,7 +10,7 @@ export function selectedFigureLayers(s:ComposerSelection){
  }
  return [{part:'figure',src:g.variants[s.person]![s.color]!}];
 }
-export function OutfitScene({selection,className='',plain=false,onReady}:{selection:ComposerSelection;className?:string;plain?:boolean;onReady?:(ready:boolean)=>void}){
+export function OutfitScene({selection,className='',plain=false,onReady,crop,label}:{selection:ComposerSelection;className?:string;plain?:boolean;onReady?:(ready:boolean)=>void;crop?:[number,number,number,number];label?:string}){
  const legacy=selection.garment==='ngu-than'&&selection.person==='male';
  const g=garmentById(selection.garment)!;
  const occasion=eventById(selection.event)!;
@@ -32,7 +32,7 @@ export function OutfitScene({selection,className='',plain=false,onReady}:{select
  const ready=loaded===key;
  // All garment colors are pre-rendered files; SVG only places photographic layers.
  return <div className={'outfit-scene '+className} aria-busy={!ready} data-scene-key={key}>
-  <svg viewBox="0 0 1086 1448" role="img" aria-label={g.name+' · '+COLORS[selection.color].name+' · '+occasion.name} className={ready?'scene-ready':''}>
+  <svg viewBox={crop?crop.join(' '):'0 0 1086 1448'} role="img" aria-label={label||g.name+' · '+COLORS[selection.color].name+' · '+occasion.name} className={ready?'scene-ready':''}>
    {plain?<rect width="1086" height="1448" fill="#F4EFE6"/>:<image data-layer="background" href={background} width="1086" height="1448" preserveAspectRatio="xMidYMid slice"/>}
    {legacy?<svg x="110" y="50" width="866" height="1345" viewBox="220 0 584 1536" preserveAspectRatio="xMidYMid meet">
     {figureLayers.map(l=><image key={l.part} data-layer={l.part} href={l.src} width="1024" height="1536"/>)}

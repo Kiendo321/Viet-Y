@@ -15,6 +15,30 @@ beforeEach(()=>{
 });
 afterEach(()=>{cleanup();globalThis.fetch=originalFetch;window.Image=originalImage;Object.defineProperty(window,'innerWidth',{configurable:true,value:originalWidth});window.HTMLElement.prototype.getClientRects=originalRects;});
 function openWorkshop(){render(React.createElement(App));fireEvent.click(screen.getByRole('link',{name:/^Bắt đầu phối/}));}
+test('Static detail disclosure has three crops, preserves selection, and never calls AI',async()=>{
+ const calls:string[]=[];globalThis.fetch=async(input)=>{calls.push(String(input));return {ok:true,json:async()=>({})} as Response;};
+ openWorkshop();const before=window.location.href;
+ assert.equal(document.querySelectorAll('.detail-row').length,0);
+ fireEvent.click(screen.getByRole('button',{name:'Chi tiết'}));
+ assert.equal(document.querySelectorAll('.detail-row').length,3);
+ assert.equal(document.querySelectorAll('.outfit-details button').length,1);
+ assert.ok(screen.getByRole('img',{name:'Cận cảnh Cổ đứng'}));
+ fireEvent.click(screen.getByRole('button',{name:'Đỏ son'}));
+ for(const crop of document.querySelectorAll('.detail-zoom'))assert.ok(crop.querySelector('image[data-layer="robe"][href$="coat-red.webp"]'));
+ const selectedUrl=window.location.href;assert.notEqual(selectedUrl,before);
+ fireEvent.click(screen.getByRole('button',{name:'Đóng'}));
+ await waitFor(()=>assert.equal(document.activeElement?.textContent,'Chi tiết'));
+ assert.equal(document.querySelectorAll('.detail-row').length,0);assert.equal(window.location.href,selectedUrl);assert.deepEqual(calls,[]);
+});
+test('Open garment details follow feminine garment changes and Escape closes them',()=>{
+ openWorkshop();fireEvent.click(screen.getByRole('button',{name:'Chi tiết'}));
+ fireEvent.click(screen.getByRole('button',{name:/Áo Nhật Bình/}));
+ assert.ok(screen.getByRole('heading',{name:'Khung cổ'}));
+ assert.ok(!screen.queryByRole('heading',{name:'Hàng khuy'}));
+ for(const crop of document.querySelectorAll('.detail-zoom'))assert.ok(crop.querySelector('image[data-layer="figure"][href$="nhatbinh-female-red.webp"]'));
+ fireEvent.keyDown(document.querySelector('.workshop-preview-body')!,{key:'Escape'});
+ assert.equal(document.querySelectorAll('.detail-row').length,0);
+});
 test('Workshop uses prepared assets, updates event and color, and contains no generation/save controls',async()=>{
  const calls:string[]=[];globalThis.fetch=async(input)=>{calls.push(String(input));return {ok:true,json:async()=>({})} as Response;};
  openWorkshop();

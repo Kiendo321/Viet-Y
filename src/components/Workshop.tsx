@@ -1,7 +1,7 @@
 import React from 'react';
 import {Check,ChevronDown,RotateCcw} from 'lucide-react';
 import {GARMENTS,OCCASIONS,COLORS,ACCESSORIES,ComposerSelection,GarmentId,EventId,Person,ColorId,AccessoryId,normalizeSelection,accessoriesFor,garmentById,eventById} from '../data/vietYCatalog';
-import {OutfitScene} from './OutfitScene';
+import {OutfitPreview} from './OutfitDetails';
 function Picker({label,value,children}:{label:string;value:string;children:React.ReactNode}){
  const details=React.useRef<HTMLDetailsElement>(null);
  const close=()=>{if(!details.current)return;details.current.open=false;details.current.querySelector<HTMLElement>('summary')?.focus({preventScroll:true});};
@@ -35,7 +35,7 @@ export function Workshop({selection,onChange}:{selection:ComposerSelection;onCha
     </div>
     <p className="selection-feedback" role="status" aria-live="polite">{feedback}</p>
    </div>
-   <div className="workshop-preview"><OutfitScene selection={selection} onReady={setReady}/><div className="preview-caption"><div><h2>{garment.shortName} · {COLORS[selection.color].name}</h2><p>{occasion.name}</p></div><span className={'preview-state '+(ready?'ready':'')}><span/>{ready?'Đang xem':'Đang tải'}</span></div></div>
+   <div className="workshop-preview"><OutfitPreview selection={selection} onReady={setReady}/><div className="preview-caption"><div><h2>{garment.shortName} · {COLORS[selection.color].name}</h2><p>{occasion.name}</p></div><span className={'preview-state '+(ready?'ready':'')}><span/>{ready?'Đang xem':'Đang tải'}</span></div></div>
   </div>
  </section>;
 }

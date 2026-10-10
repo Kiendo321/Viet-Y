@@ -15,11 +15,12 @@ Bản demo Việt phục Remix của AI Arena. URL công khai: https://viet-y.ai
 
 ## Capabilities and Constraints
 - Xưởng phối dùng asset có sẵn; không gọi Gemini để gợi ý hoặc tạo ảnh ở xưởng.
+- Nút Chi tiết ở xưởng mở ba cận cảnh tĩnh của đúng bộ phối đang chọn, kèm tên và mô tả; đóng giữ lựa chọn. Khung nhỏ xếp phần chi tiết dưới mẫu, có vùng cuộn riêng.
 - Năm loại: ngũ thân tay chẽn, áo tấc, Nhật Bình, tứ thân, giao lĩnh. Bốn sự kiện: lễ hội dân gian, lễ ăn hỏi, tham quan di tích lịch sử, biểu diễn văn nghệ.
 - Mẫu nam/nữ theo danh mục phù hợp; phụ kiện 2–3 lựa chọn theo từng áo, không áp đặt quy tắc cứng.
 - Lookbook dùng chung, không đăng nhập, theo xác nhận 10/10/2026. Có ảnh khởi đầu, trang chi tiết và tải ảnh; lời giới thiệu LLM dựa trên bối cảnh, trang phục và nhân vật.
 - VTO và thêm ảnh từ VTO chưa triển khai. Không có chức năng lưu bộ phối tại xưởng. Bộ sưu tập khởi đầu nằm trong mã nguồn, cùng nội dung cho mọi người; chưa có ảnh cá nhân tải lên.
-- Tư liệu có cột trang phục và cột sự kiện; mỗi nội dung có trang chi tiết với ảnh. Nguồn nghiên cứu lưu trong tài liệu phát triển, không đặt trích dẫn trên giao diện.
+- Tư liệu chia hai nhóm trang phục và sự kiện; trên điện thoại xếp lần lượt. Có bài riêng cho năm trang phục và bốn sự kiện, với ảnh dẫn, mục lục và bốn chương; bài trang phục thêm cận cảnh, bối cảnh hôm nay và FAQ, bài sự kiện thêm bộ phối và danh sách chuẩn bị. Liên kết Phối mở xưởng với trang phục hoặc sự kiện tương ứng. Nguồn nghiên cứu lưu trong tài liệu phát triển, không đặt trích dẫn trên giao diện; gợi ý thực hành là biên tập, không tự nhận thẩm định chuyên gia.
 - Điều hướng phải hỗ trợ URL, browser Back/Forward, reload và liên kết trực tiếp; xưởng phải vừa viewport và có vùng lựa chọn cuộn riêng.
 
 ## Brand Commitments

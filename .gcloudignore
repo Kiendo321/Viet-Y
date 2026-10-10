@@ -11,3 +11,4 @@ server.js
 *.log
 *.zip
 bun.lock
+.impeccable/review/

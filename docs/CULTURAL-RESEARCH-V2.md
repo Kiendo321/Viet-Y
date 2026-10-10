@@ -21,3 +21,13 @@ Ngày đối chiếu: 10/10/2026. Các URL được giữ nội bộ; giao diệ
 - Giới thiệu sự kiện và khuyến nghị thực hành là tổng hợp biên tập, không phải lễ chế thống nhất cho mọi địa phương/gia đình.
 - Bộ ảnh là ảnh concept của demo; chưa phải ảnh cá nhân/VTO. Thông tin này ghi trong tài liệu, không làm nhiễu xưởng phối.
 
+## Bài đọc mở rộng — 10/10/2026
+
+`src/data/libraryArticles.ts` lưu bài riêng cho 5 trang phục và 4 sự kiện. Mỗi bài có bốn chương; trang phục thêm phần mở đầu, cận cảnh, kết cấu, FAQ và bối cảnh liên quan; sự kiện thêm tình huống ở trường, danh sách chuẩn bị và các bộ phối có thể thử.
+
+Năm nguồn được đọc lại cho phần mở rộng: Bảo tàng Lịch sử Quốc gia (`museum`), Khám phá Huế (`hue`), ĐH Sư phạm Nghệ thuật Trung ương (`nhatbinh`), cơ quan người Việt Nam ở nước ngoài (`quanho`), VietnamPlus về trình diễn cổ phục (`costumes`). Các định danh nằm trong `RESEARCH_SOURCES`; chương lịch sử liên kết bằng `sourceIds`. Các nguồn khác trong bảng được giữ từ nghiên cứu trước, không mặc định đã được đọc lại ở lần mở rộng này.
+
+Khuyến nghị màu, phụ kiện, chụp ảnh, di chuyển và hoạt động ở trường là biên tập thực hành, không được gắn nhãn chứng cứ lịch sử. Nội dung không tự nhận đã qua thẩm định chuyên gia. Khi bổ sung mẫu phục dựng cụ thể sau này, cần lưu tác giả, quyền dùng ảnh, niên đại tham chiếu và đối chiếu từng đặc điểm với mẫu đó.
+
+Ảnh zoom là vùng của chính bộ phối đang hiển thị. Nội dung giải thích kết cấu áo và nội dung gợi ý phối được phân biệt: ba chi tiết nhìn thấy có ảnh riêng, các ghi chú kết cấu dùng đúng tiêu đề trong catalog, không ghép mô tả của một bộ phận vào tên bộ phận khác.
+

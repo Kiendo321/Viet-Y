@@ -13,6 +13,8 @@ Object.assign(globalThis, {
   HTMLButtonElement: dom.window.HTMLButtonElement,
   Node: dom.window.Node,
   localStorage: dom.window.localStorage,
+  requestAnimationFrame: (callback:FrameRequestCallback)=>setTimeout(()=>callback(Date.now()),0),
+  ResizeObserver: class { observe(){} unobserve(){} disconnect(){} },
 });
 
 Object.defineProperty(globalThis, 'navigator', {
