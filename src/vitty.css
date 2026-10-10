@@ -1,5 +1,5 @@
 .app-shell.is-conversation .main-content {height:100dvh;overflow:hidden;}
-.vitty-page {height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:var(--vy-paper);min-width:0;}
+.vitty-page {position:relative;height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:var(--vy-paper);min-width:0;}
 .vitty-page button {min-height:44px;}
 .vitty-header {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 32px;border-bottom:1px solid var(--vy-line);background:var(--vy-soft);}
 .vitty-identity {display:flex;align-items:center;gap:12px;min-width:0;}
