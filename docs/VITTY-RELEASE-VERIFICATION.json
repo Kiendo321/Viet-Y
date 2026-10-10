@@ -1,0 +1,23 @@
+{
+  "codeCommit": "b0ce8fda0cc33a5d2db0c31f8b3b45d01366a01f",
+  "cloudBuild": "324069d3-e70b-49a3-aede-b55827fb5de4",
+  "imageDigest": "sha256:19d965738a72220bad6ec291107624a816e23e8d42255d8f8af8c156cbf090f8",
+  "revision": "viet-y-vitty-fit-20261010",
+  "publicUrl": "https://viet-y.ai.studio/vitty",
+  "bundles": [
+    "/assets/index-C78T0h93.js",
+    "/assets/index-DVt38SXO.css"
+  ],
+  "provider": "vertex_ai",
+  "configured": true,
+  "storage": "cloud-storage",
+  "shared": true,
+  "turns": 2,
+  "models": [
+    "gemini-3.8-flash"
+  ],
+  "testsPassed": 39,
+  "testsFailed": 0,
+  "reviewDisposition": "ship",
+  "screenshot": "D:/AI Arena/output/vitty-implementation-2026-10-10/review/public-release.jpg"
+}
