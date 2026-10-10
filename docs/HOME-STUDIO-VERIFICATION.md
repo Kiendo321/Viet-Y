@@ -18,4 +18,10 @@ Preview được kiểm tra 46 ảnh hash khớp canonical trước khi promote.
 
 ## Đồng bộ editor
 
-AI Studio được đồng bộ qua giao diện import ZIP và Save; trạng thái kết quả sẽ được ghi riêng sau xác nhận preview/reload. Không coi liên kết GitHub trong Settings là bằng chứng auto-sync.
+Commit mã nguồn `64a956c` đã push lên main và nhánh làm việc. ZIP 17 file từ commit này đã được nhập qua File explorer → Upload Zip file và Save, trực tiếp trên tab AI Studio trong trình duyệt của người dùng. SHA256 ZIP `F90DE8CBF5F4BA129727D0DAE59BCBF60BFBAE588C0F36DC1C0E01911D3CE883`.
+
+Sau reload và mở qua My apps, preview xác nhận Home mới, nội dung collection mới và không có ảnh trong collection. Tuy nhiên hero của preview có naturalWidth=0 tại `/src/assets/landing/studio-hero.webp`, trong khi ảnh danh mục tải được. Chưa xác nhận đồng bộ hoàn chỉnh ảnh hero vào editor. File WebP trong ZIP có đủ 412230 byte; bản public phục vụ hero và 45 ảnh catalog với hash đúng.
+
+AI Studio gặp lỗi `/520`, `Network error`, `Failed to initialize applet`; sau Retry preview trở lại nhưng Code/Artifacts vẫn disabled và history không tải được. Không tiếp tục lặp Retry hoặc dùng phiên browser riêng để bỏ qua yêu cầu của người dùng. Việc còn lại: khi Code khả dụng, kiểm tra/upload lại file hero qua file explorer, Save và xác nhận ảnh trong preview. Không coi liên kết GitHub trong Settings là bằng chứng auto-sync và không bấm Publish để thay container public đã kiểm chứng.
+
+Evidence: `public-home.jpg` là bản website thật đủ ảnh; `ai-studio-home-synced.jpg` chỉ chứng minh bố cục/nội dung preview, không chứng minh ảnh hero đã tải. Cùng thư mục output nêu trên. Public verifier đã đạt trên cả preview và service production: 46 ảnh hash khớp.
