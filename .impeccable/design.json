@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-09T21:34:45.113Z",
+  "generatedAt": "2026-10-10T02:19:09.051Z",
   "title": "Design System: Việt Y",
   "extensions": {
     "colorMeta": {
@@ -76,44 +76,44 @@
       },
       "vy-paper": {
         "role": "neutral",
-        "displayName": "Trang giấy trắng",
+        "displayName": "Giấy ngà",
         "tonalRamp": [
-          "oklch(15.00% 0.00000 89.88)",
-          "oklch(26.43% 0.00000 89.88)",
-          "oklch(37.86% 0.00000 89.88)",
-          "oklch(49.29% 0.00000 89.88)",
-          "oklch(60.71% 0.00000 89.88)",
-          "oklch(72.14% 0.00000 89.88)",
-          "oklch(83.57% 0.00000 89.88)",
-          "oklch(95.00% 0.00000 89.88)"
+          "oklch(15.00% 0.01761 81.33)",
+          "oklch(26.43% 0.01761 81.33)",
+          "oklch(37.86% 0.01761 81.33)",
+          "oklch(49.29% 0.01761 81.33)",
+          "oklch(60.71% 0.01761 81.33)",
+          "oklch(72.14% 0.01761 81.33)",
+          "oklch(83.57% 0.01761 81.33)",
+          "oklch(95.00% 0.01761 81.33)"
         ]
       },
       "vy-soft": {
         "role": "neutral",
-        "displayName": "Giấy ấm",
+        "displayName": "Giấy ngà ấm",
         "tonalRamp": [
-          "oklch(15.00% 0.00739 80.72)",
-          "oklch(26.43% 0.00739 80.72)",
-          "oklch(37.86% 0.00739 80.72)",
-          "oklch(49.29% 0.00739 80.72)",
-          "oklch(60.71% 0.00739 80.72)",
-          "oklch(72.14% 0.00739 80.72)",
-          "oklch(83.57% 0.00739 80.72)",
-          "oklch(95.00% 0.00739 80.72)"
+          "oklch(15.00% 0.02450 83.42)",
+          "oklch(26.43% 0.02450 83.42)",
+          "oklch(37.86% 0.02450 83.42)",
+          "oklch(49.29% 0.02450 83.42)",
+          "oklch(60.71% 0.02450 83.42)",
+          "oklch(72.14% 0.02450 83.42)",
+          "oklch(83.57% 0.02450 83.42)",
+          "oklch(95.00% 0.02450 83.42)"
         ]
       },
       "vy-line": {
         "role": "neutral",
         "displayName": "Đường giấy",
         "tonalRamp": [
-          "oklch(15.00% 0.01495 70.88)",
-          "oklch(26.43% 0.01495 70.88)",
-          "oklch(37.86% 0.01495 70.88)",
-          "oklch(49.29% 0.01495 70.88)",
-          "oklch(60.71% 0.01495 70.88)",
-          "oklch(72.14% 0.01495 70.88)",
-          "oklch(83.57% 0.01495 70.88)",
-          "oklch(95.00% 0.01495 70.88)"
+          "oklch(15.00% 0.03405 77.57)",
+          "oklch(26.43% 0.03405 77.57)",
+          "oklch(37.86% 0.03405 77.57)",
+          "oklch(49.29% 0.03405 77.57)",
+          "oklch(60.71% 0.03405 77.57)",
+          "oklch(72.14% 0.03405 77.57)",
+          "oklch(83.57% 0.03405 77.57)",
+          "oklch(95.00% 0.03405 77.57)"
         ]
       },
       "control-border": {
@@ -157,12 +157,54 @@
           "oklch(83.57% 0.02227 357.19)",
           "oklch(95.00% 0.02227 357.19)"
         ]
+      },
+      "interface-white": {
+        "role": "neutral",
+        "displayName": "Interface white",
+        "tonalRamp": [
+          "oklch(15.00% 0.00000 89.88)",
+          "oklch(26.43% 0.00000 89.88)",
+          "oklch(37.86% 0.00000 89.88)",
+          "oklch(49.29% 0.00000 89.88)",
+          "oklch(60.71% 0.00000 89.88)",
+          "oklch(72.14% 0.00000 89.88)",
+          "oklch(83.57% 0.00000 89.88)",
+          "oklch(95.00% 0.00000 89.88)"
+        ]
+      },
+      "ornament-red": {
+        "role": "primary",
+        "displayName": "Đỏ nét di sản",
+        "tonalRamp": [
+          "oklch(15.00% 0.15770 24.74)",
+          "oklch(26.43% 0.15770 24.74)",
+          "oklch(37.86% 0.15770 24.74)",
+          "oklch(49.29% 0.15770 24.74)",
+          "oklch(60.71% 0.15770 24.74)",
+          "oklch(72.14% 0.15770 24.74)",
+          "oklch(83.57% 0.15770 24.74)",
+          "oklch(95.00% 0.15770 24.74)"
+        ]
+      },
+      "ornament-gold": {
+        "role": "secondary",
+        "displayName": "Vàng nét di sản",
+        "tonalRamp": [
+          "oklch(15.00% 0.08815 77.55)",
+          "oklch(26.43% 0.08815 77.55)",
+          "oklch(37.86% 0.08815 77.55)",
+          "oklch(49.29% 0.08815 77.55)",
+          "oklch(60.71% 0.08815 77.55)",
+          "oklch(72.14% 0.08815 77.55)",
+          "oklch(83.57% 0.08815 77.55)",
+          "oklch(95.00% 0.08815 77.55)"
+        ]
       }
     },
     "typographyMeta": {
       "display": {
-        "displayName": "Landing display",
-        "purpose": "Landing hero heading."
+        "displayName": "Việt Y hero title",
+        "purpose": "Restored red hero title in Noto Serif Display at weight 400."
       },
       "headline": {
         "displayName": "Page headline",
@@ -191,6 +233,10 @@
       "label": {
         "displayName": "Primary action label",
         "purpose": "Primary action typography; metadata has its own context-specific sizes."
+      },
+      "hero-motto": {
+        "displayName": "Heritage motto",
+        "purpose": "Italic Noto Serif Display paragraph below the existing flourish."
       }
     },
     "shadows": [],
@@ -257,7 +303,15 @@
       "refersTo": "button-primary",
       "description": "Solid red action used to enter the workshop or download an image.",
       "html": "<button class=\"ds-primary\">Bắt đầu phối <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 7h10v10M7 17 17 7\"/></svg></button>",
-      "css": ".ds-primary { display:inline-flex; align-items:center; justify-content:center; gap:16px; padding:15px 24px; min-height:50px; background:var(--vy-red, #951D2A); color:var(--vy-paper, #FFFFFF); border:0; border-radius:5px; font-size:13px; font-weight:600; transition:background .18s; font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-primary:hover { background:var(--vy-red-dark, #761524); } .ds-primary:active { transform:translateY(1px); } .ds-primary:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-primary:disabled { cursor:not-allowed; opacity:.42; }"
+      "css": ".ds-primary { display:inline-flex; align-items:center; justify-content:center; gap:16px; padding:15px 24px; min-height:50px; background:var(--vy-red, #951D2A); color:#FFFFFF; border:0; border-radius:5px; font-size:13px; font-weight:600; transition:background .18s; font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-primary:hover { background:var(--vy-red-dark, #761524); } .ds-primary:active { transform:translateY(1px); } .ds-primary:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-primary:disabled { cursor:not-allowed; opacity:.42; }"
+    },
+    {
+      "name": "Hero primary action",
+      "kind": "button",
+      "refersTo": "button-hero-primary",
+      "description": "The restored heritage hero uses the primary action states with a pill radius and 28px horizontal padding.",
+      "html": "<button class=\"ds-hero-primary\">Bắt đầu phối <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 7h10v10M7 17 17 7\"/></svg></button>",
+      "css": ".ds-hero-primary { display:inline-flex; align-items:center; justify-content:center; gap:16px; padding:15px 28px; min-height:50px; background:var(--vy-red, #951D2A); color:#FFFFFF; border:0; border-radius:999px; font-size:13px; font-weight:600; transition:background .18s; font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-hero-primary:hover { background:var(--vy-red-dark, #761524); } .ds-hero-primary:active { transform:translateY(1px); } .ds-hero-primary:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-hero-primary:disabled { cursor:not-allowed; opacity:.42; }"
     },
     {
       "name": "Quiet link",
@@ -289,7 +343,7 @@
       "refersTo": "navigation-item",
       "description": "Current-page navigation uses solid red while resting rows remain quiet.",
       "html": "<nav class=\"ds-nav\" aria-label=\"Các trang\"><a class=\"ds-nav-item\" href=\"/\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-4v-7H8v7H4a1 1 0 0 1-1-1Z\"/></svg><span>Trang chủ</span></a><a class=\"ds-nav-item ds-current\" href=\"/xuong-phoi\" aria-current=\"page\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 7h10v10M7 17 17 7\"/></svg><span>Xưởng phối</span></a></nav>",
-      "css": ".ds-nav { display:flex; flex-direction:column; gap:8px; padding:14px; background:var(--vy-soft, #F6F3EE); } .ds-nav-item { display:flex; align-items:center; gap:13px; min-height:48px; padding:11px 14px; border-radius:10px; color:#67575C; font-size:13px; font-weight:500; white-space:nowrap; text-decoration:none; font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-nav-item svg { flex-shrink:0; } .ds-nav-item:hover { background:#EDE5DD; color:var(--vy-red, #951D2A); } .ds-nav-item.ds-current { background:var(--vy-red, #951D2A); color:var(--vy-paper, #FFFFFF); } .ds-nav-item:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; }"
+      "css": ".ds-nav { display:flex; flex-direction:column; gap:8px; padding:14px; background:var(--vy-soft, #F7EEDD); } .ds-nav-item { display:flex; align-items:center; gap:13px; min-height:48px; padding:11px 14px; border-radius:10px; color:#67575C; font-size:13px; font-weight:500; white-space:nowrap; text-decoration:none; font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-nav-item svg { flex-shrink:0; } .ds-nav-item:hover { background:#EDE5DD; color:var(--vy-red, #951D2A); } .ds-nav-item.ds-current { background:var(--vy-red, #951D2A); color:#FFFFFF; } .ds-nav-item:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; }"
     },
     {
       "name": "Concept filter",
@@ -297,7 +351,7 @@
       "refersTo": "concept-filter",
       "description": "Lookbook concept filter in its resting and selected states.",
       "html": "<div class=\"ds-filters\" aria-label=\"Chủ đề lookbook\"><button class=\"ds-filter ds-active\" aria-pressed=\"true\">Tất cả</button><button class=\"ds-filter\" aria-pressed=\"false\">Hẹn ước</button></div>",
-      "css": ".ds-filters { display:flex; flex-wrap:wrap; gap:8px; } .ds-filter { border:0; background:none; padding:10px 16px; font-size:12px; min-height:44px; border-radius:6px; color:var(--vy-muted, #756367); font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-filter:hover { background:var(--vy-soft, #F6F3EE); } .ds-filter.ds-active { background:var(--vy-red, #951D2A); color:var(--vy-paper, #FFFFFF); } .ds-filter:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-filter:disabled { cursor:not-allowed; opacity:.42; }"
+      "css": ".ds-filters { display:flex; flex-wrap:wrap; gap:8px; } .ds-filter { border:0; background:none; padding:10px 16px; font-size:12px; min-height:44px; border-radius:6px; color:var(--vy-muted, #756367); font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-filter:hover { background:var(--vy-soft, #F7EEDD); } .ds-filter.ds-active { background:var(--vy-red, #951D2A); color:#FFFFFF; } .ds-filter:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-filter:disabled { cursor:not-allowed; opacity:.42; }"
     },
     {
       "name": "Compact choice picker",
@@ -305,7 +359,7 @@
       "refersTo": "choice-picker",
       "description": "Native inline disclosure showing its label and selected value; application rows supply catalogue images and selection handlers.",
       "html": "<details class=\"ds-picker\"><summary><span>Sự kiện</span><strong>Lễ hội dân gian</strong><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m6 9 6 6 6-6\"/></svg></summary><div class=\"ds-options\"><button class=\"ds-option ds-selected\" aria-pressed=\"true\">Lễ hội dân gian</button><button class=\"ds-option\" aria-pressed=\"false\">Lễ ăn hỏi</button></div></details>",
-      "css": ".ds-picker { margin-top:12px; border:1px solid #DCCFC4; border-radius:10px; overflow:hidden; color:var(--vy-ink, #302528); font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; } .ds-picker summary { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:3px 8px; align-items:center; padding:13px 14px; cursor:pointer; list-style:none; } .ds-picker summary::-webkit-details-marker { display:none; } .ds-picker summary>span { grid-column:1; font-size:11px; color:var(--vy-muted, #756367); } .ds-picker summary>strong { grid-column:1; font-size:13px; font-weight:500; min-width:0; } .ds-picker summary>svg { grid-column:2; grid-row:1/3; transition:transform .2s; } .ds-picker[open] summary { border-bottom:1px solid var(--vy-line, #E9E1D8); } .ds-picker[open] summary>svg { transform:rotate(180deg); } .ds-options { display:flex; flex-direction:column; max-height:320px; overflow-y:auto; } .ds-option { min-height:65px; padding:10px 12px; width:100%; border:0; background:var(--vy-paper, #FFFFFF); color:var(--vy-ink, #302528); text-align:left; font-size:12px; font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-option:hover { background:#F7F1ED; } .ds-option.ds-selected { background:#F1E4DF; } .ds-picker summary:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-option:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-option:disabled { cursor:not-allowed; opacity:.42; }"
+      "css": ".ds-picker { margin-top:12px; border:1px solid #DCCFC4; border-radius:10px; overflow:hidden; color:var(--vy-ink, #302528); font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; } .ds-picker summary { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:3px 8px; align-items:center; padding:13px 14px; cursor:pointer; list-style:none; } .ds-picker summary::-webkit-details-marker { display:none; } .ds-picker summary>span { grid-column:1; font-size:11px; color:var(--vy-muted, #756367); } .ds-picker summary>strong { grid-column:1; font-size:13px; font-weight:500; min-width:0; } .ds-picker summary>svg { grid-column:2; grid-row:1/3; transition:transform .2s; } .ds-picker[open] summary { border-bottom:1px solid var(--vy-line, #DECFB9); } .ds-picker[open] summary>svg { transform:rotate(180deg); } .ds-options { display:flex; flex-direction:column; max-height:320px; overflow-y:auto; } .ds-option { min-height:65px; padding:10px 12px; width:100%; border:0; background:#FFFFFF; color:var(--vy-ink, #302528); text-align:left; font-size:12px; font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-option:hover { background:#F7F1ED; } .ds-option.ds-selected { background:#F1E4DF; } .ds-picker summary:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-option:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-option:disabled { cursor:not-allowed; opacity:.42; }"
     },
     {
       "name": "Person segmented control",
@@ -313,7 +367,7 @@
       "refersTo": "segmented-option",
       "description": "Compact person selection; selected and unavailable states are represented with aria-pressed and disabled.",
       "html": "<div class=\"ds-segmented\" aria-label=\"Mẫu người\"><button aria-pressed=\"true\">Nam</button><button aria-pressed=\"false\">Nữ</button></div>",
-      "css": ".ds-segmented { display:flex; border:1px solid #DCCFC4; border-radius:8px; padding:4px; gap:4px; } .ds-segmented button { flex:1; border:0; border-radius:5px; min-height:38px; font-size:12px; background:none; font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-segmented button[aria-pressed=\"true\"] { background:var(--vy-red, #951D2A); color:var(--vy-paper, #FFFFFF); } .ds-segmented button:not([disabled]):hover { background:#F0E2DB; color:var(--vy-red, #951D2A); } .ds-segmented button[aria-pressed=\"true\"]:hover { background:var(--vy-red-dark, #761524); color:var(--vy-paper, #FFFFFF); } .ds-segmented button:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-segmented button:disabled { cursor:not-allowed; opacity:.42; }"
+      "css": ".ds-segmented { display:flex; border:1px solid #DCCFC4; border-radius:8px; padding:4px; gap:4px; } .ds-segmented button { flex:1; border:0; border-radius:5px; min-height:38px; font-size:12px; background:none; font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-segmented button[aria-pressed=\"true\"] { background:var(--vy-red, #951D2A); color:#FFFFFF; } .ds-segmented button:not([disabled]):hover { background:#F0E2DB; color:var(--vy-red, #951D2A); } .ds-segmented button[aria-pressed=\"true\"]:hover { background:var(--vy-red-dark, #761524); color:#FFFFFF; } .ds-segmented button:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-segmented button:disabled { cursor:not-allowed; opacity:.42; }"
     },
     {
       "name": "No-accessory choice",
@@ -321,7 +375,7 @@
       "refersTo": "accessory-card",
       "description": "The actual no-accessory option uses a diagonal line; photographic variants use the same card frame.",
       "html": "<button class=\"ds-accessory\" aria-pressed=\"false\"><div><span class=\"ds-none\"></span></div><span>Không thêm</span></button>",
-      "css": ".ds-accessory { position:relative; border:1px solid #DCCFC4; border-radius:10px; background:var(--vy-paper, #FFFFFF); min-height:102px; padding:9px 5px; display:flex; flex-direction:column; align-items:center; gap:5px; font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-accessory[aria-pressed=\"true\"] { border-color:var(--vy-red, #951D2A); background:#FBF3EE; } .ds-accessory>div { width:100%; height:55px; display:grid; place-items:center; } .ds-accessory>span { font-size:10px; white-space:nowrap; } .ds-none { display:block; width:28px; height:1px; background:#BDB0A5; transform:rotate(-32deg); } .ds-accessory:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-accessory:disabled { cursor:not-allowed; opacity:.42; }"
+      "css": ".ds-accessory { position:relative; border:1px solid #DCCFC4; border-radius:10px; background:#FFFFFF; min-height:102px; padding:9px 5px; display:flex; flex-direction:column; align-items:center; gap:5px; font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-accessory[aria-pressed=\"true\"] { border-color:var(--vy-red, #951D2A); background:#FBF3EE; } .ds-accessory>div { width:100%; height:55px; display:grid; place-items:center; } .ds-accessory>span { font-size:10px; white-space:nowrap; } .ds-none { display:block; width:28px; height:1px; background:#BDB0A5; transform:rotate(-32deg); } .ds-accessory:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; } .ds-accessory:disabled { cursor:not-allowed; opacity:.42; }"
     },
     {
       "name": "Empty gallery route",
@@ -330,15 +384,23 @@
       "description": "The existing dashed gallery tile routes to the workshop.",
       "html": "<a class=\"ds-empty-look\" href=\"/xuong-phoi\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z\"/><circle cx=\"12\" cy=\"13\" r=\"3\"/></svg><span>Thử một kiểu phối</span><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 7h10v10M7 17 17 7\"/></svg></a>",
       "css": ".ds-empty-look { aspect-ratio:3/4; min-height:180px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; border:1px dashed #C5B1A3; color:var(--vy-red, #951D2A); background:#FAF8F5; font-size:13px; border-radius:2px; text-decoration:none; font-family:var(--vy-sans, \"Be Vietnam Pro\", sans-serif); line-height:1.65; cursor:pointer; } .ds-empty-look:hover { background:#F3EAE3; } .ds-empty-look:focus-visible { outline:2px solid var(--vy-red, #951D2A); outline-offset:4px; }"
+    },
+    {
+      "name": "Preserved heritage heading",
+      "kind": "custom",
+      "refersTo": "hero-heading",
+      "description": "The actual red Việt Y title, existing SVG flourish, and italic motto. This sample isolates the heading; the application places it over the full-bleed heritage photograph.",
+      "html": "<div class=\"ds-hero-heading\"><h1>Việt Y</h1><svg class=\"ds-hero-flourish\" viewBox=\"0 0 320 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M4 18 C60 28, 140 32, 220 16 C260 8, 295 12, 316 22\" stroke=\"#8E101A\" stroke-width=\"2.2\" stroke-linecap=\"round\"/><path d=\"M24 24 C80 34, 160 36, 235 20\" stroke=\"#B18C52\" stroke-width=\"1\" stroke-linecap=\"round\" opacity=\"0.8\"/><circle cx=\"316\" cy=\"22\" r=\"3\" fill=\"#8E101A\"/><circle cx=\"316\" cy=\"22\" r=\"1.5\" fill=\"#B18C52\"/><path d=\"M312 18 C314 14, 318 14, 320 18\" stroke=\"#B18C52\" stroke-width=\"1\" stroke-linecap=\"round\"/></svg><p class=\"ds-hero-motto\">Phối theo gu,<br>hiểu nét Việt.</p></div>",
+      "css": ".ds-hero-heading { background:var(--vy-paper, #F7F0E4); padding:20px; } .ds-hero-heading h1 { margin:0; font-family:var(--vy-serif, \"Noto Serif Display\", \"Noto Serif\", serif); font-size:clamp(72px,7.4vw,96px); line-height:1.05; font-weight:400; color:var(--vy-red, #951D2A); letter-spacing:-.035em; } .ds-hero-flourish { display:block; width:230px; height:32px; margin:8px 0 17px; } .ds-hero-motto { margin:0; font-family:var(--vy-serif, \"Noto Serif Display\", \"Noto Serif\", serif); font-size:clamp(28px,2.6vw,38px); font-style:italic; line-height:1.3; color:#30251F; } @media(max-width:1080px) { .ds-hero-heading h1 { font-size:64px; } .ds-hero-motto { font-size:28px; } .ds-hero-flourish { width:190px; } } @media(max-width:759px) { .ds-hero-heading h1 { font-size:58px; } .ds-hero-flourish { width:155px; height:24px; margin:5px 0 10px; } .ds-hero-motto { font-size:27px; max-width:11ch; } } @media(max-width:380px) { .ds-hero-heading h1 { font-size:52px; } }"
     }
   ],
   "narrative": {
     "northStar": "Biên tập di sản",
-    "overview": "Trang giấy trắng, đỏ son dùng có chủ đích, vàng đồng làm nét nhỏ. Typography Noto Serif Display cho nhịp biên tập và Be Vietnam Pro cho thao tác, tiếng Việt đầy đủ. Ảnh người mặc và địa điểm thực sự là vật liệu; không dùng box/icon để thay ảnh. Nội dung đọc có khoảng thở, xưởng thì ưu tiên scan và thao tác.\n\nThe confirmed heritage editorial world is preserved here as an extraction of the current implementation. Photography carries the garments and settings; white and warm paper surfaces support reading, while compact controls support selection. This document records code, not a rendered visual approval: no current screenshots or computed-style inspection were available during extraction, and browser visual verification remains pending.",
+    "overview": "Giữ nền giấy ngà ấm của bản cũ, đỏ son dùng có chủ đích, vàng đồng làm nét nhỏ. Typography Noto Serif Display cho nhịp biên tập và Be Vietnam Pro cho thao tác, tiếng Việt đầy đủ. Ảnh người mặc và địa điểm thực sự là vật liệu; không dùng box/icon để thay ảnh. Nội dung đọc có khoảng thở, xưởng thì ưu tiên scan và thao tác.\n\nThe confirmed heritage editorial world preserves the previous full-bleed hero photograph, warm ivory background, red Việt Y title, italic motto, headline flourish, and curved paper divider. Photography carries the garments and settings; ivory surfaces support reading, while compact controls support selection. This extraction has been checked against the current code and directly inspected desktop/mobile home browser captures. It records the system and evidence available, without making a release or ship verdict.",
     "keyCharacteristics": [
-      "White paper, deliberate red, restrained gold details.",
+      "Warm ivory paper, deliberate red, restrained gold details.",
       "Serif editorial headings paired with Vietnamese sans-serif controls.",
-      "Photography leads; the interface gives images space.",
+      "The preserved full-bleed heritage hero leads; the interface gives images space.",
       "A collapsible left navigation and compact selection controls.",
       "Separate rhythms for reading, image browsing, and outfit composition."
     ],
@@ -360,7 +422,8 @@
       }
     ],
     "dos": [
-      "Do preserve white and red as the primary palette with gold as a small cultural accent.",
+      "Do preserve warm ivory paper and red as the primary palette with gold as a small cultural accent.",
+      "Do preserve the existing full-bleed heritage hero, flourish, italic motto, and curved paper divider.",
       "Do keep editorial headings in Noto Serif Display and controls in Be Vietnam Pro.",
       "Do let photographs of garments and places carry the cultural content.",
       "Do keep workshop controls independently scrollable while the preview stays visible.",
@@ -368,6 +431,7 @@
       "Do keep cultural detail pages and image details addressable through normal navigation."
     ],
     "donts": [
+      "Don't replace the preserved hero with a plain white canvas or a boxed photograph.",
       "Don't replace garment or location photography with decorative boxes or icons.",
       "Don't add long technology labels or disclaimers to the main workshop flow.",
       "Don't present demo testimonials as verified customer evidence.",

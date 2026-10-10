@@ -23,10 +23,11 @@ Bản demo Việt phục Remix của AI Arena. URL công khai: https://viet-y.ai
 - Điều hướng phải hỗ trợ URL, browser Back/Forward, reload và liên kết trực tiếp; xưởng phải vừa viewport và có vùng lựa chọn cuộn riêng.
 
 ## Brand Commitments
-Tên Việt Y. Giữ hướng biên tập di sản đã chọn; trắng và đỏ chủ đạo, vàng văn hóa làm điểm nhấn. Điều hướng bên trái có thể thu gọn. Không thêm lời rào đón hoặc nhãn công nghệ dài trên luồng chính.
+Tên Việt Y. Giữ hướng biên tập di sản đã chọn; nền giấy ngà ấm và đỏ son chủ đạo, vàng văn hóa làm điểm nhấn. Giữ hero di sản và nền cũ đã được người dùng xác nhận ngày 10/10/2026: ảnh `public/assets/style-a-hero.png`, chữ Việt Y, flourish và nét chia giấy uốn nhẹ; không thay hero bằng nền trắng trơn hoặc ảnh đóng trong box. Điều hướng bên trái có thể thu gọn. Không thêm lời rào đón hoặc nhãn công nghệ dài trên luồng chính.
 
 ## Evidence on Hand
 Asset được tạo ở các phiên trước trong public/assets. Reference lookbook: C:/Users/DELL/Downloads/reflookbook.png (lưới ảnh có khoảng cách, mở ảnh chi tiết).
+Ảnh chụp browser hiện tại lưu tại D:/AI Arena/output/ux-v2-review-2026-10-10; gồm hero desktop/mobile và các luồng xưởng, lookbook, tư liệu, drawer. DESIGN.md ghi rõ phạm vi ảnh đã kiểm tra.
 Không có đánh giá khách hàng đã kiểm chứng; mọi social proof minh họa phải nhận diện là nội dung dựng cho demo, không giả số liệu hay tổ chức xác thực.
 
 ## Product Principles
