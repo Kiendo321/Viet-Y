@@ -38,6 +38,7 @@ function Answer({answer}:{answer:VittyAnswer}){
 const welcome:VittyAnswer={title:'Chào bạn, mình là Vitty.',intro:'Một dáng áo, một dịp đặc biệt, hay ý tưởng bạn đang ấp ủ — mình cùng khám phá nhé.',sections:[{title:'Bạn muốn bắt đầu từ đâu?',body:'Mình có thể giải thích nét đặc trưng của Việt phục, cùng bạn chọn bộ phối cho một dịp, hoặc phát triển ý tưởng thiết kế từ cảm hứng văn hóa.',items:[]}],outfits:[],articles:[],design:null,followUp:''};
 function restoredOutbox():VittyTurn|null{try{const saved=JSON.parse(local.read('outbox')||'null');return saved?.id&&typeof saved.text==='string'?saved:null;}catch{return null;}}
 function mergeTurns(before:VittyTurn[],after:VittyTurn[]){const merged=new Map(before.map(t=>[t.id,t]));after.forEach(t=>merged.set(t.id,t));return [...merged.values()].sort((a,b)=>a.createdAt.localeCompare(b.createdAt)||a.id.localeCompare(b.id));}
+function fitComposer(el:HTMLTextAreaElement){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
 export function Vitty({search=''}:{search?:string}){
  const [author]=useState(ownId),[avatar,setAvatar]=useState<VittyAvatar>(()=>local.read('avatar')==='female'?'female':'male');
  const [draft,setDraft]=useState(()=>local.read('draft')||''),[turns,setTurns]=useState<VittyTurn[]>([]),[outbox,setOutbox]=useState<VittyTurn|null>(restoredOutbox);
@@ -49,7 +50,8 @@ export function Vitty({search=''}:{search?:string}){
  turnsRef.current=turns;outboxRef.current=outbox;
  const scrollBottom=()=>{const el=transcript.current;if(el)el.scrollTop=el.scrollHeight;nearBottom.current=true;setNewMessages(false);};
  useEffect(()=>{if(nearBottom.current)scrollBottom();},[turns,outbox]);
- useEffect(()=>{local.write('draft',draft);if(input.current){input.current.style.height='auto';input.current.style.height=Math.min(input.current.scrollHeight,120)+'px';}},[draft]);
+ useEffect(()=>{local.write('draft',draft);if(input.current)fitComposer(input.current);},[draft]);
+ useEffect(()=>{const el=input.current;if(!el||typeof ResizeObserver==='undefined')return;let width=el.getBoundingClientRect().width;const observer=new ResizeObserver(()=>{const next=el.getBoundingClientRect().width;if(Math.abs(next-width)>1){width=next;fitComposer(el);}});observer.observe(el);return()=>observer.disconnect();},[]);
  useEffect(()=>{
   let active=true,timer:ReturnType<typeof setTimeout>;let busy=false;
   async function refresh(){
@@ -105,7 +107,7 @@ export function Vitty({search=''}:{search?:string}){
    <div className="vitty-tools">{newMessages&&<button className="vitty-new" onClick={scrollBottom}><ArrowDown size={15}/>Tin nhắn mới</button>}<div className="vitty-fan-control"><button ref={fanButton} className={'vitty-fan-button '+(fan?'open':'')} aria-label="Gợi ý câu hỏi" aria-expanded={fan} aria-controls="vitty-starters" onClick={()=>{setFan(!fan);setAvatarOpen(false);}}><Fan/></button>{fan&&<div ref={suggestions} id="vitty-starters" className="vitty-starters">{VITTY_STARTERS.map(s=><button key={s} disabled={sending} onClick={()=>send(s)}>{s}<ArrowUpRight size={17}/></button>)}</div>}</div></div>
    {context&&<div className="vitty-context"><span>Đang trao đổi: {garmentById(context.garment)!.shortName} · {COLORS[context.color].name} · {eventById(context.event)!.shortName}</span><button aria-label="Bỏ ngữ cảnh bộ phối" onClick={()=>setContext(null)}><X size={16}/></button></div>}
    {(error||syncError)&&<div className="vitty-error" role="alert"><p>{error||syncError}</p>{outbox&&!sending&&<button onClick={()=>send(outbox.text,outbox)}><RotateCw size={15}/>Thử lại</button>}</div>}
-   <form className="vitty-composer" onSubmit={e=>{e.preventDefault();void send(draft);}}><label className="sr-only" htmlFor="vitty-question">Câu hỏi cho Vitty</label><textarea ref={input} id="vitty-question" rows={1} placeholder="Bạn muốn tìm hiểu hay phối gì hôm nay?" maxLength={4000} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();void send(draft);}}}/><button aria-label={sending?'Đang gửi':'Gửi câu hỏi'} disabled={sending||!draft.trim()} type="submit">{sending?<span className="vitty-send-wait"/>:<ArrowUp size={22}/>}</button></form>
+   <form className="vitty-composer" onSubmit={e=>{e.preventDefault();void send(draft);}}><label className="sr-only" htmlFor="vitty-question">Câu hỏi cho Vitty</label><textarea ref={input} id="vitty-question" rows={1} placeholder="Hỏi Vitty…" maxLength={4000} value={draft} onChange={e=>setDraft(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.nativeEvent.isComposing){e.preventDefault();void send(draft);}}}/><button aria-label={sending?'Đang gửi':'Gửi câu hỏi'} disabled={sending||!draft.trim()} type="submit">{sending?<span className="vitty-send-wait"/>:<ArrowUp size={22}/>}</button></form>
    <span className="sr-only" role="status" aria-live="polite">{sending?'Đang gửi câu hỏi':turns.at(-1)?.status==='complete'?'Vitty đã trả lời':''}</span>
   </div></footer>
  </section>;
