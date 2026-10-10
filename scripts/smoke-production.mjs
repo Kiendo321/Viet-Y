@@ -63,6 +63,15 @@ try {
     assert.deepEqual(Buffer.from(await response.arrayBuffer()), await readFile(path.join(stage, 'dist', url.slice(1))));
   }
   summary.push(`PASS: ${references.length} frontend JS/CSS bundles match build output`);
+  const bundledPhotos=(await readdir(path.join(stage,'dist','assets'))).filter(name=>name.endsWith('.webp'));
+  assert.equal(bundledPhotos.length,45,'Every browser photo must be emitted by Vite');
+  for(const name of bundledPhotos){
+    const response=await fetch(`${base}/assets/${name}`);
+    assert.equal(response.status,200);
+    assert.match(response.headers.get('content-type'),/image\/webp/);
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()),await readFile(path.join(stage,'dist','assets',name)));
+  }
+  summary.push('PASS: all 45 bundled browser photos are served as intact WebP images');
   const photoDirectory = path.join(stage, 'public', 'assets', 'outfit-photo-v1');
   const photos = (await readdir(photoDirectory)).filter(name => name.endsWith('.webp'));
   assert.equal(photos.length, 18);

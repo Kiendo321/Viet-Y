@@ -5,14 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build && npm run build:server",
+    "build": "npm run assets:check && vite build && npm run build:server",
     "start": "node server.js",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "test": "node --import tsx --import ./test/setup.ts --test test/**/*.test.ts",
     "build:server": "node scripts/build-server.mjs",
-    "test:production": "npm run build && node scripts/smoke-production.mjs"
+    "test:production": "npm run build && node scripts/smoke-production.mjs",
+    "assets:sync": "node scripts/sync-browser-assets.mjs",
+    "assets:check": "node scripts/sync-browser-assets.mjs --check"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
